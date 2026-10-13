@@ -28,20 +28,20 @@ export async function POST(request: Request) {
       )
       .get();
 
-    // Auto-seed default operator identity if logging in and account does not exist in DB yet
-    if (!user && (identifier === "rishabh.yadav@fintraxis.sovereign" || identifier === "rishabh" || identifier === "admin")) {
+    // Auto-seed default guest or demo operator identity if logging in
+    if (!user && (identifier === "guest" || identifier.startsWith("guest@") || identifier === "admin" || identifier === "demo")) {
       const salt = crypto.randomBytes(16).toString("hex");
       const passwordHash = crypto
-        .pbkdf2Sync(password, salt, 10000, 64, "sha512")
+        .pbkdf2Sync(password || "guest", salt, 10000, 64, "sha512")
         .toString("hex");
 
       const defaultUser = {
         id: `usr_${crypto.randomBytes(8).toString("hex")}`,
-        name: "Rishabh Kumar Yadav",
-        email: "rishabh.yadav@fintraxis.sovereign",
+        name: identifier === "guest" || identifier.startsWith("guest@") ? "Guest Analyst" : "Lead Risk Analyst",
+        email: identifier === "guest" || identifier.startsWith("guest@") ? "guest@fintraxis.terminal" : "analyst@fintraxis.terminal",
         passwordHash,
         salt,
-        desk: "Credit Risk & Intelligence",
+        desk: "Global Credit Risk & Surveillance",
         avatar: "crest",
         netDebtEbitdaHurdle: 3.50,
         interestCoverageHurdle: 2.50,

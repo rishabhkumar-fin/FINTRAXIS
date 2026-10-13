@@ -22,8 +22,9 @@ import {
   CompanyRiskProfile,
   AuditRecord,
 } from "@/lib/types";
+import { PeacockLogo } from "@/components/PeacockLogo";
 import { SEED_COMPANIES } from "@/lib/seedData";
-import { Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Loader2, AlertCircle, Sparkles, Menu, Search } from "lucide-react";
 
 export default function FintraxisTerminalPage() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -39,6 +40,7 @@ export default function FintraxisTerminalPage() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
 
   // Audit Sidecar State
   const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
@@ -240,10 +242,53 @@ export default function FintraxisTerminalPage() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenAi={() => setIsAiOpen(true)}
         earlyWarningCount={profile?.earlyWarningFlags.length || 0}
+        isMobileOpen={isMobileNavOpen}
+        onCloseMobile={() => setIsMobileNavOpen(false)}
       />
 
-      {/* Column 2: Flexible Main Workspace Area (offset by sidebar width) */}
-      <div className="flex-1 flex flex-col min-w-0 pl-64 transition-all duration-200">
+      {/* Column 2: Flexible Main Workspace Area (responsive offset: pl-0 on mobile, lg:pl-64 on desktop) */}
+      <div className="flex-1 flex flex-col min-w-0 pl-0 lg:pl-64 transition-all duration-200">
+        {/* Mobile Header Bar (< lg screens) */}
+        <header className="lg:hidden w-full bg-[#0A0E17] border-b border-[#1E2536] px-3.5 py-2.5 flex items-center justify-between sticky top-0 z-30 select-none">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#C5A880] rounded transition-colors"
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-1.5">
+              <PeacockLogo size="sm" showLockup={false} />
+              <span className="font-mono font-bold tracking-widest text-xs text-slate-100">
+                FINTRAXIS
+              </span>
+            </div>
+            {profile?.company.symbol && (
+              <span className="ml-1 px-1.5 py-0.5 bg-[#111622] border border-[#C5A880]/30 text-[#C5A880] text-[10px] font-bold rounded">
+                {profile.company.symbol}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+              title="Quick Search (Ctrl+K)"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setIsAiOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-[11px] rounded transition-colors shadow-sm cursor-pointer"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>AI</span>
+            </button>
+          </div>
+        </header>
+
         {/* Top Legible Macro Ticker & Utility Bar */}
         <MacroTickerTape
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}

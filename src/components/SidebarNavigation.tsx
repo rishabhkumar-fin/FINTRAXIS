@@ -16,6 +16,7 @@ import {
   Lock,
   Settings,
   Sparkles,
+  X,
 } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
@@ -34,6 +35,8 @@ interface SidebarNavigationProps {
   onOpenSettings?: () => void;
   onOpenAi?: () => void;
   earlyWarningCount?: number;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 const TAB_MAP: Record<string, ModuleTab> = {
@@ -65,38 +68,71 @@ export function SidebarNavigation({
   onOpenSettings,
   onOpenAi,
   earlyWarningCount = 0,
+  isMobileOpen = false,
+  onCloseMobile,
 }: SidebarNavigationProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const selected = activeProfile?.company;
 
-  return (
-    <aside
-      className={`fixed top-0 left-0 bottom-0 z-40 bg-[#0A0E17] border-r border-[#1E2536] flex flex-col justify-between transition-all duration-200 select-none no-print ${
-        isCollapsed ? "w-20" : "w-64"
-      }`}
-    >
-      {/* Top Header Lockup & Collapse Trigger */}
-      <div className="flex flex-col">
-        <div className="p-3.5 border-b border-[#1E2536] flex items-center justify-between">
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <PeacockLogo size="sm" showLockup={false} />
-            {!isCollapsed && (
-              <span className="font-mono font-medium tracking-[0.25em] text-slate-100 text-xs uppercase truncate whitespace-nowrap shrink-0">
-                FINTRAXIS
-              </span>
-            )}
-          </div>
+  const handleTabClick = (tab: ModuleTab) => {
+    onSelectTab(tab);
+    onCloseMobile?.();
+  };
 
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111622] rounded transition-colors"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-          </button>
-        </div>
+  const handleCompanySelect = (id: string) => {
+    onSelectCompany(id);
+    setIsSwitcherOpen(false);
+    onCloseMobile?.();
+  };
+
+  return (
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isMobileOpen && (
+        <div
+          onClick={onCloseMobile}
+          className="fixed inset-0 bg-black/70 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 bottom-0 z-50 bg-[#0A0E17] border-r border-[#1E2536] flex flex-col justify-between transition-all duration-200 select-none no-print ${
+          isCollapsed ? "w-20" : "w-64"
+        } ${
+          isMobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        {/* Top Header Lockup & Collapse Trigger */}
+        <div className="flex flex-col">
+          <div className="p-3.5 border-b border-[#1E2536] flex items-center justify-between">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <PeacockLogo size="sm" showLockup={false} />
+              {!isCollapsed && (
+                <span className="font-mono font-medium tracking-[0.25em] text-slate-100 text-xs uppercase truncate whitespace-nowrap shrink-0">
+                  FINTRAXIS
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden lg:block p-1 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111622] rounded transition-colors"
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={onCloseMobile}
+                className="lg:hidden p-1 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111622] rounded transition-colors"
+                title="Close Navigation Drawer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
         {/* Active Entity Quick Switcher Card */}
         <div className="p-2 border-b border-[#1E2536] relative">
@@ -136,10 +172,7 @@ export function SidebarNavigation({
               {companies.map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => {
-                    onSelectCompany(c.id);
-                    setIsSwitcherOpen(false);
-                  }}
+                  onClick={() => handleCompanySelect(c.id)}
                   className={`w-full p-2 text-left text-xs font-mono flex items-center justify-between hover:bg-[#162033] transition-colors border-b border-[#1E2536]/40 last:border-0 ${
                     selected?.id === c.id ? "bg-[#172033] text-[#C5A880]" : "text-[#94A3B8]"
                   }`}
@@ -179,7 +212,7 @@ export function SidebarNavigation({
             return (
               <button
                 key={mod.id}
-                onClick={() => onSelectTab(targetTab)}
+                onClick={() => handleTabClick(targetTab)}
                 title={isCollapsed ? `${mod.number}: ${mod.name}` : undefined}
                 className={`w-full p-2.5 flex items-center gap-3 text-left transition-all rounded ${
                   isCurrent
@@ -260,13 +293,13 @@ export function SidebarNavigation({
                 />
                 <div className="min-w-0">
                   <div className="text-xs font-bold text-[#F8FAFC] truncate">
-                    {session?.userName || "Rishabh Kumar Yadav"}
+                    {session?.userName || "Principal Risk Officer"}
                   </div>
                   <div className="text-[9px] text-[#94A3B8] truncate">
-                    {session?.userEmail || "rishabh.yadav@fintraxis.sovereign"}
+                    {session?.userEmail || "analyst@fintraxis.terminal"}
                   </div>
                   <div className="text-[8.5px] text-[#C5A880] tracking-wider mt-0.5 truncate">
-                    {session?.desk || "Global Credit Risk & Distressed Debt"}
+                    {session?.desk || "Global Credit Risk & Surveillance"}
                   </div>
                 </div>
               </div>
@@ -324,5 +357,6 @@ export function SidebarNavigation({
         )}
       </div>
     </aside>
+    </>
   );
 }

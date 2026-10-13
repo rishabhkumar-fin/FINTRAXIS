@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { PeacockLogo } from "./PeacockLogo";
-import { Lock, ArrowRight, UserPlus, LogIn, Mail, User, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Lock, ArrowRight, UserPlus, LogIn, Mail, User, Eye, EyeOff, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 
 export interface SessionClearance {
   id?: string;
@@ -26,9 +26,9 @@ interface AuthGateProps {
 export function AuthGate({ onAuthenticated }: AuthGateProps) {
   const [mode, setMode] = useState<"SIGN_IN" | "REGISTER">("SIGN_IN");
 
-  // Sign In State (defaults to ready credentials)
-  const [signInIdentifier, setSignInIdentifier] = useState("rishabh.yadav@fintraxis.sovereign");
-  const [signInPassword, setSignInPassword] = useState("Password123!");
+  // Sign In State (empty by default for user's own email/password)
+  const [signInIdentifier, setSignInIdentifier] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -42,6 +42,25 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // 1-Click Guest Analyst Access
+  const handleGuestLogin = () => {
+    const guestSession: SessionClearance = {
+      id: `usr_guest_${Date.now()}`,
+      userName: "Guest Analyst",
+      userEmail: "guest@fintraxis.terminal",
+      analystId: "Guest Analyst",
+      desk: "Global Market Surveillance",
+      avatarId: "crest",
+      netDebtEbitdaHurdle: 3.5,
+      interestCoverageHurdle: 2.5,
+      currentRatioHurdle: 1.1,
+      sessionToken: `tok_guest_${Date.now()}`,
+      authenticatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem("fintraxis_session", JSON.stringify(guestSession));
+    onAuthenticated(guestSession);
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,6 +347,22 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                   </>
                 )}
               </button>
+
+              {/* 1-Click Guest Analyst Account Button */}
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-[#1E2536]"></div>
+                <span className="flex-shrink mx-3 text-[#5A687D] text-[10px] uppercase font-mono tracking-wider">Or Instant Access</span>
+                <div className="flex-grow border-t border-[#1E2536]"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                className="w-full py-2.5 bg-[#12161F] hover:bg-[#1A2233] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold text-xs font-mono tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer rounded"
+              >
+                <Sparkles className="w-4 h-4 text-[#C5A880]" />
+                <span>Explore as Guest Analyst (1-Click)</span>
+              </button>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-3.5 text-xs">
@@ -341,7 +376,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     required
-                    placeholder="e.g. Rishabh Kumar Yadav"
+                    placeholder="e.g. Alex Morgan or Jane Doe"
                     className="w-full pl-9 pr-3 py-2.5 bg-[#06080D] border border-[#1E2536] text-[#F8FAFC] placeholder-[#475569] focus:border-[#C5A880] focus:outline-none text-xs font-mono rounded transition-colors"
                   />
                   <User className="w-4 h-4 absolute left-3 top-3 text-[#64748B]" />
@@ -422,6 +457,22 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
+              </button>
+
+              {/* 1-Click Guest Analyst Account Button */}
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-[#1E2536]"></div>
+                <span className="flex-shrink mx-3 text-[#5A687D] text-[10px] uppercase font-mono tracking-wider">Or Instant Access</span>
+                <div className="flex-grow border-t border-[#1E2536]"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                className="w-full py-2.5 bg-[#12161F] hover:bg-[#1A2233] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold text-xs font-mono tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer rounded"
+              >
+                <Sparkles className="w-4 h-4 text-[#C5A880]" />
+                <span>Explore as Guest Analyst (1-Click)</span>
               </button>
             </form>
           )}

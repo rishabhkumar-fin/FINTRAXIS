@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { PeacockLogo } from "./PeacockLogo";
-import { FileText, Printer, Copy, Check, ShieldCheck, AlertTriangle } from "lucide-react";
+import { FileText, Printer, Copy, Check, ShieldCheck, AlertTriangle, Download, Share2 } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
 import { SessionClearance } from "./AuthGate";
@@ -17,6 +17,7 @@ export function ICDossier({ profile, session }: ICDossierProps) {
   const { company, periods, latestRatios, riskScore, earlyWarningFlags, simulation } = profile;
   const latest = periods[0];
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [commentary, setCommentary] = useState("");
   const [saveStatus, setSaveStatus] = useState("SAVED");
 
@@ -89,14 +90,14 @@ export function ICDossier({ profile, session }: ICDossierProps) {
     window.print();
   };
 
-  const handleCopyMemo = () => {
-    const text = `# FINTRAXIS // CREDIT RISK & INVESTMENT COMMITTEE DOSSIER
+  const generateMarkdownTearsheet = () => {
+    return `# FINTRAXIS // CREDIT RISK & INVESTMENT COMMITTEE DOSSIER
 CONFIDENTIAL DESK COPY #04 // NOT FOR REDISTRIBUTION
 TARGET ENTITY: ${company.name} (${company.symbol})
 JURISDICTION: ${company.country} | ACCOUNTING REGIME: ${company.accountingStandard}
-UNDERWRITING LEAD: ${session?.userName || "Rishabh Kumar Yadav"} (${session?.userEmail || "rishabh.yadav@fintraxis.sovereign"})
-SURVEILLANCE DESK: ${session?.desk || "Global Credit Risk & Distressed Debt"}
-RISK SCORE: ${riskScore}/100 | RATING: ${riskScore >= 80 ? "TIER 1 PRIME" : riskScore >= 50 ? "TIER 2 WATCHLIST" : "TIER 3 DISTRESS"}
+UNDERWRITING LEAD: ${session?.userName || "Principal Underwriting Lead"} (${session?.userEmail || "analyst@fintraxis.terminal"})
+SURVEILLANCE DESK: ${session?.desk || "Global Credit Risk & Surveillance"}
+RISK SCORE: ${riskScore}/100 | RATING: ${ratingLabel}
 
 EXECUTIVE VERDICT:
 ${
@@ -106,6 +107,14 @@ ${
     ? "CONDITIONAL APPROVAL: Approved with mandatory quarterly covenant monitoring."
     : "FACILITY DECLINED: Significant solvency or leverage vulnerability."
 }
+
+KEY CREDIT HIGHLIGHTS:
+- Consolidated Revenue: ${formatFinancialValue(latest?.revenue, company.currency, company.scaleUnit)}
+- Operating Profit (EBIT): ${formatFinancialValue(latest?.ebit, company.currency, company.scaleUnit)}
+- Net Debt / EBITDA: ${formatRatio(latestRatios.netDebtToEbitda)} [Hurdle <= ${maxNetDebtHurdle}x]
+- Interest Coverage: ${formatRatio(latestRatios.interestCoverage)} [Floor >= ${minInterestHurdle}x]
+- Current Ratio: ${formatRatio(latestRatios.currentRatio)} [Benchmark >= ${minCurrentHurdle}x]
+- Early Warning Flags: ${earlyWarningFlags.length} active triggers
 
 COVENANT AUDIT:
 ${covenants.map((c) => `- ${c.covenant} [${c.threshold}]: Actual ${c.actual} => ${c.isCompliant ? "COMPLIANT" : "BREACH"}`).join("\n")}
@@ -118,9 +127,44 @@ FILING: ${latest?.filingForm} (${latest?.filingDate})
 URL: ${latest?.filingUrl}
 DIGITAL HASH: SHA256:${Buffer.from(company.symbol + (latest?.filingDate || "")).toString("hex").substring(0, 32).toUpperCase()}
 `;
+  };
+
+  const handleCopyMemo = () => {
+    const text = generateMarkdownTearsheet();
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadMarkdown = () => {
+    const text = generateMarkdownTearsheet();
+    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${company.symbol}_IC_Underwriting_Dossier.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShareSummary = () => {
+    const summary = `🏛️ FINTRAXIS CREDIT RISK DOSSIER: ${company.name} (${company.symbol})
+• Solvency Rating: ${ratingLabel} (Health Score: ${riskScore}/100)
+• Net Debt / EBITDA: ${formatRatio(latestRatios.netDebtToEbitda)} [Hurdle ≤ ${maxNetDebtHurdle}x]
+• EBIT Interest Coverage: ${formatRatio(latestRatios.interestCoverage)} [Floor ≥ ${minInterestHurdle}x]
+• Current Liquidity: ${formatRatio(latestRatios.currentRatio)}
+• Early Warning Triggers: ${earlyWarningFlags.length} flags
+• Recommendation: ${
+      riskScore >= 80
+        ? "UNCONDITIONAL FACILITY APPROVAL"
+        : riskScore >= 50
+        ? "CONDITIONAL APPROVAL WITH SURVEILLANCE"
+        : "FACILITY DECLINED"
+    }
+Synchronized live on FINTRAXIS Terminal.`;
+    navigator.clipboard.writeText(summary);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
   };
 
   const ratingLabel =
@@ -129,7 +173,7 @@ DIGITAL HASH: SHA256:${Buffer.from(company.symbol + (latest?.filingDate || "")).
   return (
     <div className="space-y-4 font-mono text-xs">
       {/* Action Controls (Hidden on Print) */}
-      <div className="p-3.5 bg-[#111622] border border-[#1E2536] flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print rounded">
+      <div className="p-3.5 bg-[#111622] border border-[#1E2536] flex flex-col xl:flex-row xl:items-center justify-between gap-3 no-print rounded-lg">
         <div className="flex items-center gap-2.5">
           <FileText className="w-4 h-4 text-[#C5A880]" />
           <div>
@@ -142,10 +186,28 @@ DIGITAL HASH: SHA256:${Buffer.from(company.symbol + (latest?.filingDate || "")).
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleDownloadMarkdown}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-xs transition-colors rounded cursor-pointer"
+            title="Download full Markdown Tearsheet file"
+          >
+            <Download className="w-3.5 h-3.5 text-[#C5A880]" />
+            <span>DOWNLOAD .MD</span>
+          </button>
+
+          <button
+            onClick={handleShareSummary}
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-xs transition-colors rounded cursor-pointer"
+            title="Copy shareable executive summary to clipboard"
+          >
+            {shareCopied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Share2 className="w-3.5 h-3.5 text-[#C5A880]" />}
+            <span>{shareCopied ? "COPIED SUMMARY" : "SHARE MEMO"}</span>
+          </button>
+
           <button
             onClick={handleCopyMemo}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-xs transition-colors rounded"
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-xs transition-colors rounded cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#C5A880]" />}
             <span>{copied ? "COPIED" : "COPY MARKDOWN"}</span>
@@ -250,6 +312,100 @@ DIGITAL HASH: SHA256:${Buffer.from(company.symbol + (latest?.filingDate || "")).
             >
               <div className="text-[9px] uppercase tracking-wider font-bold">SOLVENCY RATING</div>
               <div className="text-xs font-extrabold mt-0.5">{ratingLabel}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Executive Insights Scorecard (Key Underwriting Pillars) */}
+        <div className="space-y-2.5 print-break-inside-avoid">
+          <div className="flex items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-1">
+            <span className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider">
+              00. EXECUTIVE INSIGHTS &amp; UNDERWRITING SCORECARD
+            </span>
+            <span className="text-[10px] text-[#94A3B8] print:text-slate-600">
+              BOARDROOM TEARSHEET PILLARS
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {/* Pillar 1: Gearing */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                LEVERAGE MULTIPLE
+              </div>
+              <div className="text-sm font-bold font-mono text-[#F8FAFC] print:text-slate-900 mt-1">
+                {formatRatio(latestRatios.netDebtToEbitda)}
+              </div>
+              <div className="text-[9px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                {(latestRatios.netDebtToEbitda ?? 0) <= 0 ? "Net Cash Fortress" : `Hurdle: ≤ ${maxNetDebtHurdle}x`}
+              </div>
+            </div>
+
+            {/* Pillar 2: Debt Service */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                INTEREST COVERAGE
+              </div>
+              <div className="text-sm font-bold font-mono text-[#10B981] print:text-emerald-800 mt-1">
+                {formatRatio(latestRatios.interestCoverage)}
+              </div>
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 mt-0.5">
+                Covenant: &ge; {minInterestHurdle}x
+              </div>
+            </div>
+
+            {/* Pillar 3: Liquidity */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                WORKING CAPITAL
+              </div>
+              <div className="text-sm font-bold font-mono text-[#F8FAFC] print:text-slate-900 mt-1">
+                {formatRatio(latestRatios.currentRatio)}
+              </div>
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 mt-0.5">
+                Benchmark: &ge; {minCurrentHurdle}x
+              </div>
+            </div>
+
+            {/* Pillar 4: Margins */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                OPERATING MARGIN
+              </div>
+              <div className="text-sm font-bold font-mono text-[#C5A880] print:text-slate-900 mt-1">
+                {latestRatios.operatingMarginPct !== null ? `${latestRatios.operatingMarginPct.toFixed(1)}%` : "N/D"}
+              </div>
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 mt-0.5">
+                Gross: {latestRatios.grossMarginPct !== null ? `${latestRatios.grossMarginPct.toFixed(1)}%` : "N/D"}
+              </div>
+            </div>
+
+            {/* Pillar 5: Cash Conversion */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                CASH CONVERSION
+              </div>
+              <div className="text-sm font-bold font-mono text-[#10B981] print:text-emerald-800 mt-1">
+                {latest?.netIncome && latest.netIncome > 0 && latest.operatingCashFlow
+                  ? `${(latest.operatingCashFlow / latest.netIncome).toFixed(2)}x`
+                  : "STRONG CFO"}
+              </div>
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 mt-0.5">
+                CFO / Net Income
+              </div>
+            </div>
+
+            {/* Pillar 6: Surveillance */}
+            <div className="p-3 bg-[#111622] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+              <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">
+                EWS SURVEILLANCE
+              </div>
+              <div className="text-sm font-bold font-mono text-[#F8FAFC] print:text-slate-900 mt-1">
+                {earlyWarningFlags.length} {earlyWarningFlags.length === 1 ? "Trigger" : "Triggers"}
+              </div>
+              <div className="text-[9px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                {earlyWarningFlags.length === 0 ? "Clean Surveillance" : "Active Monitoring"}
+              </div>
             </div>
           </div>
         </div>
@@ -400,14 +556,14 @@ DIGITAL HASH: SHA256:${Buffer.from(company.symbol + (latest?.filingDate || "")).
                 UNDERWRITING OFFICER:
               </div>
               <div className="text-[#F8FAFC] print:text-slate-900 font-bold text-xs truncate">
-                {session?.userName || "Rishabh Kumar Yadav"}
+                {session?.userName || "Principal Underwriting Lead"}
               </div>
               <div className="text-[9.5px] text-[#64748B] print:text-slate-600 truncate">
-                {session?.userEmail || "rishabh.yadav@fintraxis.sovereign"}
+                {session?.userEmail || "analyst@fintraxis.terminal"}
               </div>
               <div className="border-b border-[#1E2536] print:border-slate-300 pt-2 w-36"></div>
               <div className="text-[8.5px] text-[#C5A880] print:text-slate-700 pt-0.5">
-                {session?.desk || "Global Credit Risk & Distressed Debt"}
+                {session?.desk || "Global Credit Risk & Surveillance"}
               </div>
             </div>
           </div>

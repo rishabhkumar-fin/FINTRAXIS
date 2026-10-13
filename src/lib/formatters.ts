@@ -5,8 +5,8 @@
 
 export function formatFinancialValue(
   value: number | null | undefined,
-  currency: string,
-  scaleUnit: string
+  currency: string = "USD",
+  scaleUnit: string = "Millions"
 ): string {
   if (value === null || value === undefined || isNaN(value)) {
     return "N/D";

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Globe2, ArrowRight, Loader2, Database } from "lucide-react";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
+import { VisualAnalyticsDashboard } from "./VisualAnalyticsDashboard";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
 import { NormalizedMarketSearchItem } from "@/app/api/market/search/route";
 
@@ -421,6 +422,11 @@ export function CompanyHub({
             </div>
           )}
         </div>
+      )}
+
+      {/* Visual Analytics Dashboard with Interactive Graphs & 2026 Projections */}
+      {activeProfile && (
+        <VisualAnalyticsDashboard profile={activeProfile} />
       )}
 
       {/* Global Security Master Table */}

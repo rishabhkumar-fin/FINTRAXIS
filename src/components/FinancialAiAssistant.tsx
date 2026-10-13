@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
 import { INSTITUTIONAL_COMPANIES } from "@/lib/institutionalDatabase";
+import { resolveFinanceIntelligence } from "@/lib/financeKnowledgeBase";
 
 interface Message {
   id: string;
@@ -495,25 +496,8 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
       };
     }
 
-    // 12. GENERAL FINANCIAL INTELLIGENCE & DEFINITION LOOKUP
-    return {
-      response:
-        `# FINANCIAL INTELLIGENCE BRIEFING: "${query}"\n\n` +
-        `In corporate credit analysis, underwriting, and risk management, evaluating **${query}** requires inspecting operating cash generation, debt service coverage, and macroeconomic interest rate transmission.\n\n` +
-        `### Core Analytical Framework:\n` +
-        `1. **Operating Cash Flow Quality:** Does the entity convert reported accounting net income into actual unencumbered cash flow ($> 0.85\\text{x}$ conversion)?\n` +
-        `2. **Balance Sheet Resilience:** Does quick acid liquidity (Cash + Marketable Securities) provide at least a 6-month buffer against top-line contraction?\n` +
-        `3. **Fixed Charge Coverage:** Can operating income (EBIT) absorb central bank policy tightening without breaching bank syndicate covenants?\n\n` +
-        (company
-          ? `For active entity **${company.name} (${company.symbol})**, all audited disclosures are synchronized live in the **Statements Ledger** and **Solvency DAG** modules.`
-          : ""),
-      followUps: [
-        "Analyze credit risk & solvency for this company",
-        "Explain Altman Z-Score formula & default thresholds",
-        "What does RBI Repo Rate (5.50%) mean for this firm?",
-        "Explain Net Debt to EBITDA 3.5x hurdle",
-      ],
-    };
+    // 12. COMPREHENSIVE WALL STREET & ACADEMIC FINANCIAL KNOWLEDGE ENGINE (CHATGPT / CLAUDE LEVEL)
+    return resolveFinanceIntelligence(query, company, activeProfile || undefined);
   };
 
   const handleSend = (text: string) => {
@@ -635,6 +619,24 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
           className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           📈 DuPont Analysis
+        </button>
+        <button
+          onClick={() => handleSend("Explain Free Cash Flow and how it differs from Net Income")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          💰 Free Cash Flow (FCF)
+        </button>
+        <button
+          onClick={() => handleSend("Explain WACC and how it is calculated")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          ⚖️ WACC &amp; Hurdle
+        </button>
+        <button
+          onClick={() => handleSend("Explain corporate bankruptcy Chapter 11 and creditor priority")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          🏛️ Bankruptcy &amp; Restructuring
         </button>
         <button
           onClick={() => handleSend("How does FINTRAXIS work and how to navigate the 6 modules?")}
