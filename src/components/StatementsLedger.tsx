@@ -7,7 +7,7 @@ import { formatFinancialValue } from "@/lib/formatters";
 
 interface StatementsLedgerProps {
   profile: CompanyRiskProfile;
-  onAuditMetric: (metricKey: string, period: string, label: string, value: number | null) => void;
+  onAuditMetric: (metricKey: string, period: string, label: string, value?: number | null) => void;
   activeAuditKey?: string | null;
 }
 
@@ -30,8 +30,88 @@ export function StatementsLedger({
   const isCellActive = (key: string, period: string) =>
     activeAuditKey === `${key}_${period}` || activeAuditKey === key;
 
+  const latest = sortedPeriods[0];
+  const prior = sortedPeriods[1];
+
+  const revYoY =
+    latest?.revenue != null && prior?.revenue != null && prior.revenue !== 0
+      ? ((latest.revenue - prior.revenue) / prior.revenue) * 100
+      : null;
+
+  const ebitMargin =
+    latest?.revenue != null && latest?.ebit != null && latest.revenue !== 0
+      ? (latest.ebit / latest.revenue) * 100
+      : null;
+
+  const netMargin =
+    latest?.revenue != null && latest?.netIncome != null && latest.revenue !== 0
+      ? (latest.netIncome / latest.revenue) * 100
+      : null;
+
+  const netDebt =
+    latest?.totalDebt != null && latest?.cashAndEquivalents != null
+      ? latest.totalDebt - latest.cashAndEquivalents
+      : null;
+
   return (
     <div className="space-y-4">
+      {/* Executive Financial Digest Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono">
+        <div className="p-3 bg-[#0E131A] border border-[#1E2638] rounded-sm">
+          <div className="text-[10px] text-[#5A687D] uppercase">LATEST REVENUE ({latest?.period})</div>
+          <div className="text-base font-bold text-[#E1E7EC] mt-0.5">
+            {formatCell(latest?.revenue)}
+          </div>
+          {revYoY !== null && (
+            <div className="text-[10px] mt-1 flex items-center gap-1">
+              <span className={revYoY >= 0 ? "text-[#10B981] font-bold" : "text-[#EF4444] font-bold"}>
+                {revYoY >= 0 ? "+" : ""}{revYoY.toFixed(1)}% YoY
+              </span>
+              <span className="text-[#5A687D]">vs {prior?.period}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-3 bg-[#0E131A] border border-[#1E2638] rounded-sm">
+          <div className="text-[10px] text-[#5A687D] uppercase">OPERATING INCOME (EBIT)</div>
+          <div className="text-base font-bold text-[#E1E7EC] mt-0.5">
+            {formatCell(latest?.ebit)}
+          </div>
+          {ebitMargin !== null && (
+            <div className="text-[10px] mt-1 text-[#C5A880]">
+              Operating Margin: <span className="font-bold">{ebitMargin.toFixed(1)}%</span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-3 bg-[#0E131A] border border-[#1E2638] rounded-sm">
+          <div className="text-[10px] text-[#5A687D] uppercase">NET BOTTOM-LINE PROFIT</div>
+          <div className="text-base font-bold text-[#E1E7EC] mt-0.5">
+            {formatCell(latest?.netIncome)}
+          </div>
+          {netMargin !== null && (
+            <div className="text-[10px] mt-1 text-[#9BA8B8]">
+              Net Margin: <span className={netMargin >= 0 ? "text-[#10B981] font-semibold" : "text-[#EF4444] font-semibold"}>{netMargin.toFixed(1)}%</span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-3 bg-[#0E131A] border border-[#1E2638] rounded-sm">
+          <div className="text-[10px] text-[#5A687D] uppercase">NET DEBT STATUS</div>
+          <div className="text-base font-bold mt-0.5">
+            {netDebt === null ? (
+              <span className="text-[#9BA8B8]">N/A</span>
+            ) : netDebt <= 0 ? (
+              <span className="text-[#10B981]">NET CASH FORTRESS</span>
+            ) : (
+              <span className="text-[#F59E0B]">{formatCell(netDebt)}</span>
+            )}
+          </div>
+          <div className="text-[10px] mt-1 text-[#5A687D]">
+            {netDebt !== null && netDebt <= 0 ? "Cash exceeds all debt" : "Total funded obligations"}
+          </div>
+        </div>
+      </div>
       {/* Ledger Header & Sub-Navigation */}
       <div className="p-3 bg-[#0E131A] border border-[#1E2638] flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">

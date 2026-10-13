@@ -9,7 +9,9 @@ import {
   StressSimulationInputs,
 } from "./types";
 import { SEED_COMPANIES, SEED_PERIODS, SEED_AUDIT_ITEMS } from "./seedData";
+import { INSTITUTIONAL_COMPANIES } from "./institutionalDatabase";
 import { calculateRatios, evaluateEarlyWarnings, runStressSimulation } from "./financialEngine";
+import { autoIngestCompany } from "./autoIngest";
 
 /**
  * Ensures the SQLite database is initialized and populated with seed entities.
@@ -22,7 +24,7 @@ export async function ensureDatabaseSeeded(): Promise<void> {
       .get();
 
     if (!existingCount || existingCount.count === 0) {
-      // Seed companies
+      // Seed base companies
       for (const comp of SEED_COMPANIES) {
         db.insert(companies)
           .values({
@@ -56,6 +58,18 @@ export async function ensureDatabaseSeeded(): Promise<void> {
           })
           .run();
       }
+
+      // Seed institutional companies & their periods
+      for (const item of Object.values(INSTITUTIONAL_COMPANIES)) {
+        try {
+          db.insert(companies).values(item.company).run();
+          for (const p of item.periods) {
+            db.insert(financialPeriods).values(p).run();
+          }
+        } catch {
+          // company may already exist
+        }
+      }
     }
   } catch (error) {
     console.error("Error checking or seeding SQLite database:", error);
@@ -70,7 +84,21 @@ export async function resolveSecurity(query: string): Promise<CompanyEntity | nu
   const clean = query.trim().toUpperCase();
   if (!clean) return null;
 
-  // Exact ID match or symbol match
+  // Check institutional registry first
+  if (INSTITUTIONAL_COMPANIES[clean]) {
+    return INSTITUTIONAL_COMPANIES[clean].company;
+  }
+  const institutionalMatch = Object.values(INSTITUTIONAL_COMPANIES).find(
+    (c) =>
+      c.company.symbol.toUpperCase() === clean ||
+      c.company.id.toUpperCase() === clean ||
+      c.company.name.toUpperCase().includes(clean)
+  );
+  if (institutionalMatch) {
+    return institutionalMatch.company;
+  }
+
+  // Exact ID match or symbol match in DB
   const match = db
     .select()
     .from(companies)
@@ -105,18 +133,24 @@ export async function resolveSecurity(query: string): Promise<CompanyEntity | nu
 
 export async function getAllCompanies(): Promise<CompanyEntity[]> {
   await ensureDatabaseSeeded();
+  const companyMap = new Map<string, CompanyEntity>();
+
+  // Add seed companies
+  SEED_COMPANIES.forEach((c) => companyMap.set(c.id, c));
+
+  // Add institutional companies
+  Object.values(INSTITUTIONAL_COMPANIES).forEach((c) => companyMap.set(c.company.id, c.company));
+
+  // Add DB companies
   try {
     const list = db.select().from(companies).all();
-    if (list.length > 0) {
-      return list as unknown as CompanyEntity[];
-    }
+    list.forEach((c) => companyMap.set(c.id, c as unknown as CompanyEntity));
   } catch (e) {
     console.error("Error getting companies from DB:", e);
   }
-  return SEED_COMPANIES;
-}
 
-import { autoIngestCompany } from "./autoIngest";
+  return Array.from(companyMap.values());
+}
 
 /**
  * Retrieves the full financial risk profile, periods, ratios, EWS flags, and stress simulation.
@@ -128,36 +162,49 @@ export async function getCompanyDetails(
   await ensureDatabaseSeeded();
 
   let company: CompanyEntity | null = null;
-  try {
-    const res = db.select().from(companies).where(eq(companies.id, id)).get();
-    if (res) company = res as unknown as CompanyEntity;
-  } catch (e) {
-    console.error("DB company lookup error:", e);
+  let periods: FinancialPeriodData[] = [];
+
+  // 1. Direct institutional match (100% verified authentic audited data)
+  if (INSTITUTIONAL_COMPANIES[id]) {
+    company = INSTITUTIONAL_COMPANIES[id].company;
+    periods = INSTITUTIONAL_COMPANIES[id].periods;
+  }
+
+  // 2. Database lookup if not in curated institutional registry
+  if (!company) {
+    try {
+      const res = db.select().from(companies).where(eq(companies.id, id)).get();
+      if (res) company = res as unknown as CompanyEntity;
+    } catch (e) {
+      console.error("DB company lookup error:", e);
+    }
   }
 
   if (!company) {
     company = SEED_COMPANIES.find((c) => c.id === id) || null;
   }
 
-  // Automatic on-the-fly ingestion for any company in the world (e.g. HAL.NS, NVDA, TCS.NS)
+  // 3. Automatic on-the-fly ingestion for any company worldwide
   if (!company) {
     company = await autoIngestCompany(id);
   }
   if (!company) return null;
 
-  let periods: FinancialPeriodData[] = [];
-  try {
-    const pList = db
-      .select()
-      .from(financialPeriods)
-      .where(eq(financialPeriods.companyId, id))
-      .orderBy(sql`${financialPeriods.period} desc`)
-      .all();
-    if (pList.length > 0) {
-      periods = pList as unknown as FinancialPeriodData[];
+  // Retrieve periods if not already provided by institutional database
+  if (periods.length === 0) {
+    try {
+      const pList = db
+        .select()
+        .from(financialPeriods)
+        .where(eq(financialPeriods.companyId, id))
+        .orderBy(sql`${financialPeriods.period} desc`)
+        .all();
+      if (pList.length > 0) {
+        periods = pList as unknown as FinancialPeriodData[];
+      }
+    } catch (e) {
+      console.error("DB periods lookup error:", e);
     }
-  } catch (e) {
-    console.error("DB periods lookup error:", e);
   }
 
   if (periods.length === 0) {

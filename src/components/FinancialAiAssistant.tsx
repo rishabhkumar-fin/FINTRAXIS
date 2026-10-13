@@ -5,11 +5,15 @@ import {
   Sparkles,
   X,
   Send,
-  BookOpen,
   Maximize2,
   Minimize2,
+  Copy,
+  Check,
+  RotateCcw,
+  Lightbulb,
 } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
+import { INSTITUTIONAL_COMPANIES } from "@/lib/institutionalDatabase";
 
 interface Message {
   id: string;
@@ -17,6 +21,7 @@ interface Message {
   text: string;
   timestamp: string;
   relatedTerms?: string[];
+  followUps?: string[];
 }
 
 interface FinancialAiAssistantProps {
@@ -25,241 +30,517 @@ interface FinancialAiAssistantProps {
   activeProfile: CompanyRiskProfile | null;
 }
 
-const KNOWLEDGE_BASE: Record<
-  string,
-  {
-    title: string;
-    category: string;
-    summary: string;
-    formula?: string;
-    benchmark?: string;
-    details: string;
-  }
-> = {
-  "altman-z": {
-    title: "Altman Z-Score (Distress Prediction)",
-    category: "Solvency & Default Risk",
-    summary:
-      "A quantitative scoring formula developed by NYU Professor Edward Altman to predict the probability that a company will enter bankruptcy within two years.",
-    formula: "Z = 1.2*(Working Cap/Assets) + 1.4*(Retained Earnings/Assets) + 3.3*(EBIT/Assets) + 0.6*(Market Cap/Total Liab) + 1.0*(Sales/Assets)",
-    benchmark: "Safe Zone: > 2.99 | Grey Zone: 1.81 - 2.99 | Distress Zone: < 1.81",
-    details:
-      "A score below 1.81 signals high insolvency risk. The model heavily penalizes depleted working capital and operational losses (negative EBIT).",
-  },
-  "beneish-m": {
-    title: "Beneish M-Score (Earnings Manipulation)",
-    category: "Accounting Forensics",
-    summary:
-      "A mathematical composite of 8 financial ratios designed to detect whether a corporation has manipulated its reported financial statements.",
-    formula: "M = -4.84 + 0.920*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.037*TATA + 0.0327*LVGI",
-    benchmark: "Normal / Unmanipulated: < -1.78 | Probability of Manipulation: > -1.78",
-    details:
-      "Scores greater than -1.78 suggest aggressive revenue recognition, capitalized expenses, or artificial accruals that warrant immediate audit review.",
-  },
-  "repo-rate": {
-    title: "RBI Repo Rate (5.50%) & Central Bank Impact",
-    category: "Macroeconomic Policy",
-    summary:
-      "The rate at which the Reserve Bank of India lends liquidity to commercial banks against government securities. Sets the benchmark cost of capital across India.",
-    benchmark: "Current RBI Repo Rate: 5.50% | Reverse Repo: 3.35% | SDF: 5.25%",
-    details:
-      "Higher repo rates increase marginal cost of lending (MCLR) and external benchmark lending rates (EBLR). For levered Indian corporates, every 50 bps repo hike translates into increased working capital interest expenses and tighter debt service coverage.",
-  },
-  "fed-funds": {
-    title: "US Federal Funds Rate (5.25% - 5.50%)",
-    category: "Macroeconomic Policy",
-    summary:
-      "The target overnight interest rate at which US depository institutions trade federal funds with each other. Governed by the US Federal Open Market Committee (FOMC).",
-    benchmark: "Target Range: 5.25% - 5.50% | SOFR: ~5.31%",
-    details:
-      "Anchors dollar borrowing costs globally. Elevated Fed funds rates strengthen the US dollar against emerging market currencies (e.g. INR, JPY) and raise floating-rate Term Loan B and SOFR debt servicing costs.",
-  },
-  "net-debt-ebitda": {
-    title: "Net Debt / EBITDA (Leverage Multiple)",
-    category: "Credit & Solvency",
-    summary:
-      "Measures how many years of cash generation a company would need to pay off all debt if debt and EBITDA remain constant.",
-    formula: "Net Debt / EBITDA = (Short-Term Debt + Long-Term Debt - Cash & Cash Equivalents) / EBITDA",
-    benchmark: "Institutional Hurdle: < 3.50x | Caution: 3.50x - 5.00x | Distressed: > 5.00x",
-    details:
-      "A Net Debt/EBITDA multiple above 3.5x signals that the firm carries substantial debt relative to its operational earning power, making it vulnerable to rate hikes and demand shocks.",
-  },
-  "interest-coverage": {
-    title: "Interest Coverage Ratio (Times Interest Earned)",
-    category: "Debt Service Capacity",
-    summary:
-      "Measures how comfortably a company can pay the interest due on its outstanding loans with its operating earnings.",
-    formula: "Interest Coverage = Operating Income (EBIT) / Total Interest Expense",
-    benchmark: "Investment Grade: > 4.0x | Minimum Covenant: 2.5x | Default Risk: < 1.5x",
-    details:
-      "An interest coverage ratio below 1.5x indicates that the corporate is dangerously close to operating cash shortfall, risking syndicated loan covenant breaches.",
-  },
-  "current-ratio": {
-    title: "Current Ratio & Quick Ratio",
-    category: "Liquidity",
-    summary:
-      "Measures short-term liquidity: the company's ability to cover obligations maturing within 12 months using current assets.",
-    formula: "Current Ratio = Total Current Assets / Total Current Liabilities | Quick Ratio = (Cash + Marketable Sec + Receivables) / Current Liabilities",
-    benchmark: "Healthy: > 1.20x | Tight: 1.00x - 1.20x | Liquidity Deficit: < 1.00x",
-    details:
-      "A current ratio below 1.0x means short-term liabilities exceed short-term assets, requiring immediate revolving credit drawdown or asset sales.",
-  },
-  "xbrl": {
-    title: "XBRL Digital Line-Item Provenance",
-    category: "Regulatory Auditing",
-    summary:
-      "eXtensible Business Reporting Language — the international digital standard for exchanging audited business and financial data.",
-    details:
-      "FINTRAXIS embeds cryptographic XBRL tags (such as us-gaap:Revenues or ifrs:OperatingProfit) for every single line item in the financial ledger, linking numbers directly to audited statutory regulatory filings.",
-  },
-  "ind-as": {
-    title: "Ind-AS vs US-GAAP vs IFRS Accounting",
-    category: "Accounting Regimes",
-    summary:
-      "Indian Accounting Standards (Ind-AS) converge with IFRS, whereas US-GAAP governs SEC registrants.",
-    details:
-      "Under Ind-AS 116 and IFRS 16, virtually all leases must be capitalized onto the balance sheet as Right-of-Use (ROU) assets and lease liabilities. In Indian financial statements, numbers are reported in Crores (10,000,000) or Lakhs (100,000), which FINTRAXIS normalizes automatically.",
-  },
-  "basel-iii": {
-    title: "Basel III Early Warning System (EWS)",
-    category: "Institutional Surveillance",
-    summary:
-      "International regulatory framework developed by the Basel Committee on Banking Supervision to enforce minimum bank capital adequacy and corporate credit risk controls.",
-    details:
-      "Monitors systemic credit risk triggers: liquidity coverage degradation, negative CFO despite positive net income (earnings quality warning), and excessive funded debt to equity.",
-  },
-};
-
 export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: FinancialAiAssistantProps) {
+  const company = activeProfile?.company;
+  const ratios = activeProfile?.latestRatios;
+  const latestPeriod = activeProfile?.periods?.[0];
+  const isIndianCompany =
+    company?.country === "IND" ||
+    company?.symbol.endsWith(".NS") ||
+    company?.symbol.endsWith(".BO");
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "intro",
       sender: "ai",
       text: activeProfile
-        ? `Hello! I am your **FINTRAXIS Risk & Financial Intelligence Copilot**. I have loaded live data for **${activeProfile.company.name} (${activeProfile.company.symbol})** [${activeProfile.company.country} • ${activeProfile.company.currency}]. You can ask me to explain any financial metric, ratio, macro rate, or calculate risk implications.`
-        : "Hello! I am your **FINTRAXIS Risk & Financial Intelligence Copilot**. I can explain institutional financial terms, bankruptcy formulas (Altman Z, Beneish M), central bank rates (RBI Repo 5.50%, US Fed Funds), and analyze credit risks.",
+        ? `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nI have loaded active surveillance data for **${company?.name} (${company?.symbol})**:\n\n• **Country & Currency:** ${company?.country} (${company?.currency} ${company?.scaleUnit})\n• **Accounting Regime:** ${company?.accountingStandard}\n• **Solvency Tier:** **${activeProfile.riskTier}** (Score: ${activeProfile.riskScore}/100)\n• **Net Debt / EBITDA:** ${ratios?.netDebtToEbitda !== null ? `${ratios?.netDebtToEbitda?.toFixed(2)}x` : "0.00x (Debt-Free)"}\n• **Interest Coverage:** ${ratios?.interestCoverage !== null ? `${ratios?.interestCoverage?.toFixed(2)}x` : "N/D"}\n\nI can analyze this company's creditworthiness, compute bankruptcy models, explain complex financial terms, or assess the impact of central bank interest rate hikes. What would you like to explore?`
+        : "### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nWelcome to **FINTRAXIS Institutional Intelligence**. I provide deep credit underwriting memos, forensic accounting diagnostics (Altman Z-Score, Beneish M-Score), macro interest rate evaluations (RBI Repo 5.50%, US Fed Funds), and 3-statement financial analyses.\n\nAsk me any question or pick a suggested topic below to begin!",
       timestamp: "Just now",
-      relatedTerms: ["altman-z", "repo-rate", "net-debt-ebitda", "interest-coverage"],
+      followUps: [
+        "Analyze credit risk & solvency for this company",
+        "Explain Altman Z-Score formula & default thresholds",
+        "What does RBI Repo Rate (5.50%) mean for this firm?",
+        "Explain Net Debt to EBITDA 3.5x hurdle",
+      ],
     },
   ]);
 
   const [inputQuery, setInputQuery] = useState("");
-  const [selectedTermKey, setSelectedTermKey] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const company = activeProfile?.company;
-  const ratios = activeProfile?.latestRatios;
-  const isIndianCompany = company?.country === "IND" || company?.symbol.endsWith(".NS") || company?.symbol.endsWith(".BO");
+  const handleCopy = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
-  const handleSendQuery = (queryText: string) => {
-    const text = queryText.trim();
-    if (!text) return;
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: "intro_reset",
+        sender: "ai",
+        text: "Conversation cleared. Ready for your next institutional analysis or financial question!",
+        timestamp: "Just now",
+        followUps: [
+          "Analyze credit risk & solvency for this company",
+          "Explain Altman Z-Score formula & default thresholds",
+          "What does RBI Repo Rate (5.50%) mean for this firm?",
+        ],
+      },
+    ]);
+  };
 
-    const userMsg: Message = {
-      id: `user_${Date.now()}`,
+  const generateInstitutionalResponse = (query: string): { response: string; followUps: string[] } => {
+    const q = query.toLowerCase().trim();
+
+    // 1. SPECIFIC NAMED COMPANY LOOKUP OR ACTIVE COMPANY ANALYSIS
+    const companyKeys = Object.keys(INSTITUTIONAL_COMPANIES);
+    const matchedKey = companyKeys.find(
+      (k) =>
+        q.includes(k.toLowerCase()) ||
+        q.includes(k.replace(".ns", "").replace(".t", "").toLowerCase()) ||
+        q.includes(INSTITUTIONAL_COMPANIES[k].company.name.toLowerCase().split(" ")[0])
+    );
+
+    if (
+      matchedKey ||
+      q.includes("analyze") ||
+      q.includes("credit risk") ||
+      q.includes("solvency") ||
+      q.includes("underwrite") ||
+      q.includes("underwriting") ||
+      q.includes("memo") ||
+      q.includes("this company") ||
+      q.includes("this firm")
+    ) {
+      const targetProfile = matchedKey ? INSTITUTIONAL_COMPANIES[matchedKey] : null;
+      const targetCompany = targetProfile ? targetProfile.company : company;
+      const targetPeriods = targetProfile ? targetProfile.periods : activeProfile?.periods;
+      const targetLatest = targetPeriods?.[0];
+
+      if (targetCompany && targetLatest) {
+        const rev = targetLatest.revenue ?? 0;
+        const ebit = targetLatest.ebit ?? 0;
+        const netInc = targetLatest.netIncome ?? 0;
+        const cash = targetLatest.cashAndEquivalents ?? 0;
+        const debt = targetLatest.totalDebt ?? 0;
+        const ocf = targetLatest.operatingCashFlow ?? 0;
+        const scale = targetCompany.scaleUnit;
+        const curr = targetCompany.currency;
+
+        const netDebt = debt - cash;
+        const ebitda = targetLatest.ebitda ?? ebit * 1.15;
+        const leverage = ebitda > 0 ? netDebt / ebitda : 0;
+        const interestExp = targetLatest.interestExpense ?? 0;
+        const coverage = interestExp > 0 ? ebit / interestExp : null;
+        const opMargin = rev > 0 ? (ebit / rev) * 100 : 0;
+
+        const isDebtFree = debt === 0 || netDebt <= 0;
+        const isSafeLeverage = leverage <= 3.5;
+        const isSafeCoverage = coverage === null || coverage >= 2.5;
+
+        return {
+          response:
+            `# INSTITUTIONAL CREDIT UNDERWRITING MEMORANDUM\n` +
+            `**TARGET ENTITY:** ${targetCompany.name} (${targetCompany.symbol})\n` +
+            `**JURISDICTION:** ${targetCompany.country} • **REGULATORY STANDARD:** ${targetCompany.accountingStandard}\n` +
+            `**AUDIT PERIOD:** ${targetLatest.period} (${targetLatest.filingForm} Filed: ${targetLatest.filingDate})\n\n` +
+            `---\n\n` +
+            `### 1. EXECUTIVE SOLVENCY VERDICT\n` +
+            `• **Underwriting Classification:** ${
+              isDebtFree
+                ? "**TIER 1 // PRIME INVESTMENT GRADE (FORTRESS BALANCE SHEET)**. The entity operates in a net-cash position with substantial liquidity reserves and superior operating cash conversion."
+                : isSafeLeverage && isSafeCoverage
+                ? "**TIER 1 // SOLVENT & COMPLIANT**. Leverage resides comfortably within standard syndicate hurdles with sufficient interest coverage."
+                : "**TIER 2 / TIER 3 // WATCHLIST / DISTRESS**. Elevated gearing multiple or compressed fixed charge coverage requires structured monitoring."
+            }\n\n` +
+            `### 2. AUDITED FINANCIAL DISCLOSURES (${curr} ${scale})\n` +
+            `• **Consolidated Revenue:** ${curr} ${rev.toLocaleString()} ${scale}\n` +
+            `• **Operating Income (EBIT):** ${curr} ${ebit.toLocaleString()} ${scale} *(Operating Margin: ${opMargin.toFixed(1)}%)*\n` +
+            `• **Reported Net Profit:** ${curr} ${netInc.toLocaleString()} ${scale}\n` +
+            `• **Cash & Liquid Assets:** ${curr} ${cash.toLocaleString()} ${scale}\n` +
+            `• **Total Funded Debt:** ${curr} ${debt.toLocaleString()} ${scale} *(Net Debt: ${curr} ${netDebt.toLocaleString()} ${scale})*\n` +
+            `• **Cash Flow from Operations (CFO):** ${curr} ${ocf.toLocaleString()} ${scale}\n\n` +
+            `### 3. COVENANT BENCHMARKS & HEALTH MULTIPLES\n` +
+            `• **Net Debt / EBITDA:** **${isDebtFree ? "0.00x (Net Cash Positive)" : `${leverage.toFixed(2)}x`}** *(Institutional Hurdle: $\\le 3.50\\text{x}$) — ${isDebtFree || isSafeLeverage ? "Compliant ✅" : "Breach ⚠️"}*\n` +
+            `• **EBIT Interest Coverage:** **${coverage !== null ? `${coverage.toFixed(2)}x` : "N/A (Zero Interest Draw)"}** *(Covenant Floor: $\\ge 2.50\\text{x}$) — ${isSafeCoverage ? "Compliant ✅" : "Tight Buffer ⚠️"}*\n\n` +
+            `### 4. CENTRAL BANK SENSITIVITY & MACRO TRANSMISSION\n` +
+            `${
+              targetCompany.country === "IND"
+                ? `Operates in India with benchmark funding tied to the **RBI Repo Rate (5.50%)**. ${
+                    isDebtFree
+                      ? `Because ${targetCompany.name} is debt-free, monetary tightening actually generates accretive interest income on its ${curr} ${cash.toLocaleString()} ${scale} cash reserves!`
+                      : `A 100 bps repo rate shift impacts annual interest outlays by approximately ${curr} ${(debt * 0.01).toFixed(1)} ${scale}.`
+                  }`
+                : `Reports under ${targetCompany.country} monetary regime. Funding is anchored to sovereign benchmark yields and central bank policy rates.`
+            }`,
+          followUps: [
+            `What is the Altman Z-Score for ${targetCompany.name}?`,
+            "Explain Beneish M-Score for earnings fraud",
+            "What does RBI Repo Rate (5.50%) mean for corporate debt?",
+            "Explain Net Debt / EBITDA 3.5x hurdle",
+          ],
+        };
+      }
+    }
+
+    // 2. ALTMAN Z-SCORE
+    if (q.includes("altman") || q.includes("z-score") || q.includes("bankruptcy") || q.includes("distress model")) {
+      return {
+        response:
+          `# QUANTITATIVE METHODOLOGY: ALTMAN Z-SCORE DISTRESS MODEL\n\n` +
+          `Developed by Prof. Edward Altman at NYU Stern, the **Altman Z-Score** is the global standard multi-factor linear discriminant model for predicting corporate bankruptcy within 24 months.\n\n` +
+          `### 1. MATHEMATICAL FORMULATION\n` +
+          `\\[ Z = 1.2 X_1 + 1.4 X_2 + 3.3 X_3 + 0.6 X_4 + 0.999 X_5 \\]\n\n` +
+          `Where the five financial ratios represent:\n` +
+          `• **$X_1 = \\frac{\\text{Working Capital}}{\\text{Total Assets}}$:** Short-term net liquidity buffer against unexpected cash burn.\n` +
+          `• **$X_2 = \\frac{\\text{Retained Earnings}}{\\text{Total Assets}}$:** Cumulative profitability and enterprise longevity (rewards seasoned operators over debt-funded startups).\n` +
+          `• **$X_3 = \\frac{\\text{EBIT}}{\\text{Total Assets}}$:** True asset earning power before interest expense and tax deductions (**heaviest weight: 3.3x**).\n` +
+          `• **$X_4 = \\frac{\\text{Market Value of Equity}}{\\text{Total Liabilities}}$:** Market debt capacity; measures how much enterprise value can drop before liabilities exceed assets.\n` +
+          `• **$X_5 = \\frac{\\text{Sales}}{\\text{Total Assets}}$:** Asset turnover efficiency; how dynamically management deploys capital to generate turnover.\n\n` +
+          `### 2. INSTITUTIONAL RATING THRESHOLDS\n` +
+          `• **Safe Zone ($Z > 2.99$):** Probability of default $< 5\\%$. Strong balance sheet, investment grade equivalent (AAA down to BBB).\n` +
+          `• **Grey Zone ($1.81 \\le Z \\le 2.99$):** Moderate vulnerability. Placed on institutional watchlist for quarterly covenant review.\n` +
+          `• **Distress Zone ($Z < 1.81$):** High insolvency probability ($> 75\\%$ within 2 years). Senior lenders restrict borrowing lines.\n\n` +
+          (company
+            ? `### 3. LIVE APPLICATION TO ${company.name}\n` +
+              `Under the FINTRAXIS Solvency Matrix, ${company.name} is classified in **${activeProfile?.riskTier}** with a composite health score of **${activeProfile?.riskScore}/100**.`
+            : ""),
+        followUps: [
+          "Explain Beneish M-Score for earnings manipulation",
+          "Explain Piotroski 9-Point F-Score",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 3. BENEISH M-SCORE
+    if (q.includes("beneish") || q.includes("m-score") || q.includes("manipulation") || q.includes("fraud") || q.includes("forensic")) {
+      return {
+        response:
+          `# FORENSIC ACCOUNTING: BENEISH M-SCORE EARNINGS FRAUD MODEL\n\n` +
+          `The **Beneish M-Score** is a mathematical model that uses 8 financial ratios to determine whether a public company has manipulated its recorded earnings (famously flagged Enron prior to collapse).\n\n` +
+          `### 1. MATHEMATICAL FORMULATION\n` +
+          `\\[ M = -4.84 + 0.920 \\cdot \\text{DSRI} + 0.528 \\cdot \\text{GMI} + 0.404 \\cdot \\text{AQI} + 0.892 \\cdot \\text{SGI} + 0.115 \\cdot \\text{DEPI} - 0.172 \\cdot \\text{SGAI} + 4.037 \\cdot \\text{TATA} + 0.0327 \\cdot \\text{LVGI} \\]\n\n` +
+          `### 2. THE 8 FORENSIC VECTORS\n` +
+          `1. **DSRI (Days Sales in Receivables Index):** $\\frac{\\text{Receivables}_t / \\text{Sales}_t}{\\text{Receivables}_{t-1} / \\text{Sales}_{t-1}}$ — Flags premature revenue recognition or channel stuffing.\n` +
+          `2. **GMI (Gross Margin Index):** $\\frac{\\text{Gross Margin}_{t-1}}{\\text{Gross Margin}_t}$ — Deteriorating margins create incentives to manipulate earnings.\n` +
+          `3. **AQI (Asset Quality Index):** $\\frac{1 - (\\text{CA}_t + \\text{PPE}_t) / \\text{TA}_t}{1 - (\\text{CA}_{t-1} + \\text{PPE}_{t-1}) / \\text{TA}_{t-1}}$ — Unusually high intangible asset capitalization.\n` +
+          `4. **SGI (Sales Growth Index):** High growth firms face market pressure to maintain unrealistic trajectories.\n` +
+          `5. **DEPI (Depreciation Index):** Depreciating assets slower to artificially reduce expenses.\n` +
+          `6. **SGAI (Sales, General & Admin Expense Index):** Disproportionate administrative overhead.\n` +
+          `7. **LVGI (Leverage Index):** Rising debt ratios increase covenant breach incentives.\n` +
+          `8. **TATA (Total Accruals to Total Assets):** $\\frac{\\text{Net Income} - \\text{CFO}}{\\text{Total Assets}}$ — High accruals without real operating cash flow is a cardinal fraud signal!\n\n` +
+          `### 3. INTERPRETATION BENCHMARK\n` +
+          `• **$M > -1.78$:** High probability of earnings manipulation / aggressive accounting.\n` +
+          `• **$M \\le -1.78$:** Low probability of earnings manipulation. Clean audit profile.`,
+        followUps: [
+          "Explain Altman Z-Score formula & default thresholds",
+          "What is CFO / Net Income Cash Conversion ratio?",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 4. PIOTROSKI F-SCORE
+    if (q.includes("piotroski") || q.includes("f-score")) {
+      return {
+        response:
+          `# FUNDAMENTAL SCREENING: PIOTROSKI 9-POINT F-SCORE\n\n` +
+          `Devised by Stanford Accounting Professor Joseph Piotroski, the **F-Score** evaluates a company's financial turnaround across 9 binary criteria (score ranges from 0 to 9).\n\n` +
+          `### 1. PROFITABILITY SIGNALS (4 Points)\n` +
+          `1. **Positive Net Income (ROA > 0)**: 1 point if positive net income in current year.\n` +
+          `2. **Positive Operating Cash Flow (CFO > 0)**: 1 point if operating cash flow is positive.\n` +
+          `3. **Higher ROA YoY**: 1 point if ROA is higher than prior year.\n` +
+          `4. **Quality of Earnings (CFO > Net Income)**: 1 point if cash from operations exceeds reported net income.\n\n` +
+          `### 2. LEVERAGE, LIQUIDITY & DILUTION SIGNALS (3 Points)\n` +
+          `5. **Lower Long-Term Debt YoY**: 1 point if long-term debt-to-assets decreased.\n` +
+          `6. **Higher Current Ratio YoY**: 1 point if liquidity ratio improved.\n` +
+          `7. **Zero Equity Dilution**: 1 point if no new common shares were issued.\n\n` +
+          `### 3. OPERATING EFFICIENCY SIGNALS (2 Points)\n` +
+          `8. **Higher Gross Margin YoY**: 1 point if gross margin expanded.\n` +
+          `9. **Higher Asset Turnover YoY**: 1 point if Sales / Total Assets increased.\n\n` +
+          `### 4. GRADING SCALE\n` +
+          `• **8 - 9 Points:** Exceptional fundamental health. Pristine investment candidate.\n` +
+          `• **5 - 7 Points:** Stable median corporate performer.\n` +
+          `• **0 - 4 Points:** Financially fragile, value trap or severe structural distress.`,
+        followUps: [
+          "Explain DuPont 3-part & 5-part decomposition",
+          "Explain Altman Z-Score formula & default thresholds",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 5. CURRENT RATIO & QUICK RATIO & LIQUIDITY
+    if (
+      q.includes("current ratio") ||
+      q.includes("quick ratio") ||
+      q.includes("acid test") ||
+      q.includes("liquidity") ||
+      q.includes("cash ratio")
+    ) {
+      return {
+        response:
+          `# BALANCE SHEET LIQUIDITY RUNWAY & SHORT-TERM SOLVENCY\n\n` +
+          `Liquidity ratios measure whether a firm can satisfy its short-term debt obligations (due within 12 months) without needing external emergency financing.\n\n` +
+          `### 1. CURRENT RATIO\n` +
+          `\\[ \\text{Current Ratio} = \\frac{\\text{Total Current Assets}}{\\text{Total Current Liabilities}} \\]\n` +
+          `• **Benchmark Hurdle:** $\\ge 1.20\\text{x}$ (Safe buffer: 1.50x to 2.00x).\n` +
+          `• **Plain-English Meaning:** A current ratio of $1.50\\text{x}$ means the company holds **$1.50 in short-term assets for every $1.00 of bills coming due within a year**.\n\n` +
+          `### 2. QUICK (ACID-TEST) RATIO\n` +
+          `\\[ \\text{Quick Ratio} = \\frac{\\text{Cash} + \\text{Marketable Securities} + \\text{Accounts Receivable}}{\\text{Total Current Liabilities}} \\]\n` +
+          `• **Why Exclude Inventory?** In a liquidity crunch, inventories (raw steel, unsellable inventory) cannot be converted to cash instantly without severe markdown losses.\n` +
+          `• **Benchmark Hurdle:** $\\ge 1.00\\text{x}$.\n\n` +
+          `### 3. CASH RATIO\n` +
+          `\\[ \\text{Cash Ratio} = \\frac{\\text{Cash \\& Equivalents}}{\\text{Total Current Liabilities}} \\]\n` +
+          `• The ultimate conservative solvency test. Hurdle: $\\ge 0.20\\text{x}$.\n\n` +
+          (company && ratios
+            ? `### 4. LIVE NUMBERS FOR ${company.name}\n` +
+              `• Current Ratio: **${ratios.currentRatio?.toFixed(2) || "N/D"}x** *(Status: ${(ratios.currentRatio ?? 0) >= 1.2 ? "Healthy ✅" : "Tight ⚠️"})*\n` +
+              `• Quick Ratio: **${ratios.quickRatio?.toFixed(2) || "N/D"}x**\n` +
+              `• Cash Ratio: **${ratios.cashRatio?.toFixed(2) || "N/D"}x**`
+            : ""),
+        followUps: [
+          "Explain Net Debt to EBITDA 3.5x hurdle",
+          "Explain EBIT Interest Coverage & DSCR",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 6. NET DEBT / EBITDA & LEVERAGE
+    if (
+      q.includes("ebitda") ||
+      q.includes("net debt") ||
+      q.includes("leverage") ||
+      q.includes("debt-to-equity") ||
+      q.includes("gearing")
+    ) {
+      return {
+        response:
+          `# CREDIT RISK BENCHMARK: NET DEBT / EBITDA & GEARING MULTIPLES\n\n` +
+          `The **Net Debt / EBITDA multiple** is the primary leverage metric used by Wall Street syndicates, rating agencies (S&P, Moody's, CRISIL), and private credit funds to govern borrowing covenants.\n\n` +
+          `### 1. MATHEMATICAL FORMULATION\n` +
+          `\\[ \\text{Net Debt / EBITDA} = \\frac{(\\text{Short-Term Debt} + \\text{Long-Term Debt}) - \\text{Cash \\& Equivalents}}{\\text{EBITDA}} \\]\n\n` +
+          `### 2. INSTITUTIONAL THRESHOLDS & RATINGS\n` +
+          `• **$< 1.50\\text{x}$ (Prime Investment Grade / Low Risk):** Highly solvent balance sheet. Rapid debt repayment capacity.\n` +
+          `• **$1.50\\text{x} - 3.50\\text{x}$ (Standard Corporate Hurdle):** Manageable leverage. Standard investment-grade threshold.\n` +
+          `• **$3.50\\text{x} - 5.00\\text{x}$ (Elevated Leverage / Watchlist):** Syndicate covenant restrictions trigger; cash flow sweeps enforced.\n` +
+          `• **$> 5.00\\text{x}$ (Distressed / High Yield):** Severely over-levered. High vulnerability to revenue contractions and interest rate hikes.\n` +
+          `• **Negative Multiple:** Company holds **more cash than total debt** (Net Cash Position / Fortress Balance Sheet)!\n\n` +
+          `### 3. DEBT-TO-EQUITY (D/E) RATIO\n` +
+          `\\[ \\text{D/E} = \\frac{\\text{Total Debt}}{\\text{Total Shareholders' Equity}} \\]\n` +
+          `• Prudent ceiling: $\\le 1.50\\text{x}$ for industrial firms, $\\le 0.50\\text{x}$ for tech operators.\n\n` +
+          (company && ratios
+            ? `### 4. LIVE POSITION FOR ${company.name}\n` +
+              `• Net Debt / EBITDA: **${ratios.netDebtToEbitda !== null ? `${ratios.netDebtToEbitda.toFixed(2)}x` : "0.00x"}**\n` +
+              `• Debt to Equity: **${ratios.debtToEquity !== null ? `${ratios.debtToEquity.toFixed(2)}x` : "0.00x"}**\n` +
+              `• Status: **${(ratios.netDebtToEbitda ?? 0) <= 3.5 ? "COVENANT COMPLIANT ✅" : "ELEVATED RISK ⚠️"}**`
+            : ""),
+        followUps: [
+          "Explain EBIT Interest Coverage & DSCR",
+          "What does RBI Repo Rate (5.50%) mean for this firm?",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 7. INTEREST COVERAGE & DSCR
+    if (
+      q.includes("interest coverage") ||
+      q.includes("tie") ||
+      q.includes("dscr") ||
+      q.includes("debt service")
+    ) {
+      return {
+        response:
+          `# FIXED CHARGE CAPACITY: EBIT INTEREST COVERAGE & DSCR\n\n` +
+          `Interest coverage evaluates whether a company generates enough operating profits to pay interest on its bank loans and bonds without burning cash.\n\n` +
+          `### 1. EBIT INTEREST COVERAGE (TIMES INTEREST EARNED - TIE)\n` +
+          `\\[ \\text{Interest Coverage} = \\frac{\\text{Operating Income (EBIT)}}{\\text{Gross Interest Expense}} \\]\n` +
+          `• **Institutional Floor:** $\\ge 2.50\\text{x}$ (Investment Grade: $> 4.00\\text{x}$).\n` +
+          `• **Distress Zone:** $< 1.50\\text{x}$ means the company is dangerously close to default if earnings dip even slightly.\n\n` +
+          `### 2. DEBT SERVICE COVERAGE RATIO (DSCR)\n` +
+          `\\[ \\text{DSCR} = \\frac{\\text{Net Operating Income}}{\\text{Interest Expense} + \\text{Principal Amortization}} \\]\n` +
+          `• Unlike simple interest coverage, DSCR factors in **mandatory loan principal repayments**.\n` +
+          `• Bank standard minimum: $\\ge 1.25\\text{x}$ to $1.50\\text{x}$.\n\n` +
+          (company && ratios
+            ? `### 3. LIVE POSITION FOR ${company.name}\n` +
+              `• Current EBIT Interest Coverage: **${ratios.interestCoverage !== null ? `${ratios.interestCoverage.toFixed(2)}x` : "N/D (Zero Interest)"}**\n` +
+              `• Covenant Tolerance: $\\ge 2.50\\text{x}$ *(Status: ${(ratios.interestCoverage ?? 99) >= 2.5 ? "Ample Debt Service Buffer ✅" : "Tight Buffer ⚠️"})*`
+            : ""),
+        followUps: [
+          "Explain Net Debt to EBITDA 3.5x hurdle",
+          "What does RBI Repo Rate (5.50%) mean for this firm?",
+          "Explain Cash Burn Runway & Working Capital",
+        ],
+      };
+    }
+
+    // 8. DUPONT ANALYSIS & ROE / ROA
+    if (q.includes("dupont") || q.includes("roe") || q.includes("roa") || q.includes("return on equity")) {
+      return {
+        response:
+          `# STRATEGIC CAPITAL DECOMPOSITION: DUPONT ANALYSIS\n\n` +
+          `Invented by the DuPont Corporation, this framework decomposes **Return on Equity (ROE)** into underlying operational drivers to reveal whether returns stem from high margins, efficient asset use, or dangerous debt leverage.\n\n` +
+          `### 1. THE CLASSIC 3-PART DUPONT EQUATION\n` +
+          `\\[ \\text{ROE} = \\underbrace{\\frac{\\text{Net Income}}{\\text{Sales}}}_{\\text{Net Profit Margin}} \\times \\underbrace{\\frac{\\text{Sales}}{\\text{Total Assets}}}_{\\text{Asset Turnover}} \\times \\underbrace{\\frac{\\text{Total Assets}}{\\text{Equity}}}_{\\text{Equity Multiplier (Leverage)}} \\]\n\n` +
+          `### 2. KEY ANALYTIC INSIGHTS\n` +
+          `• **Margin Driver:** High ROE from Net Margin reflects pricing power and brand moat (e.g. Apple, Nvidia).\n` +
+          `• **Turnover Driver:** High ROE from Asset Turnover reflects lean supply chain and inventory velocity (e.g. Costco, Walmart).\n` +
+          `• **Leverage Warning:** If ROE is high *only* because Equity Multiplier is 6x or 8x, management is juicing shareholder returns with dangerous balance sheet debt!\n\n` +
+          `### 3. RETURN ON ASSETS (ROA)\n` +
+          `\\[ \\text{ROA} = \\frac{\\text{Net Income}}{\\text{Total Assets}} \\]\n` +
+          `• Unlevered measure of how efficiently every dollar of corporate assets generates profit. Hurdle: $> 8\\%$.`,
+        followUps: [
+          "Explain Altman Z-Score formula & default thresholds",
+          "Explain Net Debt to EBITDA 3.5x hurdle",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 9. REPO RATE & CENTRAL BANKS (RBI / FED / BOJ)
+    if (
+      q.includes("repo") ||
+      q.includes("rbi") ||
+      q.includes("fed") ||
+      q.includes("interest rate") ||
+      q.includes("boj") ||
+      q.includes("central bank") ||
+      q.includes("inflation")
+    ) {
+      return {
+        response:
+          `# MACROECONOMIC LIQUIDITY & CENTRAL BANK TRANSMISSION\n\n` +
+          `Central bank policy rates dictate the price of credit throughout corporate capital markets.\n\n` +
+          `### 1. RBI REPO RATE (INDIA: 5.50%)\n` +
+          `The **Repo Rate** is the benchmark policy rate at which the Reserve Bank of India lends liquidity to commercial banks against sovereign G-Sec collateral.\n` +
+          `• **Current Standing Policy:** Repo Rate: **5.50%** | SDF: **5.25%** | MSF: **5.75%**.\n` +
+          `• **Corporate Impact:** Under RBI regulations, all floating-rate corporate credit lines are mandated to benchmark to external benchmarks (EBLR or MCLR). When RBI shifts repo rates:\n` +
+          `  1. Corporate working capital borrowing costs adjust immediately.\n` +
+          `  2. Commercial Paper (CP) yields and 91-day T-bill yields shift in lockstep.\n` +
+          `  3. Companies with high floating-rate debt face contracting Interest Coverage Ratios.\n\n` +
+          `### 2. US FEDERAL FUNDS RATE (USA: 5.25% - 5.50%)\n` +
+          `• Set by the FOMC, this overnight benchmark anchors global dollar liquidity and SOFR.\n` +
+          `• A strong dollar increases cross-border debt servicing costs for emerging market firms with dollar-denominated External Commercial Borrowings (ECBs).\n\n` +
+          `### 3. BANK OF JAPAN (BOJ: 0.25%)\n` +
+          `• The Bank of Japan's rate normalization shifts the global **Yen Carry Trade**, where hedge funds borrow cheap JPY to invest in higher-yielding global equities and bonds.\n\n` +
+          (isIndianCompany && company
+            ? `### 4. TRANSMISSION TO ${company.name}\n` +
+              `Because ${company.name} reports in **INR Crores**, its funding environment is directly governed by RBI liquidity operations. ${
+                (latestPeriod?.totalDebt ?? 0) === 0
+                  ? `However, since ${company.name} operates **virtually debt-free**, elevated repo rates **benefit** the firm by boosting yield on its substantial cash reserves!`
+                  : `Its floating debt obligations experience higher carrying costs under elevated rates.`
+              }`
+            : ""),
+        followUps: [
+          "Explain Net Debt to EBITDA 3.5x hurdle",
+          "Explain EBIT Interest Coverage & DSCR",
+          "Analyze credit risk & solvency for this company",
+        ],
+      };
+    }
+
+    // 10. ACCOUNTING REGIMES & XBRL (IND-AS vs US-GAAP vs IFRS)
+    if (
+      q.includes("ind-as") ||
+      q.includes("ifrs") ||
+      q.includes("gaap") ||
+      q.includes("xbrl") ||
+      q.includes("crore") ||
+      q.includes("lakh")
+    ) {
+      return {
+        response:
+          `# STATUTORY ACCOUNTING STANDARDS & XBRL AUDIT TAXONOMY\n\n` +
+          `### 1. IND-AS (INDIA) VS US-GAAP (USA) VS IFRS (GLOBAL)\n` +
+          `• **Ind-AS 116 / IFRS 16 (Leases):** Requires all operating leases > 12 months to be capitalized on the balance sheet as Right-of-Use (ROU) Assets with matching Lease Liabilities. This inflates recorded EBITDA and gross debt.\n` +
+          `• **US-GAAP (ASC 842):** Distinguishes operating leases from finance leases, preserving classical operating lease expense presentation in operating cash flows.\n` +
+          `• **Numerical Scaling Units:**\n` +
+          `  - **Crore (₹):** $10^7 = 10,000,000$ (Ten Million).\n` +
+          `  - **Lakh (₹):** $10^5 = 100,000$ (One Hundred Thousand).\n` +
+          `  - FINTRAXIS standardizes Indian filings in **INR Crores** and US filings in **USD Millions** seamlessly.\n\n` +
+          `### 2. DIGITAL XBRL AUDIT LINEAGE\n` +
+          `**eXtensible Business Reporting Language (XBRL)** is the global standard for machine-readable financial filings:\n` +
+          `• Every cell in Module 02 is tagged with its official regulatory taxonomy (e.g. \`us-gaap:Revenues\` or \`ind-as:RevenueFromOperations\`).\n` +
+          `• Clicking any cell in the ledger opens the **Audit Drawer**, presenting the original regulatory filing form (10-K, MCA/BSE Annual Report), filing date, and calculation tree.`,
+        followUps: [
+          "Analyze credit risk & solvency for this company",
+          "Explain Altman Z-Score formula & default thresholds",
+          "What does RBI Repo Rate (5.50%) mean for this firm?",
+        ],
+      };
+    }
+
+    // 11. PLATFORM GUIDE & DASHBOARD USAGE
+    if (
+      q.includes("fintraxis") ||
+      q.includes("dashboard") ||
+      q.includes("how to use") ||
+      q.includes("guide") ||
+      q.includes("modules") ||
+      q.includes("features") ||
+      q.includes("terminal")
+    ) {
+      return {
+        response:
+          `# FINTRAXIS INSTITUTIONAL TERMINAL ARCHITECTURE\n\n` +
+          `FINTRAXIS is an institutional-grade Credit Risk & Solvency Intelligence Terminal designed for investment committees, sovereign wealth analysts, and corporate credit desks.\n\n` +
+          `### The 6 Core Modules:\n` +
+          `1. **[01] COMPANY HUB:** Global multi-currency search omnibar (\`Ctrl+K\`). Ingests any public equity worldwide (NSE, BSE, NASDAQ, NYSE, TSE) with real-time market pricing.\n` +
+          `2. **[02] STATEMENTS LEDGER:** Auditable 3-statement financial ledger (P&L, Balance Sheet, Cash Flow) across 3 fiscal periods with XBRL audit trail drawer.\n` +
+          `3. **[03] SOLVENCY & HEALTH DAG:** Deterministic Directed Acyclic Graph (DAG) evaluating 9 critical solvency, liquidity, and capital conversion ratios.\n` +
+          `4. **[04] VULNERABILITY MONITOR:** Automated Early Warning System (EWS) flagging covenant breaches, margin contraction, and debt service risks against Basel III standards.\n` +
+          `5. **[05] STRESS SIMULATOR:** Real-time pro-forma scenario engine testing revenue shocks (-25%), inflation (+10%), and central bank interest rate hikes (+350 bps).\n` +
+          `6. **[06] IC DOSSIER:** Production-grade Investment Committee Underwriting Memorandum ready for 1-click printing, clipboard export, and markdown signoff.`,
+        followUps: [
+          "Analyze credit risk & solvency for this company",
+          "Explain Altman Z-Score formula & default thresholds",
+          "Explain how the Stress Simulator works",
+        ],
+      };
+    }
+
+    // 12. GENERAL FINANCIAL INTELLIGENCE & DEFINITION LOOKUP
+    return {
+      response:
+        `# FINANCIAL INTELLIGENCE BRIEFING: "${query}"\n\n` +
+        `In corporate credit analysis, underwriting, and risk management, evaluating **${query}** requires inspecting operating cash generation, debt service coverage, and macroeconomic interest rate transmission.\n\n` +
+        `### Core Analytical Framework:\n` +
+        `1. **Operating Cash Flow Quality:** Does the entity convert reported accounting net income into actual unencumbered cash flow ($> 0.85\\text{x}$ conversion)?\n` +
+        `2. **Balance Sheet Resilience:** Does quick acid liquidity (Cash + Marketable Securities) provide at least a 6-month buffer against top-line contraction?\n` +
+        `3. **Fixed Charge Coverage:** Can operating income (EBIT) absorb central bank policy tightening without breaching bank syndicate covenants?\n\n` +
+        (company
+          ? `For active entity **${company.name} (${company.symbol})**, all audited disclosures are synchronized live in the **Statements Ledger** and **Solvency DAG** modules.`
+          : ""),
+      followUps: [
+        "Analyze credit risk & solvency for this company",
+        "Explain Altman Z-Score formula & default thresholds",
+        "What does RBI Repo Rate (5.50%) mean for this firm?",
+        "Explain Net Debt to EBITDA 3.5x hurdle",
+      ],
+    };
+  };
+
+  const handleSend = (text: string) => {
+    const cleanText = text.trim();
+    if (!cleanText) return;
+
+    const userMessage: Message = {
+      id: `usr_${Date.now()}`,
       sender: "user",
-      text,
+      text: cleanText,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputQuery("");
 
-    // Analyze query and produce intelligent institutional response
     setTimeout(() => {
-      const lower = text.toLowerCase();
-      let aiResponseText = "";
-      let foundTerms: string[] = [];
-
-      if (lower.includes("altman") || lower.includes("z-score") || lower.includes("bankruptcy") || lower.includes("insolvency")) {
-        const kb = KNOWLEDGE_BASE["altman-z"];
-        foundTerms.push("altman-z");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Mathematical Formula:**\n\`${kb.formula}\`\n\n**Institutional Benchmark:**\n${kb.benchmark}\n\n${kb.details}`;
-        if (company) {
-          aiResponseText += `\n\n**Analysis for ${company.name}:**\nWith an Altman Z score evaluated within our Solvency Matrix, early warning indicators show the risk tier is **${activeProfile?.riskTier}** (Score: ${activeProfile?.riskScore}/100).`;
-        }
-      } else if (lower.includes("repo") || lower.includes("rbi") || lower.includes("india rate") || lower.includes("interest rate")) {
-        const kb = KNOWLEDGE_BASE["repo-rate"];
-        foundTerms.push("repo-rate");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Current Benchmark Rates:**\n${kb.benchmark}\n\n${kb.details}`;
-        if (isIndianCompany) {
-          aiResponseText += `\n\n**Impact on ${company?.name}:**\nBecause ${company?.name} operates in India under **${company?.currency} (${company?.scaleUnit})**, a 50 bps shift in the RBI Repo Rate directly affects their short-term borrowing and commercial paper discount rates.`;
-        }
-      } else if (lower.includes("fed") || lower.includes("us rate") || lower.includes("sofr") || lower.includes("fomc")) {
-        const kb = KNOWLEDGE_BASE["fed-funds"];
-        foundTerms.push("fed-funds");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Benchmark:**\n${kb.benchmark}\n\n${kb.details}`;
-      } else if (lower.includes("ebitda") || lower.includes("net debt") || lower.includes("leverage")) {
-        const kb = KNOWLEDGE_BASE["net-debt-ebitda"];
-        foundTerms.push("net-debt-ebitda");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Formula:**\n\`${kb.formula}\`\n\n**Hurdle:**\n${kb.benchmark}\n\n${kb.details}`;
-        if (ratios?.netDebtToEbitda !== undefined && ratios?.netDebtToEbitda !== null) {
-          aiResponseText += `\n\n**Active Metric for ${company?.name}:**\nReported Net Debt / EBITDA is **${ratios.netDebtToEbitda.toFixed(2)}x** against an institutional hurdle of **3.50x**. Status: ${ratios.netDebtToEbitda <= 3.5 ? "COMPLIANT ✅" : "BREACH / HIGH LEVERAGE ⚠️"}.`;
-        }
-      } else if (lower.includes("coverage") || lower.includes("interest coverage") || lower.includes("dscr")) {
-        const kb = KNOWLEDGE_BASE["interest-coverage"];
-        foundTerms.push("interest-coverage");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Formula:**\n\`${kb.formula}\`\n\n**Benchmark:**\n${kb.benchmark}\n\n${kb.details}`;
-        if (ratios?.interestCoverage !== undefined && ratios?.interestCoverage !== null) {
-          aiResponseText += `\n\n**Active Metric for ${company?.name}:**\nReported Interest Coverage is **${ratios.interestCoverage.toFixed(2)}x**.`;
-        }
-      } else if (lower.includes("current ratio") || lower.includes("quick ratio") || lower.includes("liquidity")) {
-        const kb = KNOWLEDGE_BASE["current-ratio"];
-        foundTerms.push("current-ratio");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Formula:**\n\`${kb.formula}\`\n\n**Benchmark:**\n${kb.benchmark}\n\n${kb.details}`;
-        if (ratios?.currentRatio) {
-          aiResponseText += `\n\n**Active Metric for ${company?.name}:**\nCurrent Ratio: **${ratios.currentRatio.toFixed(2)}x** | Quick Ratio: **${ratios.quickRatio?.toFixed(2) || "N/D"}x**.`;
-        }
-      } else if (lower.includes("beneish") || lower.includes("m-score") || lower.includes("fraud") || lower.includes("manipulation")) {
-        const kb = KNOWLEDGE_BASE["beneish-m"];
-        foundTerms.push("beneish-m");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n**Formula:**\n\`${kb.formula}\`\n\n**Benchmark:**\n${kb.benchmark}\n\n${kb.details}`;
-      } else if (lower.includes("xbrl") || lower.includes("provenance") || lower.includes("filing")) {
-        const kb = KNOWLEDGE_BASE["xbrl"];
-        foundTerms.push("xbrl");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n${kb.details}`;
-      } else if (lower.includes("ind-as") || lower.includes("ifrs") || lower.includes("gaap") || lower.includes("crore") || lower.includes("lakh")) {
-        const kb = KNOWLEDGE_BASE["ind-as"];
-        foundTerms.push("ind-as");
-        aiResponseText = `### ${kb.title}\n\n${kb.summary}\n\n${kb.details}`;
-      } else if (lower.includes("analyze") || lower.includes("company") || lower.includes("summary") || lower.includes("overview")) {
-        if (company) {
-          aiResponseText = `### Institutional Risk Executive Briefing: ${company.name} (${company.symbol})\n\n` +
-            `• **Country & Regime:** ${company.country} (${company.accountingStandard})\n` +
-            `• **Reporting Currency:** ${company.currency} (${company.scaleUnit})\n` +
-            `• **Market Capitalization:** ${company.currency} ${company.marketCap?.toLocaleString() || "N/D"} ${company.scaleUnit}\n` +
-            `• **Risk Tier:** **${activeProfile?.riskTier || "LOW"}** (Composite Risk Score: ${activeProfile?.riskScore || 0}/100)\n` +
-            `• **Net Debt / EBITDA:** ${ratios?.netDebtToEbitda !== null ? ratios?.netDebtToEbitda?.toFixed(2) + "x" : "N/D"} (Hurdle: 3.50x)\n` +
-            `• **Interest Coverage:** ${ratios?.interestCoverage !== null ? ratios?.interestCoverage?.toFixed(2) + "x" : "N/D"} (Hurdle: 2.50x)\n` +
-            `• **Current Ratio:** ${ratios?.currentRatio !== null ? ratios?.currentRatio?.toFixed(2) + "x" : "N/D"} (Hurdle: 1.10x)\n\n` +
-            `**Key Takeaway:** The company's balance sheet exhibits ${
-              (activeProfile?.riskScore || 0) < 30
-                ? "strong investment-grade solvency with low refinancing vulnerabilities."
-                : (activeProfile?.riskScore || 0) < 60
-                ? "moderate leverage requiring close covenant surveillance under rising interest rates."
-                : "heightened default risk requiring urgent debt restructuring analysis."
-            }`;
-          foundTerms.push("net-debt-ebitda", "interest-coverage");
-        } else {
-          aiResponseText = "Select any company using the search bar or Security Master table, and I will generate an executive risk brief!";
-        }
-      } else {
-        aiResponseText = `I analyzed your question regarding **"${text}"**:\n\n` +
-          `In institutional credit risk analysis, financial metrics are interpreted relative to corporate cash flow predictability, asset tangibility, and macro liquidity conditions.\n\n` +
-          `Would you like me to elaborate on one of these related institutional topics?`;
-        foundTerms = ["altman-z", "net-debt-ebitda", "repo-rate", "current-ratio"];
-      }
-
-      const aiMsg: Message = {
+      const { response, followUps } = generateInstitutionalResponse(cleanText);
+      const aiMessage: Message = {
         id: `ai_${Date.now()}`,
         sender: "ai",
-        text: aiResponseText,
+        text: response,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        relatedTerms: foundTerms,
+        followUps,
       };
-
-      setMessages((prev) => [...prev, aiMsg]);
-    }, 350);
+      setMessages((prev) => [...prev, aiMessage]);
+    }, 280);
   };
 
   if (!isOpen) return null;
@@ -267,29 +548,38 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
   return (
     <div
       className={`fixed top-0 bottom-0 right-0 z-50 bg-[#0A0E17] border-l border-[#1E2536] shadow-2xl flex flex-col font-mono text-xs transition-all duration-200 ${
-        isExpanded ? "w-full md:w-[680px]" : "w-full sm:w-[460px]"
+        isExpanded ? "w-full md:w-[780px]" : "w-full sm:w-[540px]"
       }`}
     >
       {/* Top Header */}
       <div className="p-3.5 bg-[#0D111A] border-b border-[#1E2536] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded bg-[#C5A880]/10 border border-[#C5A880]/30 flex items-center justify-center text-[#C5A880]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded bg-[#C5A880]/15 border border-[#C5A880]/40 flex items-center justify-center text-[#C5A880]">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
             <div className="font-bold text-[#F8FAFC] flex items-center gap-2 text-xs">
               <span>FINANCIAL AI RISK COPILOT</span>
-              <span className="text-[9px] px-1.5 py-0.2 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] font-normal rounded">
-                ACTIVE
+              <span className="text-[9px] px-1.5 py-0.2 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] font-semibold rounded">
+                SOVEREIGN
               </span>
             </div>
             <div className="text-[10px] text-[#64748B]">
-              {company ? `Context: ${company.name} (${company.symbol})` : "General Institutional Intelligence"}
+              {company
+                ? `Active Context: ${company.name} (${company.symbol})`
+                : "Institutional Intelligence Engine"}
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleClearChat}
+            className="p-1.5 hover:bg-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+            title="Reset Conversation"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
           <button
             onClick={() => setIsExpanded((prev) => !prev)}
             className="p-1.5 hover:bg-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
@@ -309,36 +599,48 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
 
       {/* Suggested Quick Prompt Pills */}
       <div className="p-2.5 bg-[#080B10] border-b border-[#1E2536] flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[10px]">
-        <span className="text-[#64748B] text-[9.5px] uppercase whitespace-nowrap mr-1">QUICK PROMPTS:</span>
+        <span className="text-[#64748B] text-[9.5px] uppercase whitespace-nowrap mr-1">TOP TOPICS:</span>
         <button
-          onClick={() => handleSendQuery(`Analyze credit risk for ${company?.name || "current company"}`)}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] text-[#C5A880] rounded whitespace-nowrap transition-colors"
+          onClick={() => handleSend(`Analyze credit risk for ${company?.name || "current company"}`)}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] rounded whitespace-nowrap transition-colors"
         >
-          🔍 Analyze Risk Profile
+          🔍 Underwriting Memo
         </button>
         <button
-          onClick={() => handleSendQuery("Explain Altman Z-Score formula and default thresholds")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          onClick={() => handleSend("Explain Altman Z-Score formula and default thresholds")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           📉 Altman Z-Score
         </button>
         <button
-          onClick={() => handleSendQuery("What does RBI Repo Rate 5.50% mean for Indian corporate debt?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          onClick={() => handleSend("Explain Beneish M-Score for earnings fraud")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          🕵️ Beneish M-Score
+        </button>
+        <button
+          onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           🇮🇳 RBI Repo Rate
         </button>
         <button
-          onClick={() => handleSendQuery("Explain Net Debt to EBITDA 3.5x hurdle")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          onClick={() => handleSend("Explain Net Debt to EBITDA 3.5x hurdle")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           📊 Net Debt/EBITDA
         </button>
         <button
-          onClick={() => handleSendQuery("Explain Ind-AS 116 vs US-GAAP lease accounting")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          onClick={() => handleSend("Explain DuPont 3-part and 5-part decomposition")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
-          📑 Ind-AS vs US-GAAP
+          📈 DuPont Analysis
+        </button>
+        <button
+          onClick={() => handleSend("How does FINTRAXIS work and how to navigate the 6 modules?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          💡 Platform Guide
         </button>
       </div>
 
@@ -350,89 +652,68 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
             className={`flex flex-col ${m.sender === "user" ? "items-end" : "items-start"}`}
           >
             <div className="flex items-center gap-1.5 mb-1 text-[10px] text-[#64748B]">
-              <span>{m.sender === "user" ? "OPERATOR" : "FINTRAXIS AI"}</span>
+              <span>{m.sender === "user" ? "RISK OPERATOR" : "FINTRAXIS AI"}</span>
               <span>&bull;</span>
               <span>{m.timestamp}</span>
             </div>
 
             <div
-              className={`p-3.5 rounded-lg max-w-[92%] leading-relaxed text-xs ${
+              className={`p-4 rounded-lg max-w-[95%] leading-relaxed text-xs relative group ${
                 m.sender === "user"
-                  ? "bg-[#C5A880] text-[#080B10] font-medium"
+                  ? "bg-[#C5A880] text-[#080B10] font-semibold"
                   : "bg-[#0E131A] border border-[#1E2536] text-[#E2E8F0]"
               }`}
             >
-              <div className="whitespace-pre-wrap">{m.text}</div>
+              {/* Copy message button */}
+              {m.sender === "ai" && (
+                <button
+                  onClick={() => handleCopy(m.id, m.text)}
+                  className="absolute top-2.5 right-2.5 p-1 bg-[#12161F] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors opacity-0 group-hover:opacity-100"
+                  title="Copy analysis"
+                >
+                  {copiedId === m.id ? (
+                    <Check className="w-3 h-3 text-[#10B981]" />
+                  ) : (
+                    <Copy className="w-3 h-3" />
+                  )}
+                </button>
+              )}
 
-              {/* Related Knowledge Base Term Pills */}
-              {m.relatedTerms && m.relatedTerms.length > 0 && (
-                <div className="mt-3 pt-2.5 border-t border-[#1E2536] flex flex-wrap gap-1.5 items-center">
-                  <span className="text-[9.5px] text-[#64748B] uppercase">Deep Dive:</span>
-                  {m.relatedTerms.map((tKey) => {
-                    const item = KNOWLEDGE_BASE[tKey];
-                    if (!item) return null;
-                    return (
+              <div className="whitespace-pre-wrap font-sans text-xs leading-normal">
+                {m.text}
+              </div>
+
+              {/* Follow-up Question Chips */}
+              {m.followUps && m.followUps.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-[#1E2536] space-y-1.5">
+                  <div className="text-[9.5px] text-[#C5A880] font-bold uppercase flex items-center gap-1">
+                    <Lightbulb className="w-3 h-3 text-[#C5A880]" />
+                    <span>RECOMMENDED FOLLOW-UP ANALYSES:</span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {m.followUps.map((fu, idx) => (
                       <button
-                        key={tKey}
-                        onClick={() => setSelectedTermKey(tKey)}
-                        className="px-2 py-0.5 bg-[#172033] hover:bg-[#1E2D4A] border border-[#C5A880]/30 text-[#C5A880] text-[10px] rounded flex items-center gap-1 transition-colors"
+                        key={idx}
+                        onClick={() => handleSend(fu)}
+                        className="text-left px-2.5 py-1.5 bg-[#12161F] hover:bg-[#1A2233] border border-[#1E2536] hover:border-[#C5A880]/50 text-[#CBD5E1] text-[10.5px] rounded transition-colors flex items-center justify-between"
                       >
-                        <BookOpen className="w-2.5 h-2.5" />
-                        <span>{item.title.split("(")[0].trim()}</span>
+                        <span>{fu}</span>
+                        <span className="text-[#C5A880] text-[10px]">&rarr;</span>
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         ))}
-
-        {/* Selected Term Detail Modal Card inside assistant */}
-        {selectedTermKey && KNOWLEDGE_BASE[selectedTermKey] && (
-          <div className="p-4 bg-[#111622] border border-[#C5A880] rounded-lg space-y-2 animate-in fade-in">
-            <div className="flex items-center justify-between text-[#C5A880] font-bold text-xs">
-              <div className="flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>{KNOWLEDGE_BASE[selectedTermKey].title}</span>
-              </div>
-              <button
-                onClick={() => setSelectedTermKey(null)}
-                className="text-[#94A3B8] hover:text-[#F8FAFC]"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="text-[11px] text-[#CBD5E1]">
-              {KNOWLEDGE_BASE[selectedTermKey].summary}
-            </div>
-
-            {KNOWLEDGE_BASE[selectedTermKey].formula && (
-              <div className="p-2 bg-[#080B10] border border-[#1E2536] text-[10px] text-[#38BDF8] rounded">
-                <span className="text-[#64748B] block text-[9px] uppercase">Formula:</span>
-                <code>{KNOWLEDGE_BASE[selectedTermKey].formula}</code>
-              </div>
-            )}
-
-            {KNOWLEDGE_BASE[selectedTermKey].benchmark && (
-              <div className="text-[10.5px] text-[#10B981] font-semibold">
-                Benchmark: {KNOWLEDGE_BASE[selectedTermKey].benchmark}
-              </div>
-            )}
-
-            <div className="text-[11px] text-[#94A3B8] leading-snug">
-              {KNOWLEDGE_BASE[selectedTermKey].details}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Input Message Form */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          handleSendQuery(inputQuery);
+          handleSend(inputQuery);
         }}
         className="p-3 bg-[#0D111A] border-t border-[#1E2536] flex items-center gap-2"
       >
@@ -440,16 +721,16 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
           type="text"
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
-          placeholder="Ask anything (e.g. 'What is Altman Z?', 'Explain Repo Rate', 'Analyze HAL')..."
-          className="flex-1 px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] placeholder-[#475569] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none"
+          placeholder="Ask any question, term, formula, or company analysis..."
+          className="flex-1 px-3.5 py-2.5 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] placeholder-[#475569] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none transition-colors"
         />
         <button
           type="submit"
           disabled={!inputQuery.trim()}
-          className="px-3 py-2 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-xs rounded transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+          className="px-4 py-2.5 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-xs rounded transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-sm"
         >
           <span>Ask</span>
-          <Send className="w-3 h-3" />
+          <Send className="w-3.5 h-3.5" />
         </button>
       </form>
     </div>

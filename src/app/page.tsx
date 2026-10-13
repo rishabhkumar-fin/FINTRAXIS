@@ -175,7 +175,7 @@ export default function FintraxisTerminalPage() {
     metricKey: string,
     period: string,
     label: string,
-    value: number | null
+    value?: number | null
   ) => {
     setActiveAuditKey(`${metricKey}_${period}`);
     setIsAuditOpen(true);

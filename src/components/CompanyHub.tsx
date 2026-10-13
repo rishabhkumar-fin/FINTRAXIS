@@ -140,6 +140,55 @@ export function CompanyHub({
         </div>
       </div>
 
+      {/* Featured Institutional Coverage Quick Selection */}
+      <div className="p-3 bg-[#0E131A] border border-[#1E2536] rounded-sm space-y-2">
+        <div className="flex items-center justify-between text-[10px] text-[#5A687D]">
+          <span className="font-bold text-[#C5A880] uppercase tracking-wider flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-[#C5A880]" />
+            FEATURED INSTITUTIONAL COVERAGE // AUDITED REGISTRY
+          </span>
+          <span className="hidden sm:inline">Click any ticker to inspect distinct audited multi-year statements</span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { symbol: "HAL.NS", name: "HAL (Defence)", flag: "🇮🇳" },
+            { symbol: "TCS.NS", name: "TCS (Tech)", flag: "🇮🇳" },
+            { symbol: "TATASTEEL.NS", name: "Tata Steel", flag: "🇮🇳" },
+            { symbol: "RELIANCE.NS", name: "Reliance Ind", flag: "🇮🇳" },
+            { symbol: "INFY.NS", name: "Infosys", flag: "🇮🇳" },
+            { symbol: "HDFCBANK.NS", name: "HDFC Bank", flag: "🇮🇳" },
+            { symbol: "NVDA", name: "NVIDIA", flag: "🇺🇸" },
+            { symbol: "MSFT", name: "Microsoft", flag: "🇺🇸" },
+            { symbol: "AAPL", name: "Apple", flag: "🇺🇸" },
+            { symbol: "GOOGL", name: "Alphabet", flag: "🇺🇸" },
+            { symbol: "AMZN", name: "Amazon", flag: "🇺🇸" },
+            { symbol: "TSLA", name: "Tesla", flag: "🇺🇸" },
+            { symbol: "7203.T", name: "Toyota", flag: "🇯🇵" },
+          ].map((item) => {
+            const isCurrent = selected?.symbol === item.symbol;
+            return (
+              <button
+                key={item.symbol}
+                onClick={() => onSelectCompany(item.symbol)}
+                className={`px-2 py-1 border text-[11px] font-mono transition-all flex items-center gap-1.5 rounded-sm ${
+                  isCurrent
+                    ? "bg-[#C5A880] text-[#080B10] border-[#C5A880] font-bold shadow-[0_0_10px_rgba(197,168,128,0.3)]"
+                    : "bg-[#12161F] hover:bg-[#1A2233] text-[#E1E7EC] border-[#232B3A] hover:border-[#C5A880]"
+                }`}
+              >
+                <span>{item.flag}</span>
+                <span className={isCurrent ? "text-[#080B10] font-bold" : "text-[#C5A880] font-semibold"}>
+                  {item.symbol}
+                </span>
+                <span className={isCurrent ? "text-[#181F2B] text-[10px]" : "text-[#5A687D] text-[10px]"}>
+                  {item.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Global Live Omnichannel Search Dropdown Results */}
       {liveSearchResults.length > 0 && searchQuery.trim().length >= 2 && (
         <div className="border border-[#C5A880]/50 bg-[#0A0D12] p-3 space-y-2 shadow-2xl animate-in fade-in duration-150">

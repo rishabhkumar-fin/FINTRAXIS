@@ -91,7 +91,7 @@ export interface AuditRecord {
   period: string;
   metricKey: string;
   metricLabel: string;
-  reportedValue: number | null;
+  reportedValue?: number | null;
   currency: CurrencyCode;
   scaleUnit: ScaleUnit;
   formula?: string | null;
