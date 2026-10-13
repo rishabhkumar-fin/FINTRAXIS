@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Globe2, ArrowRight, Loader2, Database, PlusCircle } from "lucide-react";
+import { Search, Globe2, ArrowRight, Loader2, Database } from "lucide-react";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
@@ -29,7 +29,6 @@ export function CompanyHub({
   const [isSearchingMarket, setIsSearchingMarket] = useState(false);
   const [quote, setQuote] = useState<NormalizedMarketQuote | null>(null);
   const [isQuoteLoading, setIsQuoteLoading] = useState(false);
-  const [ingestStatus, setIngestStatus] = useState<string | null>(null);
 
   const selected = activeProfile?.company;
 
@@ -82,34 +81,7 @@ export function CompanyHub({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Ingest new entity into local SQLite
-  const handleIngestEntity = async (item: NormalizedMarketSearchItem) => {
-    setIngestStatus("INGESTING...");
-    try {
-      const res = await fetch("/api/companies/ingest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          symbol: item.symbol,
-          name: item.name,
-          exchange: item.exchange,
-          country: item.country,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setIngestStatus("INGESTED!");
-        onRefreshMaster();
-        onSelectCompany(item.symbol);
-        setTimeout(() => setIngestStatus(null), 2000);
-      } else {
-        setIngestStatus("FAILED");
-      }
-    } catch (e) {
-      console.error("Ingest error:", e);
-      setIngestStatus("FAILED");
-    }
-  };
+
 
   const filteredLocal = companies.filter((c) => {
     const q = searchQuery.toLowerCase().trim();
@@ -177,17 +149,16 @@ export function CompanyHub({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {liveSearchResults.map((item) => {
-              const isAlreadyInDb = companies.some((c) => c.symbol === item.symbol);
-              return (
+            {liveSearchResults.map((item) => (
                 <div
                   key={item.symbol}
-                  className="p-2.5 bg-[#12161F] border border-[#232B3A] hover:border-[#C5A880] flex items-center justify-between transition-colors"
+                  onClick={() => onSelectCompany(item.symbol)}
+                  className="p-2.5 bg-[#12161F] border border-[#232B3A] hover:border-[#C5A880] flex items-center justify-between transition-colors cursor-pointer group"
                 >
                   <div className="truncate mr-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-[#C5A880]">{item.symbol}</span>
-                      <span className="text-[9px] px-1 bg-[#07090E] border border-[#1E2638] text-[#9BA8B8]">
+                      <span className="font-bold text-[#C5A880] group-hover:text-[#F3E5AB]">{item.symbol}</span>
+                      <span className="text-[9px] px-1 bg-[#07090E] border border-[#1E2536] text-[#9BA8B8]">
                         {item.country}
                       </span>
                     </div>
@@ -195,28 +166,18 @@ export function CompanyHub({
                     <div className="text-[9.5px] text-[#5A687D]">{item.exchange}</div>
                   </div>
 
-                  {isAlreadyInDb ? (
-                    <button
-                      onClick={() => onSelectCompany(item.symbol)}
-                      className="px-2 py-1 bg-[#07090E] border border-[#10B981] text-[#10B981] text-[10px] font-bold hover:bg-[#10B981] hover:text-[#07090E] transition-colors whitespace-nowrap"
-                    >
-                      VIEW
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-1.5">
-                      {ingestStatus && <span className="text-[9px] text-[#C5A880]">{ingestStatus}</span>}
-                      <button
-                        onClick={() => handleIngestEntity(item)}
-                        className="px-2 py-1 bg-[#C5A880] hover:bg-[#F3E5AB] text-[#07090E] text-[10px] font-bold flex items-center gap-1 transition-colors whitespace-nowrap"
-                      >
-                        <PlusCircle className="w-3 h-3" />
-                        <span>INGEST</span>
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectCompany(item.symbol);
+                    }}
+                    className="px-2.5 py-1 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] text-[10px] font-bold flex items-center gap-1 transition-colors whitespace-nowrap rounded"
+                  >
+                    <span>ANALYZE</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
-              );
-            })}
+              ))}
           </div>
         </div>
       )}
@@ -350,6 +311,66 @@ export function CompanyHub({
               </div>
             </div>
           )}
+
+          {/* Institutional Credit Vitals & Quick Health Cockpit */}
+          {activeProfile && (
+            <div className="pt-3 border-t border-[#1E2536] space-y-3">
+              <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#94A3B8] font-bold uppercase">INSTITUTIONAL RISK PROFILE:</span>
+                  <span
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                      activeProfile.riskTier === "TIER_1_STABLE"
+                        ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/40"
+                        : activeProfile.riskTier === "TIER_2_WATCHLIST"
+                        ? "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/40"
+                        : "bg-[#F43F5E]/10 text-[#F43F5E] border-[#F43F5E]/40"
+                    }`}
+                  >
+                    {activeProfile.riskTier === "TIER_1_STABLE" ? "STABLE" : activeProfile.riskTier === "TIER_2_WATCHLIST" ? "WATCHLIST" : "CRITICAL"} &bull; COMPOSITE SCORE: {activeProfile.riskScore}/100
+                  </span>
+                </div>
+                <div className="text-[10px] text-[#64748B]">
+                  EARLY WARNING TRIGGERS: <span className="font-bold text-[#F8FAFC]">{activeProfile.earlyWarningFlags.length}</span>
+                </div>
+              </div>
+
+              {/* 4 Core Financial Vitals */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded">
+                  <div className="text-[9.5px] text-[#64748B] uppercase">NET DEBT / EBITDA</div>
+                  <div className="text-base font-bold font-mono text-[#F8FAFC] mt-0.5">
+                    {activeProfile.latestRatios.netDebtToEbitda !== null ? `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x` : "N/D"}
+                  </div>
+                  <div className="text-[9px] text-[#94A3B8]">Hurdle: &le; 3.50x</div>
+                </div>
+
+                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded">
+                  <div className="text-[9.5px] text-[#64748B] uppercase">INTEREST COVERAGE</div>
+                  <div className="text-base font-bold font-mono text-[#F8FAFC] mt-0.5">
+                    {activeProfile.latestRatios.interestCoverage !== null ? `${activeProfile.latestRatios.interestCoverage.toFixed(2)}x` : "N/D"}
+                  </div>
+                  <div className="text-[9px] text-[#94A3B8]">Covenant: &ge; 2.50x</div>
+                </div>
+
+                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded">
+                  <div className="text-[9.5px] text-[#64748B] uppercase">CURRENT LIQUIDITY</div>
+                  <div className="text-base font-bold font-mono text-[#F8FAFC] mt-0.5">
+                    {activeProfile.latestRatios.currentRatio !== null ? `${activeProfile.latestRatios.currentRatio.toFixed(2)}x` : "N/D"}
+                  </div>
+                  <div className="text-[9px] text-[#94A3B8]">Benchmark: &ge; 1.10x</div>
+                </div>
+
+                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded">
+                  <div className="text-[9.5px] text-[#64748B] uppercase">OPERATING MARGIN</div>
+                  <div className="text-base font-bold font-mono text-[#F8FAFC] mt-0.5">
+                    {activeProfile.latestRatios.operatingMarginPct !== null ? `${activeProfile.latestRatios.operatingMarginPct.toFixed(1)}%` : "N/D"}
+                  </div>
+                  <div className="text-[9px] text-[#94A3B8]">Gross: {activeProfile.latestRatios.grossMarginPct !== null ? `${activeProfile.latestRatios.grossMarginPct.toFixed(1)}%` : "N/D"}</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -362,9 +383,18 @@ export function CompanyHub({
               GLOBAL MULTI-CURRENCY SECURITY MASTER // CROSS-BORDER REGISTER
             </span>
           </div>
-          <span className="text-[11px] font-mono text-[#5A687D]">
-            REGISTERED ENTITIES: {filteredLocal.length}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-mono text-[#5A687D]">
+              REGISTERED ENTITIES: {filteredLocal.length}
+            </span>
+            <button
+              onClick={onRefreshMaster}
+              className="px-2 py-0.5 bg-[#12161F] hover:bg-[#1E2536] border border-[#1E2536] text-[10px] text-[#C5A880] rounded transition-colors"
+              title="Sync SQLite Security Master"
+            >
+              SYNC
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

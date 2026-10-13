@@ -116,6 +116,8 @@ export async function getAllCompanies(): Promise<CompanyEntity[]> {
   return SEED_COMPANIES;
 }
 
+import { autoIngestCompany } from "./autoIngest";
+
 /**
  * Retrieves the full financial risk profile, periods, ratios, EWS flags, and stress simulation.
  */
@@ -136,6 +138,11 @@ export async function getCompanyDetails(
   if (!company) {
     company = SEED_COMPANIES.find((c) => c.id === id) || null;
   }
+
+  // Automatic on-the-fly ingestion for any company in the world (e.g. HAL.NS, NVDA, TCS.NS)
+  if (!company) {
+    company = await autoIngestCompany(id);
+  }
   if (!company) return null;
 
   let periods: FinancialPeriodData[] = [];
@@ -155,6 +162,23 @@ export async function getCompanyDetails(
 
   if (periods.length === 0) {
     periods = SEED_PERIODS.filter((p) => p.companyId === id);
+  }
+
+  if (periods.length === 0) {
+    await autoIngestCompany(id);
+    try {
+      const pList = db
+        .select()
+        .from(financialPeriods)
+        .where(eq(financialPeriods.companyId, id))
+        .orderBy(sql`${financialPeriods.period} desc`)
+        .all();
+      if (pList.length > 0) {
+        periods = pList as unknown as FinancialPeriodData[];
+      }
+    } catch (e) {
+      console.error("DB re-fetch periods error:", e);
+    }
   }
 
   const latestPeriod = periods[0] ?? null;

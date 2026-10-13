@@ -1,5 +1,5 @@
-export type CountryCode = "USA" | "IND" | "JPN";
-export type CurrencyCode = "USD" | "INR" | "JPY";
+export type CountryCode = "USA" | "IND" | "JPN" | "GBR" | "EUR" | "GLOBAL";
+export type CurrencyCode = "USD" | "INR" | "JPY" | "GBP" | "EUR";
 export type ScaleUnit = "Millions" | "Crores" | "Billions";
 export type RiskTier = "TIER_1_STABLE" | "TIER_2_WATCHLIST" | "TIER_3_CRITICAL";
 

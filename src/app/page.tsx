@@ -15,6 +15,7 @@ import { ICDossier } from "@/components/ICDossier";
 import { AuditSidecar } from "@/components/AuditSidecar";
 import { ModuleGuide } from "@/components/ModuleGuide";
 import { SettingsModal, OperatorSettings } from "@/components/SettingsModal";
+import { FinancialAiAssistant } from "@/components/FinancialAiAssistant";
 import { ModuleTab } from "@/components/NavigationTabs";
 import {
   CompanyEntity,
@@ -22,7 +23,7 @@ import {
   AuditRecord,
 } from "@/lib/types";
 import { SEED_COMPANIES } from "@/lib/seedData";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Sparkles } from "lucide-react";
 
 export default function FintraxisTerminalPage() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -34,9 +35,10 @@ export default function FintraxisTerminalPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Command Palette & Settings Modal State
+  // Command Palette, Settings Modal & AI Copilot State
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
 
   // Audit Sidecar State
   const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
@@ -73,7 +75,14 @@ export default function FintraxisTerminalPage() {
         return;
       }
 
-      // 3. Tab Jump (1-6) when not in an input/textarea
+      // 3. Financial AI Risk Copilot (Ctrl + J or Cmd + J)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsAiOpen((prev) => !prev);
+        return;
+      }
+
+      // 4. Tab Jump (1-6) when not in an input/textarea
       const target = e.target as HTMLElement;
       const isInput =
         target.tagName === "INPUT" ||
@@ -229,6 +238,7 @@ export default function FintraxisTerminalPage() {
         session={session}
         onLogout={handleLockSession}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenAi={() => setIsAiOpen(true)}
         earlyWarningCount={profile?.earlyWarningFlags.length || 0}
       />
 
@@ -240,6 +250,7 @@ export default function FintraxisTerminalPage() {
           onOpenSettings={() => setIsSettingsOpen(true)}
           selectedTicker={profile?.company.symbol}
           selectedCurrency={profile?.company.currency}
+          selectedCountry={profile?.company.country}
           userDesk={session.desk}
         />
 
@@ -372,6 +383,26 @@ export default function FintraxisTerminalPage() {
           />
         )}
 
+        {/* Floating AI Financial Risk Copilot Trigger */}
+        <button
+          onClick={() => setIsAiOpen(true)}
+          className="fixed bottom-10 right-6 z-40 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(197,168,128,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
+          title="Open Financial AI Copilot (Ctrl + J)"
+        >
+          <Sparkles className="w-4 h-4 text-[#080B10]" />
+          <span>AI Risk Copilot</span>
+          <span className="text-[9.5px] px-1.5 py-0.2 bg-[#080B10]/20 rounded font-normal">
+            CTRL+J
+          </span>
+        </button>
+
+        {/* Financial AI Risk Copilot Drawer */}
+        <FinancialAiAssistant
+          isOpen={isAiOpen}
+          onClose={() => setIsAiOpen(false)}
+          activeProfile={profile}
+        />
+
         {/* Institutional Fixed Status Footer */}
         <footer className="fixed bottom-0 left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
           <div className="flex items-center gap-3">
@@ -385,7 +416,7 @@ export default function FintraxisTerminalPage() {
             <span>DESK: {session.desk}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span>HOTKEYS: [1-6] MODULES &bull; CTRL+K COMMAND &bull; CTRL+SHIFT+L LOCK</span>
+            <span>HOTKEYS: [1-6] MODULES &bull; CTRL+K SEARCH &bull; CTRL+J AI COPILOT &bull; CTRL+SHIFT+L LOCK</span>
             <span>&bull;</span>
             <span className="text-[#C5A880]">FINTRAXIS INSTITUTIONAL</span>
           </div>

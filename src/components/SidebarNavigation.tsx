@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Lock,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
@@ -31,6 +32,7 @@ interface SidebarNavigationProps {
   session: SessionClearance | null;
   onLogout: () => void;
   onOpenSettings?: () => void;
+  onOpenAi?: () => void;
   earlyWarningCount?: number;
 }
 
@@ -61,6 +63,7 @@ export function SidebarNavigation({
   session,
   onLogout,
   onOpenSettings,
+  onOpenAi,
   earlyWarningCount = 0,
 }: SidebarNavigationProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -219,6 +222,29 @@ export function SidebarNavigation({
             );
           })}
         </nav>
+
+        {/* Dedicated Financial AI Risk Copilot Button */}
+        {onOpenAi && (
+          <div className="px-3 pt-3">
+            <button
+              onClick={onOpenAi}
+              className={`w-full p-2 bg-[#172033] hover:bg-[#1E2D4A] border border-[#C5A880]/40 text-[#C5A880] rounded flex items-center transition-all group ${
+                isCollapsed ? "justify-center" : "justify-between"
+              }`}
+              title="Open Financial AI Copilot (Ctrl + J)"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#C5A880] group-hover:rotate-12 transition-transform shrink-0" />
+                {!isCollapsed && <span className="font-bold text-[11px]">AI Risk Copilot</span>}
+              </div>
+              {!isCollapsed && (
+                <span className="text-[8.5px] px-1 py-0.2 bg-[#080B10] text-[#94A3B8] rounded border border-[#1E2536]">
+                  CTRL+J
+                </span>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Sidebar Footer with Operator Identity & Settings CTA */}
