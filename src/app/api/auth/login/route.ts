@@ -1,26 +1,35 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const identifier = (body.email || body.username || "").trim().toLowerCase();
+    const { password } = body;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return NextResponse.json(
-        { success: false, error: "Institutional email and password are required" },
+        { success: false, error: "Username/email and password are required" },
         { status: 400 }
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    let user = db.select().from(users).where(eq(users.email, cleanEmail)).get();
+    let user = db
+      .select()
+      .from(users)
+      .where(
+        or(
+          eq(users.email, identifier),
+          sql`lower(${users.name}) = ${identifier}`
+        )
+      )
+      .get();
 
-    // Auto-seed default principal if logging in with pre-seeded identity and DB has no record yet
-    if (!user && cleanEmail === "rishabh.yadav@fintraxis.sovereign") {
+    // Auto-seed default operator identity if logging in and account does not exist in DB yet
+    if (!user && (identifier === "rishabh.yadav@fintraxis.sovereign" || identifier === "rishabh" || identifier === "admin")) {
       const salt = crypto.randomBytes(16).toString("hex");
       const passwordHash = crypto
         .pbkdf2Sync(password, salt, 10000, 64, "sha512")
@@ -29,10 +38,10 @@ export async function POST(request: Request) {
       const defaultUser = {
         id: `usr_${crypto.randomBytes(8).toString("hex")}`,
         name: "Rishabh Kumar Yadav",
-        email: cleanEmail,
+        email: "rishabh.yadav@fintraxis.sovereign",
         passwordHash,
         salt,
-        desk: "Global Credit Risk & Distressed Debt",
+        desk: "Credit Risk & Intelligence",
         avatar: "crest",
         netDebtEbitdaHurdle: 3.50,
         interestCoverageHurdle: 2.50,
@@ -46,12 +55,12 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "User not found in institutional register" },
+        { success: false, error: "User account not found. Please check your credentials or create an account." },
         { status: 401 }
       );
     }
 
-    // Cryptographic PBKDF2 hash verification
+    // Cryptographic PBKDF2 verification with timing-safe comparison
     const testHash = crypto
       .pbkdf2Sync(password, user.salt, 10000, 64, "sha512")
       .toString("hex");
@@ -64,7 +73,7 @@ export async function POST(request: Request) {
 
     if (!isMatch) {
       return NextResponse.json(
-        { success: false, error: "Invalid password for this clearance identity" },
+        { success: false, error: "Incorrect password. Please try again." },
         { status: 401 }
       );
     }
@@ -84,7 +93,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Operator authentication successful",
+      message: "Authentication successful",
       user: sessionPayload,
     });
   } catch (error: unknown) {

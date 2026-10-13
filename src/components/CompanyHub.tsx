@@ -135,37 +135,36 @@ export function CompanyHub({
 
   return (
     <div className="space-y-4 font-mono text-xs">
-      {/* Omnibar Global Market Search */}
-      <div className="p-3 bg-[#0E131A] border border-[#1E2638] flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-xl">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#5A687D]">
-            {isSearchingMarket ? <Loader2 className="w-4 h-4 animate-spin text-[#C5A880]" /> : <Search className="w-4 h-4" />}
+      {/* Omnibar Global Market Search - Full Width & Clean */}
+      <div className="p-3 bg-[#0E131A] border border-[#1E2536] rounded-sm">
+        <div className="relative w-full">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5A687D]">
+            {isSearchingMarket ? (
+              <Loader2 className="w-4 h-4 animate-spin text-[#C5A880]" />
+            ) : (
+              <Search className="w-4 h-4 text-[#C5A880]" />
+            )}
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Resolve any global ticker (NVDA, TSLA, TCS.NS, HDFCBANK.NS, 7203.T, ASML)..."
-            className="w-full pl-9 pr-4 py-2 bg-[#07090E] border border-[#232B3A] text-xs font-mono text-[#E1E7EC] placeholder-[#5A687D] focus:outline-none focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880]"
+            placeholder="Search & resolve any global equity or ticker (e.g. NVDA, AAPL, RELIANCE.NS, TCS.NS, 7203.T, MSFT)..."
+            className="w-full pl-10 pr-28 py-2.5 bg-[#07090E] border border-[#232B3A] text-xs font-mono text-[#E1E7EC] placeholder-[#5A687D] focus:outline-none focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] rounded-sm transition-all"
           />
-        </div>
-
-        {/* Quick Institutional Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-mono">
-          <span className="text-[10px] text-[#5A687D] uppercase mr-1 whitespace-nowrap">QUICK RESOLVE:</span>
-          {companies.map((c) => (
+          {searchQuery && (
             <button
-              key={c.id}
-              onClick={() => onSelectCompany(c.id)}
-              className={`px-2 py-1 border text-[11px] whitespace-nowrap transition-colors ${
-                selected?.id === c.id
-                  ? "bg-[#181F2B] border-[#C5A880] text-[#C5A880] font-bold"
-                  : "bg-[#07090E] border-[#1E2638] text-[#9BA8B8] hover:text-[#E1E7EC] hover:border-[#232B3A]"
-              }`}
+              onClick={() => setSearchQuery("")}
+              className="absolute inset-y-0 right-24 flex items-center px-2 text-[#5A687D] hover:text-[#E1E7EC] text-[10px] font-bold"
             >
-              {c.symbol} ({c.country})
+              CLEAR
             </button>
-          ))}
+          )}
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <span className="text-[10px] px-2 py-0.5 bg-[#172033] border border-[#1E2536] text-[#C5A880] font-semibold rounded">
+              GLOBAL SEARCH
+            </span>
+          </div>
         </div>
       </div>
 

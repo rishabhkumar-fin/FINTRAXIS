@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Database, Clock, Landmark, Settings, Shield } from "lucide-react";
+import { Search, Database, Clock, Landmark, Settings, TrendingUp, TrendingDown } from "lucide-react";
 
 interface MacroTickerTapeProps {
   onOpenCommandPalette?: () => void;
@@ -38,7 +38,6 @@ export function MacroTickerTape({
   onOpenSettings,
   selectedTicker,
   selectedCurrency,
-  userDesk = "Global Credit Risk & Distressed Debt",
 }: MacroTickerTapeProps) {
   const [utcTime, setUtcTime] = useState<string>("");
 
@@ -56,99 +55,107 @@ export function MacroTickerTape({
   }, []);
 
   return (
-    <header className="w-full bg-[#0D111A] border-b border-[#1E2536] px-4 py-2 flex items-center justify-between gap-4 font-mono text-xs select-none no-print">
-      {/* Left: Active Ticker Badge & Omnibar Search */}
-      <div className="flex items-center gap-2.5 min-w-[260px] max-w-sm flex-1">
-        {selectedTicker && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#111622] border border-[#1E2536] text-[11px] shrink-0 rounded">
-            <span className="text-[#94A3B8] text-[10px]">TICKER:</span>
-            <span className="font-bold text-[#C5A880]">{selectedTicker}</span>
-            {selectedCurrency && <span className="text-[#64748B] text-[10px]">[{selectedCurrency}]</span>}
-          </div>
-        )}
-
-        <button
-          onClick={onOpenCommandPalette}
-          className="w-full flex items-center justify-between px-3 py-1.5 bg-[#080B10] hover:bg-[#111622] border border-[#1E2536] hover:border-[#C5A880]/50 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded text-xs"
-        >
-          <div className="flex items-center gap-2 truncate">
-            <Search className="w-3.5 h-3.5 text-[#C5A880]" />
-            <span className="truncate">Resolve Global Security...</span>
-          </div>
-          <span className="text-[10px] px-1.5 py-0.2 bg-[#172033] border border-[#1E2536] text-[#38BDF8] font-semibold">
-            CTRL + K
-          </span>
-        </button>
-      </div>
-
-      {/* Center: High-Contrast Macro & Central Bank Ticker Cards */}
-      <div className="hidden lg:flex items-center gap-4 overflow-x-auto text-[11px]">
-        {/* Central Bank Policy Rates */}
-        <div className="flex items-center gap-2.5 border-r border-[#1E2536] pr-3 text-[#94A3B8]">
-          <span className="text-[#C5A880] font-bold flex items-center gap-1">
-            <Landmark className="w-3 h-3" />
-            <span>RATES:</span>
-          </span>
-          {POLICY_RATES.map((pr) => (
-            <div key={pr.name} className="flex items-center gap-1">
-              <span className="text-[#64748B] text-[10px]">{pr.name}</span>
-              <span className="font-bold font-mono tabular-nums text-[#F8FAFC]">{pr.rate}</span>
+    <div className="w-full select-none no-print font-mono text-xs">
+      {/* Tier 1: Top Navigation & Utility Controls */}
+      <header className="w-full bg-[#0D111A] border-b border-[#1E2536] px-4 py-2 flex items-center justify-between gap-3">
+        {/* Left: Active Security Indicator & Quick Omnibar Trigger */}
+        <div className="flex items-center gap-3 min-w-0 max-w-md flex-1">
+          {selectedTicker && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#111622] border border-[#1E2536] text-[11px] shrink-0 rounded">
+              <span className="text-[#94A3B8] text-[10px] uppercase">Active:</span>
+              <span className="font-bold text-[#C5A880]">{selectedTicker}</span>
+              {selectedCurrency && (
+                <span className="text-[#64748B] text-[10px]">[{selectedCurrency}]</span>
+              )}
             </div>
-          ))}
+          )}
+
+          <button
+            onClick={onOpenCommandPalette}
+            className="flex-1 flex items-center justify-between px-3 py-1.5 bg-[#080B10] hover:bg-[#111622] border border-[#1E2536] hover:border-[#C5A880]/50 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded text-xs truncate"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <Search className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
+              <span className="truncate">Resolve Global Security...</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 bg-[#172033] border border-[#1E2536] text-[#38BDF8] font-semibold shrink-0 ml-2 rounded">
+              CTRL + K
+            </span>
+          </button>
+        </div>
+
+        {/* Right: System Health, Live UTC Clock & Calibration */}
+        <div className="flex items-center gap-2.5 shrink-0 text-xs">
+          {/* SQLite Status */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-[#111622] border border-[#1E2536] text-[11px] rounded">
+            <Database className="w-3 h-3 text-[#10B981]" />
+            <span className="text-[#64748B]">SQLITE:</span>
+            <span className="text-[#10B981] font-bold">ONLINE</span>
+          </div>
+
+          {/* Live UTC Clock */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#080B10] border border-[#1E2536] text-[11px] text-[#F8FAFC] rounded">
+            <Clock className="w-3 h-3 text-[#C5A880] shrink-0" />
+            <span className="font-mono font-medium tabular-nums tracking-wider">
+              {utcTime || "2026-10-13 09:30:00 UTC"}
+            </span>
+          </div>
+
+          {/* Settings Calibration */}
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded"
+              title="Calibration Settings"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Tier 2: Dedicated, Non-Overlapping Macroeconomic & Benchmark Ribbon */}
+      <div className="w-full bg-[#080B10] border-b border-[#1E2536] px-4 py-1.5 flex items-center justify-between gap-4 overflow-x-auto text-[11px] scrollbar-none">
+        {/* Central Bank Policy Rates */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 text-[#C5A880] font-bold text-[10px] tracking-wider uppercase">
+            <Landmark className="w-3 h-3" />
+            <span>CENTRAL BANK RATES:</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {POLICY_RATES.map((pr) => (
+              <div key={pr.name} className="flex items-center gap-1.5 bg-[#0D111A] px-2 py-0.5 border border-[#1E2536] rounded">
+                <span className="text-[#64748B] text-[10px]">{pr.name}</span>
+                <span className="font-bold font-mono tabular-nums text-[#F8FAFC]">{pr.rate}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Global Market Benchmarks */}
-        <div className="flex items-center gap-3">
-          {BENCHMARKS.map((bm) => (
-            <div key={bm.id} className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className="text-[#64748B] text-[10px]">{bm.label}:</span>
-              <span className="font-semibold font-mono tabular-nums text-[#F8FAFC]">{bm.value}</span>
-              <span
-                className={`text-[10px] font-mono tabular-nums ${
-                  bm.isPositive ? "text-[#10B981]" : "text-[#F43F5E]"
-                }`}
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-[#64748B] text-[10px] uppercase font-medium">BENCHMARKS:</span>
+          <div className="flex items-center gap-3">
+            {BENCHMARKS.map((bm) => (
+              <div
+                key={bm.id}
+                className="flex items-center gap-1.5 bg-[#0D111A] px-2 py-0.5 border border-[#1E2536] rounded whitespace-nowrap"
               >
-                {bm.delta}
-              </span>
-            </div>
-          ))}
+                <span className="text-[#94A3B8] text-[10px]">{bm.label}</span>
+                <span className="font-semibold font-mono tabular-nums text-[#F8FAFC]">{bm.value}</span>
+                <span
+                  className={`text-[10px] font-mono tabular-nums flex items-center gap-0.5 ${
+                    bm.isPositive ? "text-[#10B981]" : "text-[#F43F5E]"
+                  }`}
+                >
+                  {bm.isPositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                  {bm.delta}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Right: User Desk, SQLite WAL Status, Live UTC Clock & Settings Gear */}
-      <div className="flex items-center gap-2 shrink-0 text-xs">
-        {/* User Desk Badge */}
-        <div className="hidden xl:flex items-center gap-1.5 px-2 py-1 bg-[#111622] border border-[#1E2536] text-[11px] rounded max-w-[210px] truncate">
-          <Shield className="w-3 h-3 text-[#C5A880] shrink-0" />
-          <span className="text-[#94A3B8] truncate">{userDesk}</span>
-        </div>
-
-        {/* SQLite Status */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-[#111622] border border-[#1E2536] text-[11px] rounded">
-          <Database className="w-3 h-3 text-[#10B981]" />
-          <span className="text-[#64748B]">SQLITE:</span>
-          <span className="text-[#10B981] font-bold">LIVE</span>
-        </div>
-
-        {/* Live Monospace UTC Clock */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#080B10] border border-[#1E2536] text-[11px] text-[#F8FAFC] rounded">
-          <Clock className="w-3 h-3 text-[#C5A880]" />
-          <span className="font-mono font-medium tabular-nums tracking-wider">
-            {utcTime || "2026-10-13 09:30:00 UTC"}
-          </span>
-        </div>
-
-        {/* Settings Gear Button */}
-        {onOpenSettings && (
-          <button
-            onClick={onOpenSettings}
-            className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded"
-            title="Open Institutional Calibration Settings"
-          >
-            <Settings className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-    </header>
+    </div>
   );
 }

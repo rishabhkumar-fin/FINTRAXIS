@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, password, desk, avatar } = body;
+    const { name, email, password } = body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
       return NextResponse.json({ success: false, error: "Full Name is required" }, { status: 400 });
     }
 
-    if (!email || typeof email !== "string" || !email.includes("@")) {
-      return NextResponse.json({ success: false, error: "Valid institutional email is required" }, { status: 400 });
+    if (!email || typeof email !== "string" || !email.trim()) {
+      return NextResponse.json({ success: false, error: "Username or email is required" }, { status: 400 });
     }
 
     if (!password || typeof password !== "string" || password.length < 8) {
@@ -24,12 +24,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const existing = db.select().from(users).where(eq(users.email, cleanEmail)).get();
+    const cleanIdentifier = email.trim().toLowerCase();
+    const existing = db
+      .select()
+      .from(users)
+      .where(
+        or(
+          eq(users.email, cleanIdentifier),
+          sql`lower(${users.name}) = ${cleanIdentifier}`
+        )
+      )
+      .get();
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: "User with this institutional email already registered" },
+        { success: false, error: "An account with this username or email already exists" },
         { status: 409 }
       );
     }
@@ -41,8 +50,7 @@ export async function POST(request: Request) {
       .toString("hex");
 
     const userId = `usr_${crypto.randomBytes(8).toString("hex")}`;
-    const selectedDesk = desk || "Global Credit Risk & Distressed Debt";
-    const selectedAvatar = avatar || "crest";
+    const cleanEmail = cleanIdentifier.includes("@") ? cleanIdentifier : `${cleanIdentifier}@fintraxis.local`;
 
     const newUser = {
       id: userId,
@@ -50,8 +58,8 @@ export async function POST(request: Request) {
       email: cleanEmail,
       passwordHash,
       salt,
-      desk: selectedDesk,
-      avatar: selectedAvatar,
+      desk: "Credit Risk & Intelligence",
+      avatar: "crest",
       netDebtEbitdaHurdle: 3.50,
       interestCoverageHurdle: 2.50,
       currentRatioHurdle: 1.10,
@@ -75,7 +83,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Operator registered and verified in SQLite enclave",
+      message: "User successfully registered",
       user: sessionPayload,
     });
   } catch (error: unknown) {
