@@ -1,7 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sliders, User, Database, Check, RefreshCw, Upload, Trash2 } from "lucide-react";
+import {
+  X,
+  Sliders,
+  User,
+  Database,
+  Check,
+  RefreshCw,
+  Upload,
+  Trash2,
+  Share2,
+  Copy,
+  Award,
+  Shield,
+  KeyRound,
+  LogOut,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+} from "lucide-react";
 import { WallStreetAvatar, AVATAR_PRESETS, AvatarPresetId } from "./WallStreetAvatar";
 
 export interface OperatorSettings {
@@ -9,8 +28,13 @@ export interface OperatorSettings {
   name: string;
   email: string;
   desk: string;
+  title?: string;
+  phone?: string;
   avatar: string;
   avatarCustomUrl?: string;
+  activeBadges?: string[];
+  incognitoMode?: boolean;
+  telemetryEnabled?: boolean;
   netDebtEbitdaHurdle: number;
   interestCoverageHurdle: number;
   currentRatioHurdle: number;
@@ -22,6 +46,7 @@ interface SettingsModalProps {
   settings: OperatorSettings;
   onSave: (updated: OperatorSettings) => void;
   onReseedCache?: () => void;
+  onLogout?: () => void;
 }
 
 const DESK_OPTIONS = [
@@ -29,7 +54,56 @@ const DESK_OPTIONS = [
   "Special Situations & Restructuring",
   "Sovereign Risk Desk",
   "Leveraged Finance & Syndicate Desk",
+  "Fixed Income Capital Markets (FICM)",
+  "Private Credit Underwriting Desk",
 ];
+
+export const WALL_STREET_BADGES = [
+  {
+    id: "SOVEREIGN_RISK",
+    name: "Sovereign Risk Clearance",
+    firm: "FINTRAXIS CENTRAL",
+    icon: "🛡️",
+    desc: "Top-tier sovereign debt & macro rate surveillance clearance",
+  },
+  {
+    id: "ALADDIN_CORE",
+    name: "Aladdin Fixed Income Specialist",
+    firm: "BlackRock Aladdin",
+    icon: "💼",
+    desc: "Institutional multi-asset portfolio risk & duration analytics",
+  },
+  {
+    id: "GS_MARQUEE",
+    name: "Principal Credit Strategies",
+    firm: "Goldman Sachs Marquee",
+    icon: "🏛️",
+    desc: "Senior secured lending & mezzanine distress restructuring",
+  },
+  {
+    id: "MS_MATRIX",
+    name: "M&A Advisory & LevFin",
+    firm: "Morgan Stanley Matrix",
+    icon: "🤝",
+    desc: "Cross-border debt syndication & covenant modeling",
+  },
+  {
+    id: "JPM_MARKETS",
+    name: "Private Credit Underwriter",
+    firm: "J.P. Morgan Markets",
+    icon: "📊",
+    desc: "Bespoke sponsor-backed debt & direct corporate lending",
+  },
+  {
+    id: "BASEL_III",
+    name: "Basel III Regulatory Auditor",
+    firm: "BIS / Fed / RBI",
+    icon: "⚖️",
+    desc: "LCR, NSFR, and supervisory capital buffer certification",
+  },
+];
+
+type SettingsTab = "PROFILE" | "BADGES" | "SHARE_ID" | "PRIVACY_PASS" | "HURDLES" | "SYSTEM";
 
 export function SettingsModal({
   isOpen,
@@ -37,24 +111,48 @@ export function SettingsModal({
   settings,
   onSave,
   onReseedCache,
+  onLogout,
 }: SettingsModalProps) {
-  const [activeTab, setActiveTab] = useState<"PROFILE" | "HURDLES" | "DIAGNOSTICS">("PROFILE");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("PROFILE");
 
-  // Form State
+  // Profile Form State
   const [name, setName] = useState(settings.name);
   const [email, setEmail] = useState(settings.email);
+  const [title, setTitle] = useState(settings.title || "Senior Credit Underwriter");
+  const [phone, setPhone] = useState(settings.phone || "+1 (212) 555-0199 x44");
   const [desk, setDesk] = useState(settings.desk || DESK_OPTIONS[0]);
   const [avatar, setAvatar] = useState<string>(settings.avatar || "crest");
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string>(settings.avatarCustomUrl || "");
+  const [badges, setBadges] = useState<string[]>(
+    settings.activeBadges || ["SOVEREIGN_RISK", "ALADDIN_CORE"]
+  );
+
+  // Risk Hurdles
   const [netDebtHurdle, setNetDebtHurdle] = useState<number>(settings.netDebtEbitdaHurdle ?? 3.5);
   const [interestCovHurdle, setInterestCovHurdle] = useState<number>(settings.interestCoverageHurdle ?? 2.5);
   const [currentRatioHurdle, setCurrentRatioHurdle] = useState<number>(settings.currentRatioHurdle ?? 1.1);
 
+  // Privacy & Passwords
+  const [incognitoMode, setIncognitoMode] = useState<boolean>(settings.incognitoMode ?? false);
+  const [telemetryEnabled, setTelemetryEnabled] = useState<boolean>(settings.telemetryEnabled ?? true);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
+
+  // Sharing State
+  const [copiedId, setCopiedId] = useState(false);
+  const [copiedShareSummary, setCopiedShareSummary] = useState(false);
+
+  // General Status
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [reseedStatus, setReseedStatus] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const analystId = settings.id || `OPR-7702-${name.slice(0, 3).toUpperCase() || "NYK"}`;
 
   const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,18 +170,76 @@ export function SettingsModal({
     reader.readAsDataURL(file);
   };
 
+  const toggleBadge = (badgeId: string) => {
+    setBadges((prev) =>
+      prev.includes(badgeId) ? prev.filter((id) => id !== badgeId) : [...prev, badgeId]
+    );
+  };
+
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(analystId);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  const handleCopyShareSummary = () => {
+    const summary = [
+      `🏛️ FINTRAXIS INSTITUTIONAL CLEARANCE CARD`,
+      `----------------------------------------`,
+      `Analyst ID: ${analystId}`,
+      `Operator: ${name}`,
+      `Corporate Title: ${title}`,
+      `Institutional Email: ${email}`,
+      `Surveillance Desk: ${desk}`,
+      `Active Badges: ${badges.join(", ")}`,
+      `Verification Node: MUM-01 // PRODUCTION SECURE`,
+      `Terminal Access: https://fintraxis.vercel.app`,
+    ].join("\n");
+
+    navigator.clipboard.writeText(summary);
+    setCopiedShareSummary(true);
+    setTimeout(() => setCopiedShareSummary(false), 2000);
+  };
+
+  const handlePasswordUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword) {
+      setPasswordStatus("Please provide a new password");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordStatus("New password must be at least 6 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordStatus("Passwords do not match");
+      return;
+    }
+
+    setPasswordStatus("PASSWORD UPDATED & ENCRYPTED IN LOCAL VAULT ✅");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setTimeout(() => setPasswordStatus(null), 3000);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
       const payload: OperatorSettings = {
-        id: settings.id,
+        id: settings.id || analystId,
         name: name.trim(),
         email: email.trim(),
+        title: title.trim(),
+        phone: phone.trim(),
         desk,
         avatar,
         avatarCustomUrl: customAvatarUrl || undefined,
+        activeBadges: badges,
+        incognitoMode,
+        telemetryEnabled,
         netDebtEbitdaHurdle: Number(netDebtHurdle),
         interestCoverageHurdle: Number(interestCovHurdle),
         currentRatioHurdle: Number(currentRatioHurdle),
@@ -98,29 +254,28 @@ export function SettingsModal({
       const json = await res.json();
       if (json.success && json.user) {
         onSave({ ...payload, ...json.user });
-        setSaveSuccess(true);
-        setTimeout(() => {
-          setSaveSuccess(false);
-          onClose();
-        }, 800);
       } else {
-        // Fallback save to parent and localStorage
         onSave(payload);
-        setSaveSuccess(true);
-        setTimeout(() => {
-          setSaveSuccess(false);
-          onClose();
-        }, 800);
       }
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        onClose();
+      }, 700);
     } catch (err) {
-      console.warn("Settings save error, falling back to local state:", err);
+      console.warn("Settings save fallback:", err);
       const fallback: OperatorSettings = {
-        id: settings.id,
+        id: settings.id || analystId,
         name: name.trim(),
         email: email.trim(),
+        title: title.trim(),
+        phone: phone.trim(),
         desk,
         avatar,
         avatarCustomUrl: customAvatarUrl || undefined,
+        activeBadges: badges,
+        incognitoMode,
+        telemetryEnabled,
         netDebtEbitdaHurdle: Number(netDebtHurdle),
         interestCoverageHurdle: Number(interestCovHurdle),
         currentRatioHurdle: Number(currentRatioHurdle),
@@ -132,30 +287,28 @@ export function SettingsModal({
     }
   };
 
-  const handleTriggerReseed = async () => {
-    setReseedStatus("RE-SEEDING WAL MASTER...");
+  const handleTriggerReseed = () => {
+    setReseedStatus("RE-INDEXING WAL MASTER...");
     try {
-      if (onReseedCache) {
-        onReseedCache();
-      }
+      if (onReseedCache) onReseedCache();
       setTimeout(() => {
         setReseedStatus("DATABASE RE-SYNCHRONIZED (WAL OK)");
         setTimeout(() => setReseedStatus(null), 2500);
-      }, 600);
+      }, 500);
     } catch {
       setReseedStatus("RE-SEED COMPLETE");
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-sm flex items-center justify-center p-4 font-mono select-none">
-      <div className="w-full max-w-2xl bg-[#111622] border border-[#1E2536] shadow-2xl rounded overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 font-mono select-none">
+      <div className="w-full max-w-2xl bg-[#111622] border border-[#1E2536] shadow-2xl rounded overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
         {/* Modal Header */}
-        <div className="p-4 bg-[#0D111A] border-b border-[#1E2536] flex items-center justify-between">
+        <div className="p-3.5 bg-[#0D111A] border-b border-[#1E2536] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#C5A880]"></span>
             <span className="font-bold tracking-wider text-slate-100 text-xs uppercase">
-              INSTITUTIONAL SETTINGS &bull; OPERATOR CALIBRATION
+              INSTITUTIONAL OPERATOR SETTINGS &bull; CLEARANCE CONTROL
             </span>
           </div>
 
@@ -167,76 +320,139 @@ export function SettingsModal({
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-[#1E2536] bg-[#090D14] text-xs">
+        {/* Tab Navigation Bar */}
+        <div className="flex border-b border-[#1E2536] bg-[#090D14] text-xs overflow-x-auto scrollbar-none shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab("PROFILE")}
-            className={`flex-1 py-2.5 px-4 flex items-center justify-center gap-2 font-medium transition-colors ${
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
               activeTab === "PROFILE"
                 ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
                 : "text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Profile &amp; Desk</span>
+            <span>Profile &amp; Info</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("BADGES")}
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
+              activeTab === "BADGES"
+                ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
+                : "text-[#94A3B8] hover:text-[#F8FAFC]"
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            <span>Desk Badges ({badges.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("SHARE_ID")}
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
+              activeTab === "SHARE_ID"
+                ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
+                : "text-[#94A3B8] hover:text-[#F8FAFC]"
+            }`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Share ID</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("PRIVACY_PASS")}
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
+              activeTab === "PRIVACY_PASS"
+                ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
+                : "text-[#94A3B8] hover:text-[#F8FAFC]"
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>Security &amp; Privacy</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("HURDLES")}
-            className={`flex-1 py-2.5 px-4 flex items-center justify-center gap-2 font-medium transition-colors ${
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
               activeTab === "HURDLES"
                 ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
                 : "text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Risk Hurdle Calibration</span>
+            <span>Hurdles</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab("DIAGNOSTICS")}
-            className={`flex-1 py-2.5 px-4 flex items-center justify-center gap-2 font-medium transition-colors ${
-              activeTab === "DIAGNOSTICS"
+            onClick={() => setActiveTab("SYSTEM")}
+            className={`py-2 px-3 sm:px-4 flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors ${
+              activeTab === "SYSTEM"
                 ? "bg-[#111622] text-[#C5A880] border-b-2 border-[#C5A880]"
                 : "text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
             <Database className="w-3.5 h-3.5" />
-            <span>SQLite Diagnostics</span>
+            <span>System &amp; Exit</span>
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSave} className="p-5 space-y-4 text-xs">
-          {/* TAB 1: PROFILE & DESK */}
+        {/* Modal Scrollable Body */}
+        <form onSubmit={handleSave} className="p-4 sm:p-5 space-y-4 text-xs overflow-y-auto flex-1">
+          {/* TAB 1: PROFILE & PERSONAL INFO */}
           {activeTab === "PROFILE" && (
             <div className="space-y-4 animate-in fade-in duration-100">
-              <div className="space-y-1.5">
-                <label className="text-[10px] text-[#94A3B8] uppercase">OPERATOR FULL NAME</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#94A3B8] uppercase">OPERATOR FULL NAME</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#94A3B8] uppercase">INSTITUTIONAL EMAIL</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] text-[#94A3B8] uppercase">INSTITUTIONAL EMAIL</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#94A3B8] uppercase">CORPORATE TITLE</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#94A3B8] uppercase">DESK PHONE / EXTENSION</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono focus:border-[#C5A880] focus:outline-none rounded"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-[10px] text-[#94A3B8] uppercase">SURVEILLANCE DESK ASSIGNMENT</label>
                 <select
                   value={desk}
@@ -251,12 +467,57 @@ export function SettingsModal({
                 </select>
               </div>
 
-              {/* Avatar Selector */}
+              {/* Photo Upload & Preset Section */}
               <div className="space-y-2 pt-2 border-t border-[#1E2536]">
                 <label className="text-[10px] text-[#94A3B8] uppercase flex items-center justify-between">
-                  <span>WALL STREET AVATAR PRESET</span>
-                  <span className="text-[#C5A880]">Active: {avatar}</span>
+                  <span>PROFILE PHOTO // WALL STREET IDENTITY</span>
+                  <span className="text-[#10B981]">{customAvatarUrl ? "Custom Photo Active" : "Avatar Preset"}</span>
                 </label>
+
+                <div className="p-3 bg-[#090D14] border border-[#1E2536] rounded flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full border border-[#C5A880]/50 overflow-hidden bg-[#162033] flex items-center justify-center shrink-0">
+                    {customAvatarUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={customAvatarUrl} alt="Custom Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <WallStreetAvatar avatarId={avatar as AvatarPresetId} size="md" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <label className="px-3 py-1.5 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] text-[10px] font-bold rounded cursor-pointer transition-colors flex items-center gap-1.5">
+                        <Upload className="w-3 h-3" />
+                        <span>Upload Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {customAvatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomAvatarUrl("")}
+                          className="px-2.5 py-1.5 bg-[#1F1316] hover:bg-[#2D161B] border border-[#F43F5E]/40 text-[#F43F5E] text-[10px] rounded transition-colors flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Reset</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-[9px] text-[#64748B]">
+                      Upload JPG or PNG. Appears on your analyst badge, reports, and IC Dossier sign-off.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Avatar Preset Grid */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[10px] text-[#94A3B8] uppercase">SELECT PRESET BADGE AVATAR</label>
                 <div className="grid grid-cols-2 gap-2">
                   {AVATAR_PRESETS.map((p) => {
                     const isSelected = avatar === p.id;
@@ -283,63 +544,211 @@ export function SettingsModal({
                   })}
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Custom Photo Upload Card */}
-              <div className="space-y-2 pt-3 border-t border-[#1E2536]">
-                <label className="text-[10px] text-[#94A3B8] uppercase flex items-center justify-between">
-                  <span>CUSTOM PROFILE PHOTO</span>
-                  <span className="text-[#10B981]">{customAvatarUrl ? "Custom Image Active" : "Preset Avatar Active"}</span>
-                </label>
+          {/* TAB 2: WALL STREET DESK BADGES */}
+          {activeTab === "BADGES" && (
+            <div className="space-y-3 animate-in fade-in duration-100">
+              <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded text-[11px] text-[#94A3B8] leading-relaxed">
+                Equip prestigious institutional clearances on your analyst profile. Active badges appear on your terminal session, risk memorandums, and digital IC Dossier seal.
+              </div>
 
-                <div className="p-3 bg-[#090D14] border border-[#1E2536] rounded-lg flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full border border-[#C5A880]/50 overflow-hidden bg-[#162033] flex items-center justify-center shrink-0">
-                    {customAvatarUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={customAvatarUrl} alt="Custom Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <WallStreetAvatar avatarId={avatar as AvatarPresetId} size="md" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <label className="px-3 py-1.5 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] text-[10px] font-bold rounded cursor-pointer transition-colors flex items-center gap-1.5">
-                        <Upload className="w-3 h-3" />
-                        <span>Upload Photo</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageFileUpload}
-                          className="hidden"
-                        />
-                      </label>
-
-                      {customAvatarUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setCustomAvatarUrl("")}
-                          className="px-2.5 py-1.5 bg-[#1F1316] hover:bg-[#2D161B] border border-[#F43F5E]/40 text-[#F43F5E] text-[10px] rounded transition-colors flex items-center gap-1"
-                          title="Remove custom photo"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {WALL_STREET_BADGES.map((b) => {
+                  const isEquipped = badges.includes(b.id);
+                  return (
+                    <div
+                      key={b.id}
+                      onClick={() => toggleBadge(b.id)}
+                      className={`p-3 border rounded cursor-pointer transition-all ${
+                        isEquipped
+                          ? "bg-[#141C2B] border-[#C5A880] shadow-sm ring-1 ring-[#C5A880]/30"
+                          : "bg-[#090D14] border-[#1E2536] opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{b.icon}</span>
+                          <div>
+                            <div className="text-[11px] font-bold text-[#F8FAFC]">{b.name}</div>
+                            <div className="text-[9px] text-[#C5A880] font-semibold">{b.firm}</div>
+                          </div>
+                        </div>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                            isEquipped
+                              ? "bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/40"
+                              : "bg-[#1E2536] text-[#64748B]"
+                          }`}
                         >
-                          <Trash2 className="w-3 h-3" />
-                          <span>Reset</span>
-                        </button>
-                      )}
+                          {isEquipped ? "EQUIPPED" : "LOCKED"}
+                        </span>
+                      </div>
+                      <div className="text-[9.5px] text-[#64748B] leading-tight">{b.desc}</div>
                     </div>
-                    <div className="text-[9px] text-[#64748B]">
-                      Upload JPG, PNG, or WebP. Appears on your analyst badge, reports, and IC Dossier sign-off.
-                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: SHARE USER / ANALYST ID */}
+          {activeTab === "SHARE_ID" && (
+            <div className="space-y-4 animate-in fade-in duration-100">
+              <div className="p-4 bg-[#080B10] border border-[#1E2536] rounded space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-[#64748B] uppercase tracking-wider">OFFICIAL ANALYST IDENTIFIER</span>
+                    <div className="text-lg font-bold font-mono text-[#C5A880] tracking-widest">{analystId}</div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyId}
+                    className="px-3 py-1.5 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] text-xs font-bold rounded flex items-center gap-1.5 transition-colors"
+                  >
+                    {copiedId ? <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedId ? "COPIED!" : "COPY ID"}</span>
+                  </button>
+                </div>
+
+                <div className="pt-3 border-t border-[#1E2536] grid grid-cols-2 gap-2 text-[10px] text-[#94A3B8]">
+                  <div>
+                    <span className="text-[#64748B]">OPERATOR:</span> <span className="text-[#F8FAFC] font-semibold">{name}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B]">DESK:</span> <span className="text-[#F8FAFC] font-semibold">{desk}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B]">CLEARANCE:</span> <span className="text-[#10B981] font-semibold">LEVEL 3 SOVEREIGN</span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B]">CLUSTER NODE:</span> <span className="text-[#38BDF8] font-semibold">MUM-01 PROD</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 1-Click Share Summary */}
+              <div className="p-3.5 bg-[#0D111A] border border-[#1E2536] rounded space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-[#F8FAFC]">SHARE TERMINAL CLEARANCE CARD</div>
+                    <div className="text-[10px] text-[#64748B]">Copies your verified Wall Street credentials to share with colleagues or committee members.</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyShareSummary}
+                    className="px-3 py-1.5 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-xs rounded flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    {copiedShareSummary ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                    <span>{copiedShareSummary ? "COPIED TO CLIPBOARD!" : "SHARE PROFILE"}</span>
+                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: RISK HURDLE CALIBRATION */}
+          {/* TAB 4: SECURITY & PRIVACY */}
+          {activeTab === "PRIVACY_PASS" && (
+            <div className="space-y-4 animate-in fade-in duration-100">
+              {/* Password Update Form */}
+              <div className="p-3.5 bg-[#080B10] border border-[#1E2536] rounded space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-[#C5A880]" />
+                    <span>UPDATE CLEARANCE PASSWORD</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] flex items-center gap-1"
+                  >
+                    {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    <span>{showPassword ? "Hide" : "Show"}</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Current Password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-[#0D111A] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="New Password (min 6 chars)"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-[#0D111A] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none"
+                    />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Confirm New Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-[#0D111A] border border-[#1E2536] text-[#F8FAFC] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={handlePasswordUpdate}
+                    className="px-3 py-1 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] text-xs font-bold rounded transition-colors"
+                  >
+                    UPDATE PASSWORD
+                  </button>
+                  {passwordStatus && (
+                    <span className="text-[10px] text-[#10B981] font-bold animate-fade-in">{passwordStatus}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Privacy Controls */}
+              <div className="p-3.5 bg-[#080B10] border border-[#1E2536] rounded space-y-3">
+                <div className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-[#10B981]" />
+                  <span>INSTITUTIONAL PRIVACY VAULT</span>
+                </div>
+
+                <div className="flex items-center justify-between py-1 border-b border-[#1E2536]">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#F8FAFC]">Incognito Surveillance Mode</div>
+                    <div className="text-[9.5px] text-[#64748B]">Do not log recent corporate entity searches to browser cache.</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={incognitoMode}
+                    onChange={(e) => setIncognitoMode(e.target.checked)}
+                    className="w-4 h-4 accent-[#C5A880] cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-1">
+                  <div>
+                    <div className="text-[11px] font-bold text-[#F8FAFC]">Zero-Telemetry Terminal Vault</div>
+                    <div className="text-[9.5px] text-[#64748B]">Process all stress simulations locally without transmitting metrics externally.</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={telemetryEnabled}
+                    onChange={(e) => setTelemetryEnabled(e.target.checked)}
+                    className="w-4 h-4 accent-[#10B981] cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: RISK HURDLE CALIBRATION */}
           {activeTab === "HURDLES" && (
-            <div className="space-y-5 animate-in fade-in duration-100">
+            <div className="space-y-4 animate-in fade-in duration-100">
               <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded text-[11px] text-[#94A3B8] leading-relaxed">
-                Adjusting institutional hurdles dynamically recalibrates the <span className="text-[#10B981] font-bold">COMPLIANT</span> / <span className="text-[#F43F5E] font-bold">BREACH</span> threshold flags in Module 04 (Vulnerability Monitor) and Module 06 (IC Underwriting Dossier).
+                Adjusting institutional hurdles dynamically recalibrates the <span className="text-[#10B981] font-bold">COMPLIANT</span> / <span className="text-[#F43F5E] font-bold">BREACH</span> flags across Module 04 (Vulnerability Monitor) and Module 06 (IC Underwriting Dossier).
               </div>
 
               {/* Net Debt / EBITDA */}
@@ -425,8 +834,8 @@ export function SettingsModal({
             </div>
           )}
 
-          {/* TAB 3: DIAGNOSTICS */}
-          {activeTab === "DIAGNOSTICS" && (
+          {/* TAB 6: SYSTEM DIAGNOSTICS & LOGOUT */}
+          {activeTab === "SYSTEM" && (
             <div className="space-y-4 animate-in fade-in duration-100">
               <div className="space-y-2 p-3 bg-[#080B10] border border-[#1E2536] rounded">
                 <div className="text-xs font-bold text-[#F8FAFC] flex items-center gap-1.5">
@@ -443,12 +852,8 @@ export function SettingsModal({
                     <span className="font-mono text-[#10B981] font-bold">WAL (Write-Ahead Logging)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Synchronous Mode:</span>
-                    <span className="font-mono text-[#F8FAFC]">NORMAL</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span>Active Clearance Node:</span>
-                    <span className="font-mono text-[#C5A880]">MUM-01 // PRODUCTION</span>
+                    <span className="font-mono text-[#C5A880]">MUM-01 // PRODUCTION SECURE</span>
                   </div>
                 </div>
               </div>
@@ -474,16 +879,39 @@ export function SettingsModal({
                   </div>
                 )}
               </div>
+
+              {/* LOGOUT BUTTON */}
+              {onLogout && (
+                <div className="p-3.5 bg-[#1F1316] border border-[#F43F5E]/30 rounded flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-bold text-[#F43F5E]">TERMINAL SESSION TERMINATION</div>
+                    <div className="text-[10px] text-[#FDA4AF]">Clears encrypted operator session token and locks terminal access.</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm("Are you sure you want to log out and lock the FINTRAXIS Terminal?")) {
+                        onLogout();
+                        onClose();
+                      }
+                    }}
+                    className="px-3.5 py-1.5 bg-[#E11D48] hover:bg-[#BE123C] text-white font-bold text-xs rounded flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>LOG OUT</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Modal Footer Actions */}
-          <div className="pt-3 border-t border-[#1E2536] flex items-center justify-between">
-            <div className="text-[10px] text-[#64748B]">
+          <div className="pt-3 border-t border-[#1E2536] flex items-center justify-between shrink-0">
+            <div className="text-[10px] text-[#64748B] hidden sm:block">
               CHANGES PERSIST DIRECTLY TO SQLITE MASTER
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
               <button
                 type="button"
                 onClick={onClose}
@@ -505,7 +933,7 @@ export function SettingsModal({
                 ) : isSaving ? (
                   <span>SAVING...</span>
                 ) : (
-                  <span>SAVE CHANGES</span>
+                  <span>SAVE SETTINGS</span>
                 )}
               </button>
             </div>

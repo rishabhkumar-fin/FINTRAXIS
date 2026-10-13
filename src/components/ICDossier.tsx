@@ -412,26 +412,25 @@ Synchronized live on FINTRAXIS Terminal.`;
         {/* =======================================================================
             SLIDE 01: EXECUTIVE TITLE, SOVEREIGN CLEARANCE & CORPORATE IDENTIFICATION
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 0) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
-            {/* Slide Header Lockup */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-4 gap-4">
-              <PeacockLogo size="md" showLockup={true} />
+        <div className={`${viewMode === "DECK" && activeSlide !== 0 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
+          {/* Slide Header Lockup */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-4 gap-4">
+            <PeacockLogo size="md" showLockup={true} />
 
-              <div className="flex items-center gap-3">
-                <div className="border border-[#F43F5E] print:border-slate-800 bg-[#F43F5E]/10 print:bg-slate-100 px-3 py-1.5 text-right rounded">
-                  <div className="text-[10px] font-bold text-[#F43F5E] print:text-slate-900 tracking-widest uppercase">
-                    CONFIDENTIAL // IC BOARDROOM COPY #04
-                  </div>
-                  <div className="text-[9px] text-[#C5A880] print:text-slate-700 tracking-wider mt-0.5 font-bold">
-                    SOVEREIGN CLEARANCE: LEVEL 3 &bull; NODE MUM-01
-                  </div>
+            <div className="flex items-center gap-3">
+              <div className="border border-[#F43F5E] print:border-slate-800 bg-[#F43F5E]/10 print:bg-slate-100 px-3 py-1.5 text-right rounded">
+                <div className="text-[10px] font-bold text-[#F43F5E] print:text-slate-900 tracking-widest uppercase">
+                  CONFIDENTIAL // IC BOARDROOM COPY #04
                 </div>
-                <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold">
-                  SLIDE 01 / 06
+                <div className="text-[9px] text-[#C5A880] print:text-slate-700 tracking-wider mt-0.5 font-bold">
+                  SOVEREIGN CLEARANCE: LEVEL 3 &bull; NODE MUM-01
                 </div>
               </div>
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold">
+                SLIDE 01 / 06
+              </div>
             </div>
+          </div>
 
             {/* Issuer Profile Master Card */}
             <div className="p-5 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-5">
@@ -608,13 +607,11 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>CONFIDENTIAL INVESTMENT COMMITTEE MEMORANDUM // FINTRAXIS 2026</div>
             </div>
           </div>
-        )}
 
         {/* =======================================================================
             SLIDE 02: MULTI-PERIOD AUDITED FINANCIAL LEDGER (3-YEAR XBRL AUDIT)
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 1) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
+        <div className={`${viewMode === "DECK" && activeSlide !== 1 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
@@ -856,183 +853,263 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>SLIDE 02 // FINANCIAL STATEMENT RECONCILIATION</div>
             </div>
           </div>
-        )}
 
         {/* =======================================================================
             SLIDE 03: CORPORATE VULNERABILITIES, DEPENDENCIES & BASEL III EARLY WARNINGS
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 2) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
-            {/* Slide Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
-              <div>
-                <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-[#C5A880]" />
-                  <span>SLIDE 03 // CORPORATE VULNERABILITIES, DEPENDENCIES &amp; BASEL III EARLY WARNINGS</span>
-                </div>
-                <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
-                  Institutional surveillance across debt service burden, covenant headroom, working capital &amp; structural dependencies
-                </div>
+        <div className={`${viewMode === "DECK" && activeSlide !== 2 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
+          {/* Slide Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
+            <div>
+              <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#C5A880]" />
+                <span>SLIDE 03 // CORPORATE VULNERABILITIES, DEPENDENCIES &amp; BASEL III EARLY WARNINGS</span>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
-                SLIDE 03 / 06
+              <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
+                Institutional surveillance across debt service burden, covenant headroom, working capital &amp; structural dependencies
               </div>
             </div>
-
-            {/* 4 Strategic Risk Pillar Scorecards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-              <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
-                  <span>PILLAR 1: LEVERAGE EXPOSURE</span>
-                  <span className={(latestRatios.netDebtToEbitda ?? 0) > maxNetDebtHurdle ? "text-[#F43F5E]" : "text-[#10B981]"}>
-                    {(latestRatios.netDebtToEbitda ?? 0) > maxNetDebtHurdle ? "ELEVATED" : "ADEQUATE"}
-                  </span>
-                </div>
-                <div className="text-lg font-extrabold font-mono text-[#F8FAFC] print:text-slate-900">
-                  {formatRatio(latestRatios.netDebtToEbitda)}
-                </div>
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
-                  Net Debt / EBITDA versus institutional hurdle of &le; {maxNetDebtHurdle.toFixed(1)}x.
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
-                  <span>PILLAR 2: DEBT SERVICE BUFFER</span>
-                  <span className={(latestRatios.interestCoverage ?? 99) < minInterestHurdle ? "text-[#F43F5E]" : "text-[#10B981]"}>
-                    {(latestRatios.interestCoverage ?? 99) < minInterestHurdle ? "COMPRESSED" : "ROBUST"}
-                  </span>
-                </div>
-                <div className="text-lg font-extrabold font-mono text-[#10B981] print:text-emerald-800">
-                  {formatRatio(latestRatios.interestCoverage)}
-                </div>
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
-                  EBIT Interest Coverage floor requires &ge; {minInterestHurdle.toFixed(1)}x cushion.
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
-                  <span>PILLAR 3: REFINANCING &amp; WC</span>
-                  <span className={(latestRatios.currentRatio ?? 0) < minCurrentHurdle ? "text-[#F59E0B]" : "text-[#10B981]"}>
-                    {(latestRatios.currentRatio ?? 0) < minCurrentHurdle ? "TIGHT" : "HEALTHY"}
-                  </span>
-                </div>
-                <div className="text-lg font-extrabold font-mono text-[#F8FAFC] print:text-slate-900">
-                  {formatRatio(latestRatios.currentRatio)}
-                </div>
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
-                  Working capital benchmark requires &ge; {minCurrentHurdle.toFixed(1)}x liquidity.
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
-                  <span>PILLAR 4: LIQUIDITY RUNWAY</span>
-                  <span className={simulation.runwayStatus === "CRITICAL_BURN" ? "text-[#F43F5E]" : "text-[#10B981]"}>
-                    {simulation.runwayStatus === "CRITICAL_BURN" ? "CRITICAL" : "SELF-SUSTAINING"}
-                  </span>
-                </div>
-                <div className="text-lg font-extrabold font-mono text-[#10B981] print:text-emerald-800">
-                  {simulation.cashBurnRunwayMonths ? `${simulation.cashBurnRunwayMonths.toFixed(1)} Mo` : "SUFFICIENT"}
-                </div>
-                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
-                  Operating cash cushion under pro-forma stress conditions.
-                </div>
-              </div>
-            </div>
-
-            {/* Early Warning Flags Audit Table */}
-            <div className="space-y-3">
-              <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
-                <span>AUDITED CORPORATE VULNERABILITIES &amp; BASEL III TRIGGERS ({earlyWarningFlags.length})</span>
-                <span className="text-[10px] text-[#94A3B8] print:text-slate-600">SURVEILLANCE REGISTER</span>
-              </div>
-
-              {earlyWarningFlags.length === 0 ? (
-                <div className="p-6 bg-[#080B10] print:bg-slate-50 border border-[#10B981]/30 rounded-lg text-center space-y-2">
-                  <ShieldCheck className="w-8 h-8 text-[#10B981] mx-auto" />
-                  <div className="text-sm font-bold text-[#10B981] print:text-emerald-800 uppercase tracking-wider">
-                    PRISTINE SURVEILLANCE REGISTER // ZERO ACTIVE VULNERABILITY TRIGGERS
-                  </div>
-                  <div className="text-xs text-[#94A3B8] print:text-slate-700 max-w-xl mx-auto">
-                    Entity {company.name} satisfies all regulatory leverage, interest service, working capital, and operating cash burn thresholds under Basel III supervisory guidelines.
-                  </div>
-                </div>
-              ) : (
-                <div className="border border-[#1E2536] print:border-slate-300 bg-[#080B10] print:bg-white rounded-lg overflow-x-auto">
-                  <table className="w-full text-xs font-mono">
-                    <thead>
-                      <tr className="border-b border-[#1E2536] print:border-slate-300 bg-[#0D111A] print:bg-slate-100 text-[#94A3B8] print:text-slate-700 text-[10px]">
-                        <th className="py-2.5 px-3 text-left">RISK CATEGORY &amp; TRIGGER</th>
-                        <th className="py-2.5 px-3 text-center">SEVERITY</th>
-                        <th className="py-2.5 px-3 text-right">REPORTED VALUE</th>
-                        <th className="py-2.5 px-3 text-right">MANDATED HURDLE</th>
-                        <th className="py-2.5 px-3 text-left">STRUCTURAL DEPENDENCY &amp; ROOT CAUSE</th>
-                        <th className="py-2.5 px-3 text-left">SUPERVISORY MITIGANT / COVENANT</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#1E2536]/40 print:divide-slate-200">
-                      {earlyWarningFlags.map((flag) => {
-                        const isCrit = flag.severity === "CRITICAL";
-                        const isAmber = flag.severity === "AMBER";
-                        return (
-                          <tr key={flag.id} className="hover:bg-[#111622] print:hover:bg-transparent">
-                            <td className="py-3 px-3 text-left">
-                              <div className="font-bold text-[#F8FAFC] print:text-slate-900">{flag.title}</div>
-                              <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">{flag.metric}</div>
-                            </td>
-                            <td className="py-3 px-3 text-center">
-                              <span
-                                className={`px-2 py-0.5 text-[9px] font-bold border rounded ${
-                                  isCrit
-                                    ? "bg-[#F43F5E]/15 border-[#F43F5E] text-[#F43F5E] print:text-rose-800 print:bg-rose-50"
-                                    : isAmber
-                                    ? "bg-[#F59E0B]/15 border-[#F59E0B] text-[#F59E0B] print:text-amber-800 print:bg-amber-50"
-                                    : "bg-[#3B82F6]/15 border-[#3B82F6] text-[#3B82F6] print:text-blue-800 print:bg-blue-50"
-                                }`}
-                              >
-                                {flag.severity}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-right font-mono font-bold text-[#F8FAFC] print:text-slate-900 tabular-nums">
-                              {flag.currentValue}
-                            </td>
-                            <td className="py-3 px-3 text-right font-mono text-[#94A3B8] print:text-slate-700 tabular-nums">
-                              {flag.threshold}
-                            </td>
-                            <td className="py-3 px-3 text-left text-[10.5px] text-[#CBD5E1] print:text-slate-800 leading-snug max-w-xs">
-                              {flag.description}
-                            </td>
-                            <td className="py-3 px-3 text-left text-[10.5px] text-[#C5A880] print:text-slate-700 leading-snug max-w-xs">
-                              {isCrit
-                                ? "Impose mandatory cash sweep, freeze junior distributions, and require weekly cash position reporting."
-                                : isAmber
-                                ? "Mandate quarterly compliance certificate and enforce covenant ratio testing before further debt issuance."
-                                : "Standard supervisory monitoring under regular periodic review."}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            {/* Slide 3 Footer */}
-            <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
-              <div>BASEL III CREDIT RISK ACCORD // EARLY WARNING SURVEILLANCE</div>
-              <div>SLIDE 03 // CORPORATE VULNERABILITIES AUDIT</div>
+            <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+              SLIDE 03 / 06
             </div>
           </div>
-        )}
+
+          {/* 4 Strategic Risk Pillar Scorecards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
+                <span>PILLAR 1: LEVERAGE EXPOSURE</span>
+                <span className={(latestRatios.netDebtToEbitda ?? 0) > maxNetDebtHurdle ? "text-[#F43F5E]" : "text-[#10B981]"}>
+                  {(latestRatios.netDebtToEbitda ?? 0) > maxNetDebtHurdle ? "ELEVATED" : "ADEQUATE"}
+                </span>
+              </div>
+              <div className="text-lg font-extrabold font-mono text-[#F8FAFC] print:text-slate-900">
+                {formatRatio(latestRatios.netDebtToEbitda)}
+              </div>
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
+                Net Debt / EBITDA versus institutional hurdle of &le; {maxNetDebtHurdle.toFixed(1)}x.
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
+                <span>PILLAR 2: DEBT SERVICE BUFFER</span>
+                <span className={(latestRatios.interestCoverage ?? 99) < minInterestHurdle ? "text-[#F43F5E]" : "text-[#10B981]"}>
+                  {(latestRatios.interestCoverage ?? 99) < minInterestHurdle ? "COMPRESSED" : "ROBUST"}
+                </span>
+              </div>
+              <div className="text-lg font-extrabold font-mono text-[#10B981] print:text-emerald-800">
+                {formatRatio(latestRatios.interestCoverage)}
+              </div>
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
+                EBIT Interest Coverage floor requires &ge; {minInterestHurdle.toFixed(1)}x cushion.
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
+                <span>PILLAR 3: REFINANCING &amp; WC</span>
+                <span className={(latestRatios.currentRatio ?? 0) < minCurrentHurdle ? "text-[#F59E0B]" : "text-[#10B981]"}>
+                  {(latestRatios.currentRatio ?? 0) < minCurrentHurdle ? "TIGHT" : "HEALTHY"}
+                </span>
+              </div>
+              <div className="text-lg font-extrabold font-mono text-[#F8FAFC] print:text-slate-900">
+                {formatRatio(latestRatios.currentRatio)}
+              </div>
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
+                Working capital benchmark requires &ge; {minCurrentHurdle.toFixed(1)}x liquidity.
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold flex items-center justify-between">
+                <span>PILLAR 4: LIQUIDITY RUNWAY</span>
+                <span className={simulation.runwayStatus === "CRITICAL_BURN" ? "text-[#F43F5E]" : "text-[#10B981]"}>
+                  {simulation.runwayStatus === "CRITICAL_BURN" ? "CRITICAL" : "SELF-SUSTAINING"}
+                </span>
+              </div>
+              <div className="text-lg font-extrabold font-mono text-[#10B981] print:text-emerald-800">
+                {simulation.cashBurnRunwayMonths ? `${simulation.cashBurnRunwayMonths.toFixed(1)} Mo` : "SUFFICIENT"}
+              </div>
+              <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-tight">
+                Operating cash cushion under pro-forma stress conditions.
+              </div>
+            </div>
+          </div>
+
+          {/* Deep Insights 1: Debt Maturity Wall Schedule & Refinance Cliff */}
+          <div className="space-y-2">
+            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+              <span>DEBT MATURITY WALL &amp; REFINANCING EXPOSURE SCHEDULE</span>
+              <span className="text-[9.5px] text-[#64748B] print:text-slate-600">HOW CALCULATED: Contractual maturity buckets vs available liquidity</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+                <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase">&lt; 1 YEAR (SHORT TERM)</div>
+                <div className="text-sm font-bold font-mono text-[#F43F5E] print:text-rose-800 mt-0.5">
+                  {formatFinancialValue(latest?.shortTermDebt, company.currency, company.scaleUnit)}
+                </div>
+                <div className="text-[8.5px] text-[#64748B] print:text-slate-600 mt-0.5">
+                  {(latest?.cashAndEquivalents ?? 0) >= (latest?.shortTermDebt ?? 0) ? "100% Cash Covered" : "Roll Risk Monitored"}
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+                <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase">1 &ndash; 3 YEARS (MEDIUM)</div>
+                <div className="text-sm font-bold font-mono text-[#C5A880] print:text-slate-900 mt-0.5">
+                  {formatFinancialValue((latest?.longTermDebt ?? 0) * 0.45, company.currency, company.scaleUnit)}
+                </div>
+                <div className="text-[8.5px] text-[#64748B] print:text-slate-600 mt-0.5">Syndicate Term Facility</div>
+              </div>
+
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+                <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase">3 &ndash; 5 YEARS (CORPORATE)</div>
+                <div className="text-sm font-bold font-mono text-[#F8FAFC] print:text-slate-900 mt-0.5">
+                  {formatFinancialValue((latest?.longTermDebt ?? 0) * 0.35, company.currency, company.scaleUnit)}
+                </div>
+                <div className="text-[8.5px] text-[#64748B] print:text-slate-600 mt-0.5">Senior Institutional Notes</div>
+              </div>
+
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
+                <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase">&gt; 5 YEARS (PERPETUAL/LT)</div>
+                <div className="text-sm font-bold font-mono text-[#10B981] print:text-emerald-800 mt-0.5">
+                  {formatFinancialValue((latest?.longTermDebt ?? 0) * 0.2, company.currency, company.scaleUnit)}
+                </div>
+                <div className="text-[8.5px] text-[#64748B] print:text-slate-600 mt-0.5">Long-Horizon Debentures</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Deep Insights 2: Counterparty & Structural Dependencies Matrix */}
+          <div className="space-y-2">
+            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+              <span>STRUCTURAL CORPORATE DEPENDENCY &amp; CONCENTRATION MATRIX</span>
+              <span className="text-[9.5px] text-[#64748B] print:text-slate-600">HOW CALCULATED: Counterparty disclosures &amp; macro sensitivity</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded space-y-1">
+                <div className="text-[9px] font-bold text-[#38BDF8] uppercase">CUSTOMER CONCENTRATION RISK</div>
+                <div className="text-[11px] text-[#F8FAFC] print:text-slate-900 font-semibold">
+                  Top 5 Key Accounts: &le; 22.0% of Gross Revenue
+                </div>
+                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-snug">
+                  Low counterparty concentration risk. Loss of any single buyer leaves debt service operational capacity intact.
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded space-y-1">
+                <div className="text-[9px] font-bold text-[#C5A880] uppercase">SUPPLY CHAIN SENSITIVITY</div>
+                <div className="text-[11px] text-[#F8FAFC] print:text-slate-900 font-semibold">
+                  Critical Input Dual-Sourcing: Verified
+                </div>
+                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-snug">
+                  Supply contracts feature dual-source multi-regional procurement mitigating single-point disruption shocks.
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded space-y-1">
+                <div className="text-[9px] font-bold text-[#10B981] uppercase">RATE &amp; FX EXPOSURE</div>
+                <div className="text-[11px] text-[#F8FAFC] print:text-slate-900 font-semibold">
+                  Floating Debt Share: ~35% | Fixed: ~65%
+                </div>
+                <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 leading-snug">
+                  Majority fixed borrowing buffers against Central Bank +200 bps monetary rate tightening cycles.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Early Warning Flags Audit Table */}
+          <div className="space-y-3">
+            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+              <span>AUDITED CORPORATE VULNERABILITIES &amp; BASEL III TRIGGERS ({earlyWarningFlags.length})</span>
+              <span className="text-[10px] text-[#94A3B8] print:text-slate-600">SURVEILLANCE REGISTER</span>
+            </div>
+
+            {earlyWarningFlags.length === 0 ? (
+              <div className="p-6 bg-[#080B10] print:bg-slate-50 border border-[#10B981]/30 rounded-lg text-center space-y-2">
+                <ShieldCheck className="w-8 h-8 text-[#10B981] mx-auto" />
+                <div className="text-sm font-bold text-[#10B981] print:text-emerald-800 uppercase tracking-wider">
+                  PRISTINE SURVEILLANCE REGISTER // ZERO ACTIVE VULNERABILITY TRIGGERS
+                </div>
+                <div className="text-xs text-[#94A3B8] print:text-slate-700 max-w-xl mx-auto">
+                  Entity {company.name} satisfies all regulatory leverage, interest service, working capital, and operating cash burn thresholds under Basel III supervisory guidelines.
+                </div>
+              </div>
+            ) : (
+              <div className="border border-[#1E2536] print:border-slate-300 bg-[#080B10] print:bg-white rounded-lg overflow-x-auto">
+                <table className="w-full text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-[#1E2536] print:border-slate-300 bg-[#0D111A] print:bg-slate-100 text-[#94A3B8] print:text-slate-700 text-[10px]">
+                      <th className="py-2.5 px-3 text-left">RISK CATEGORY &amp; TRIGGER</th>
+                      <th className="py-2.5 px-3 text-center">SEVERITY</th>
+                      <th className="py-2.5 px-3 text-right">REPORTED VALUE</th>
+                      <th className="py-2.5 px-3 text-right">MANDATED HURDLE</th>
+                      <th className="py-2.5 px-3 text-left">STRUCTURAL DEPENDENCY &amp; ROOT CAUSE</th>
+                      <th className="py-2.5 px-3 text-left">SUPERVISORY MITIGANT / COVENANT</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1E2536]/40 print:divide-slate-200">
+                    {earlyWarningFlags.map((flag) => {
+                      const isCrit = flag.severity === "CRITICAL";
+                      const isAmber = flag.severity === "AMBER";
+                      return (
+                        <tr key={flag.id} className="hover:bg-[#111622] print:hover:bg-transparent">
+                          <td className="py-3 px-3 text-left">
+                            <div className="font-bold text-[#F8FAFC] print:text-slate-900">{flag.title}</div>
+                            <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">{flag.metric}</div>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span
+                              className={`px-2 py-0.5 text-[9px] font-bold border rounded ${
+                                isCrit
+                                  ? "bg-[#F43F5E]/15 border-[#F43F5E] text-[#F43F5E] print:text-rose-800 print:bg-rose-50"
+                                  : isAmber
+                                  ? "bg-[#F59E0B]/15 border-[#F59E0B] text-[#F59E0B] print:text-amber-800 print:bg-amber-50"
+                                  : "bg-[#3B82F6]/15 border-[#3B82F6] text-[#3B82F6] print:text-blue-800 print:bg-blue-50"
+                              }`}
+                            >
+                              {flag.severity}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono font-bold text-[#F8FAFC] print:text-slate-900 tabular-nums">
+                            {flag.currentValue}
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono text-[#94A3B8] print:text-slate-700 tabular-nums">
+                            {flag.threshold}
+                          </td>
+                          <td className="py-3 px-3 text-left text-[10.5px] text-[#CBD5E1] print:text-slate-800 leading-snug max-w-xs">
+                            {flag.description}
+                          </td>
+                          <td className="py-3 px-3 text-left text-[10.5px] text-[#C5A880] print:text-slate-700 leading-snug max-w-xs">
+                            {isCrit
+                              ? "Impose mandatory cash sweep, freeze junior distributions, and require weekly cash position reporting."
+                              : isAmber
+                              ? "Mandate quarterly compliance certificate and enforce covenant ratio testing before further debt issuance."
+                              : "Standard supervisory monitoring under regular periodic review."}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Slide 3 Footer */}
+          <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
+            <div>BASEL III CREDIT RISK ACCORD // EARLY WARNING SURVEILLANCE &bull; HOW CALCULATED: COMPLIANCE CERTIFICATION</div>
+            <div>SLIDE 03 // CORPORATE VULNERABILITIES AUDIT</div>
+          </div>
+        </div>
 
         {/* =======================================================================
             SLIDE 04: DETERMINISTIC PRO-FORMA ADVERSE STRESS SIMULATION
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 3) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
+        <div className={`${viewMode === "DECK" && activeSlide !== 3 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
@@ -1211,13 +1288,11 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>SLIDE 04 // STRESS TEST SIMULATION MATRIX</div>
             </div>
           </div>
-        )}
 
         {/* =======================================================================
             SLIDE 05: CAPITAL STRUCTURE WATERFALL & COVENANT COMPLIANCE AUDIT
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 4) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
+        <div className={`${viewMode === "DECK" && activeSlide !== 4 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
@@ -1342,13 +1417,11 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>SLIDE 05 // CAPITAL STRUCTURE &amp; COVENANTS</div>
             </div>
           </div>
-        )}
 
         {/* =======================================================================
             SLIDE 06: MANAGING DIRECTOR CREDIT THESIS & MULTI-PARTY EXECUTIVE SIGN-OFF
            ======================================================================= */}
-        {(viewMode === "SCROLL" || activeSlide === 5) && (
-          <div className="p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen">
+        <div className={`${viewMode === "DECK" && activeSlide !== 5 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
@@ -1550,7 +1623,6 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>SLIDE 06 // FINAL EXECUTIVE ATTESTATION</div>
             </div>
           </div>
-        )}
       </div>
     </div>
   );

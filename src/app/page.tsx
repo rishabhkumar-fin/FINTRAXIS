@@ -427,6 +427,7 @@ export default function FintraxisTerminalPage() {
             }}
             onSave={handleUpdateSettings}
             onReseedCache={loadCompanies}
+            onLogout={handleLockSession}
           />
         )}
 
@@ -451,7 +452,7 @@ export default function FintraxisTerminalPage() {
         />
 
         {/* Institutional Fixed Status Footer */}
-        <footer className="fixed bottom-0 left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
+        <footer className="fixed bottom-0 left-0 lg:left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-[#10B981]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>

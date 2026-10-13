@@ -60,6 +60,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
   const [inputQuery, setInputQuery] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [explainMode, setExplainMode] = useState<"PRO" | "ELI10">("PRO");
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -85,15 +86,44 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
 
   const generateInstitutionalResponse = (query: string): { response: string; followUps: string[] } => {
     const q = query.toLowerCase().trim();
+    const isEli10 =
+      explainMode === "ELI10" ||
+      /\b(10|eli10|kid|child|lemonade|pizza|simple|easy|explain like|beginner)\b/i.test(query);
+
+    // 0. CONCEPT CHECK FIRST: If the user is asking conceptual questions (e.g., "what is assets", "explain ebitda", "what is repo rate"),
+    // dispatch to the finance knowledge base immediately to avoid false positive company name matches.
+    const isConceptQuery =
+      /^(what is|what are|what's|explain|define|meaning of|definition of|how does|why is|tell me about)\b/i.test(q) ||
+      /\b(asset|assets|liability|liabilities|equity|ebitda|revenue|cogs|gross profit|net income|repo rate|free cash flow|fcf|wacc|covenant|covenants|dcf|bond|bonds|stock|stocks|working capital|balance sheet)\b/i.test(q);
+
+    if (isConceptQuery && !q.includes("analyze") && !q.includes("underwrite") && !q.includes("memo for")) {
+      const conceptResult = resolveFinanceIntelligence(query, company, activeProfile || undefined, isEli10);
+      if (conceptResult && conceptResult.response) {
+        return conceptResult;
+      }
+    }
 
     // 1. SPECIFIC NAMED COMPANY LOOKUP OR ACTIVE COMPANY ANALYSIS
     const companyKeys = Object.keys(INSTITUTIONAL_COMPANIES);
-    const matchedKey = companyKeys.find(
-      (k) =>
-        q.includes(k.toLowerCase()) ||
-        q.includes(k.replace(".ns", "").replace(".t", "").toLowerCase()) ||
-        q.includes(INSTITUTIONAL_COMPANIES[k].company.name.toLowerCase().split(" ")[0])
-    );
+    const matchedKey = companyKeys.find((k) => {
+      const sym = k.toLowerCase();
+      const pureSym = sym.replace(".ns", "").replace(".t", "");
+      const compName = INSTITUTIONAL_COMPANIES[k].company.name.toLowerCase();
+      const tickerRegex = new RegExp(`\\b${pureSym}\\b`, "i");
+      return (
+        q.includes(sym) ||
+        tickerRegex.test(q) ||
+        (compName.length > 5 && q.includes(compName)) ||
+        (k === "HAL.NS" && /\bhal\b/i.test(q)) ||
+        (k === "TCS.NS" && /\btcs\b/i.test(q)) ||
+        (k === "SBIN.NS" && (/\bsbi\b/i.test(q) || /\bstate bank of india\b/i.test(q))) ||
+        (k === "RELIANCE.NS" && /\breliance\b/i.test(q)) ||
+        (k === "AAPL" && /\bapple\b/i.test(q)) ||
+        (k === "MSFT" && /\bmicrosoft\b/i.test(q)) ||
+        (k === "NVDA" && /\bnvidia\b/i.test(q)) ||
+        (k === "7203.T" && /\btoyota\b/i.test(q))
+      );
+    });
 
     if (
       matchedKey ||
@@ -179,10 +209,22 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
 
     // 2. ALTMAN Z-SCORE
     if (q.includes("altman") || q.includes("z-score") || q.includes("bankruptcy") || q.includes("distress model")) {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (DOCTOR'S CHECKUP ANALOGY)\n` +
+        `Imagine a doctor checking your health before you run a race:\n` +
+        `• The doctor checks your pulse, your muscles, your temperature, and your energy level.\n` +
+        `• The **Altman Z-Score** does the exact same checkup for companies!\n` +
+        `• **Score > 3.0 (Safe Zone):** You are as healthy as an Olympic athlete! Zero worries.\n` +
+        `• **Score 1.8 to 2.9 (Grey Zone):** You have a slight cough. The doctor says stay in bed and take vitamins.\n` +
+        `• **Score < 1.8 (Distress Zone):** Sirens go off! The company is very sick and might go bankrupt within 2 years!\n\n` +
+        `---\n\n`;
+
       return {
         response:
           `# QUANTITATIVE METHODOLOGY: ALTMAN Z-SCORE DISTRESS MODEL\n\n` +
+          (isEli10 ? eli10Section : "") +
           `Developed by Prof. Edward Altman at NYU Stern, the **Altman Z-Score** is the global standard multi-factor linear discriminant model for predicting corporate bankruptcy within 24 months.\n\n` +
+          (!isEli10 ? eli10Section : "") +
           `### 1. MATHEMATICAL FORMULATION\n` +
           `\\[ Z = 1.2 X_1 + 1.4 X_2 + 3.3 X_3 + 0.6 X_4 + 0.999 X_5 \\]\n\n` +
           `Where the five financial ratios represent:\n` +
@@ -497,7 +539,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
     }
 
     // 12. COMPREHENSIVE WALL STREET & ACADEMIC FINANCIAL KNOWLEDGE ENGINE (CHATGPT / CLAUDE LEVEL)
-    return resolveFinanceIntelligence(query, company, activeProfile || undefined);
+    return resolveFinanceIntelligence(query, company, activeProfile || undefined, isEli10);
   };
 
   const handleSend = (text: string) => {
@@ -587,45 +629,134 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
         </div>
       </div>
 
+      {/* Explanation Mode Switcher */}
+      <div className="px-3.5 py-2 bg-[#090D14] border-b border-[#1E2536] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[9.5px] text-[#64748B] uppercase tracking-wider">MODE:</span>
+          <div className="inline-flex rounded border border-[#1E2536] bg-[#0D111A] p-0.5">
+            <button
+              type="button"
+              onClick={() => setExplainMode("PRO")}
+              className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${
+                explainMode === "PRO"
+                  ? "bg-[#C5A880] text-[#080B10] shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+              }`}
+            >
+              🏛️ Wall Street Pro
+            </button>
+            <button
+              type="button"
+              onClick={() => setExplainMode("ELI10")}
+              className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${
+                explainMode === "ELI10"
+                  ? "bg-[#10B981] text-[#080B10] shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+              }`}
+            >
+              🎈 Explain Like I&apos;m 10 (ELI10)
+            </button>
+          </div>
+        </div>
+        <span className="text-[9px] text-[#C5A880] font-medium hidden sm:inline">
+          {explainMode === "ELI10" ? "Simple Lemonade Stand & Pizza Analogies" : "Institutional Formulas & Basel III Standards"}
+        </span>
+      </div>
+
       {/* Suggested Quick Prompt Pills */}
       <div className="p-2.5 bg-[#080B10] border-b border-[#1E2536] flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[10px]">
         <span className="text-[#64748B] text-[9.5px] uppercase whitespace-nowrap mr-1">TOP TOPICS:</span>
-        <button
-          onClick={() => handleSend("What is assets and how are they classified on the balance sheet?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold rounded whitespace-nowrap transition-colors"
-        >
-          🏛️ What is Assets?
-        </button>
-        <button
-          onClick={() => handleSend("What are liabilities and how do they differ from total debt?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          ⚖️ Liabilities &amp; Debt
-        </button>
-        <button
-          onClick={() => handleSend("What is EBITDA and why do lenders and Wall Street use it?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          📊 What is EBITDA?
-        </button>
-        <button
-          onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          🇮🇳 RBI Repo Rate
-        </button>
-        <button
-          onClick={() => handleSend(`Analyze credit risk for ${company?.name || "current company"}`)}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] rounded whitespace-nowrap transition-colors"
-        >
-          🔍 Underwriting Memo
-        </button>
-        <button
-          onClick={() => handleSend("What is a debt covenant and what happens when it breaches?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          📜 Debt Covenants
-        </button>
+        {explainMode === "ELI10" ? (
+          <>
+            <button
+              onClick={() => handleSend("Explain Assets like I'm 10 using the lemonade stand analogy")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#10B981] font-bold rounded whitespace-nowrap transition-colors"
+            >
+              🎈 What is Assets?
+            </button>
+            <button
+              onClick={() => handleSend("Explain Liabilities like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 Borrowed Coins (Liabilities)
+            </button>
+            <button
+              onClick={() => handleSend("Explain EBITDA like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 Stand Profit (EBITDA)
+            </button>
+            <button
+              onClick={() => handleSend("Explain RBI Repo Rate like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 School Principal (Repo Rate)
+            </button>
+            <button
+              onClick={() => handleSend("Explain Debt Covenants like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 House Rules (Covenants)
+            </button>
+            <button
+              onClick={() => handleSend("Explain Free Cash Flow like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 Ice Cream Money (FCF)
+            </button>
+            <button
+              onClick={() => handleSend("Explain Stocks like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 Pizza Slices (Stocks)
+            </button>
+            <button
+              onClick={() => handleSend("Explain Altman Z-Score like I'm 10")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#10B981] text-[#A7F3D0] rounded whitespace-nowrap transition-colors"
+            >
+              🎈 Doctor Checkup (Altman Z)
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => handleSend("What is assets and how are they classified on the balance sheet?")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold rounded whitespace-nowrap transition-colors"
+            >
+              🏛️ What is Assets?
+            </button>
+            <button
+              onClick={() => handleSend("What are liabilities and how do they differ from total debt?")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+            >
+              ⚖️ Liabilities &amp; Debt
+            </button>
+            <button
+              onClick={() => handleSend("What is EBITDA and why do lenders and Wall Street use it?")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+            >
+              📊 What is EBITDA?
+            </button>
+            <button
+              onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+            >
+              🇮🇳 RBI Repo Rate
+            </button>
+            <button
+              onClick={() => handleSend(`Analyze credit risk for ${company?.name || "current company"}`)}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] rounded whitespace-nowrap transition-colors"
+            >
+              🔍 Underwriting Memo
+            </button>
+            <button
+              onClick={() => handleSend("What is a debt covenant and what happens when it breaches?")}
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+            >
+              📜 Debt Covenants
+            </button>
+          </>
+        )}
         <button
           onClick={() => handleSend("Explain Altman Z-Score formula and default thresholds")}
           className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"

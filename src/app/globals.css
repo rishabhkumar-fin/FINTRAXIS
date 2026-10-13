@@ -97,6 +97,20 @@ body {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
+  .print-slide {
+    break-after: page !important;
+    page-break-after: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    min-height: 98vh !important;
+    padding: 2rem !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  .print-slide:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
   .print-clean-canvas {
     background: #ffffff !important;
     color: #0f172a !important;

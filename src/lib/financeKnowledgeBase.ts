@@ -5,7 +5,7 @@ export interface KnowledgeTopic {
   keys: string[];
   title: string;
   category: "BALANCE_SHEET" | "INCOME_STATEMENT" | "CASH_FLOW" | "RATIO" | "VALUATION" | "SOLVENCY" | "ACCOUNTING" | "MACRO" | "DEBT";
-  content: (company?: CompanyEntity, profile?: CompanyRiskProfile) => string;
+  content: (company?: CompanyEntity, profile?: CompanyRiskProfile, isEli10?: boolean) => string;
   followUps: string[];
 }
 
@@ -31,15 +31,28 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "ASSETS & BALANCE SHEET CAPITAL ARCHITECTURE",
     category: "BALANCE_SHEET",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.totalAssets !== undefined;
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `Imagine you decide to run a **lemonade stand** on a sunny Saturday afternoon!\n` +
+        `• **Your ASSETS are simply everything you OWN that helps you make money:**\n` +
+        `  1. **The Cash in your pocket:** Coins to give change to your customers *(Cash & Equivalents)*.\n` +
+        `  2. **The Lemons and Sugar:** Supplies waiting on your kitchen counter ready to be made into drinks *(Inventory)*.\n` +
+        `  3. **The Wooden Table, Pitcher, and Squeezer:** Tools you use every day that don't get used up after one cup *(Equipment / Fixed Assets)*.\n` +
+        `  4. **The $2 your neighbor friend promised to bring tomorrow:** He drank a cup today and promised to pay you tomorrow *(Accounts Receivable)*.\n` +
+        `**Simple Rule for a 10-Year-Old:** *If you own it, and it puts coins in your piggy bank, it is an Asset!*\n\n` +
+        `---\n\n`;
+
       return (
         `# CORPORATE ASSETS: THE FOUNDATION OF BALANCE SHEET CAPITAL\n\n` +
+        (isEli10 ? eli10Section : "") +
         `An **Asset** is any resource of economic value owned or controlled by an entity (business, individual, or sovereign) with the legal expectation that it will generate **future economic benefits, cash flows, or cost reductions**.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. THE FUNDAMENTAL ACCOUNTING IDENTITY\n` +
         `Every balance sheet on Earth operates under double-entry accounting rules (US-GAAP, IFRS, and Ind-AS):\n` +
         `\\[ \\mathbf{\\text{Total Assets}} = \\mathbf{\\text{Total Liabilities}} + \\mathbf{\\text{Shareholders' Equity}} \\]\n\n` +
@@ -102,15 +115,27 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "LIABILITIES & CORPORATE OBLIGATIONS",
     category: "BALANCE_SHEET",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.totalLiabilities !== undefined;
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `Remember that lemonade stand? Imagine you didn't have enough money to buy lemons, so:\n` +
+        `• **Your LIABILITIES are everything you OWE to other people that you have to pay back:**\n` +
+        `  1. **$10 you borrowed from your Mom:** She gave you $10 for lemons, but you promised to return it on Sunday *(Short-Term Debt)*.\n` +
+        `  2. **$5 you owe the grocery store:** The grocer let you take paper cups and said, "Pay me next week" *(Accounts Payable)*.\n` +
+        `  3. **$20 you borrowed from your Older Brother:** To buy a fancy wooden cart, you took $20 that you have to repay over the next two years *(Long-Term Debt)*.\n` +
+        `**Simple Rule for a 10-Year-Old:** *Assets put coins in your pocket; Liabilities take coins out of your pocket because you borrowed them!*\n\n` +
+        `---\n\n`;
+
       return (
         `# CORPORATE LIABILITIES: CREDIT OBLIGATIONS & CLAIMS\n\n` +
+        (isEli10 ? eli10Section : "") +
         `A **Liability** represents a legally enforceable financial obligation or debt owed by a business to external third parties (creditors, banks, bondholders, suppliers, or employees), settled over time through transfers of economic resources (cash, goods, or services).\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. CORE BREAKDOWN: CURRENT VS LONG-TERM\n\n` +
         `#### A. Current Liabilities (Due Within 12 Months)\n` +
         `Immediate claims that must be satisfied using operating cash or short-term assets:\n` +
@@ -162,16 +187,29 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "SHAREHOLDERS' EQUITY & CORPORATE BOOK VALUE",
     category: "BALANCE_SHEET",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.totalShareholdersEquity !== undefined;
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `Imagine you decide to close your lemonade stand at the end of the summer:\n` +
+        `• You sell all your lemons, cups, pitchers, and your wooden table for **$50 in cash** *(Total Assets)*.\n` +
+        `• You repay your Mom the **$10** she lent you and the grocer **$5** for paper cups *(Total Liabilities = $15)*.\n` +
+        `• What is left over in your hands? **$50 - $15 = $35!**\n` +
+        `• That **$35 is your SHAREHOLDERS' EQUITY!** It is the true money that belongs entirely to you, the owner!\n` +
+        `• **Book Value:** What your notebook says the stand is worth.\n` +
+        `• **Market Value:** What a kid down the street is willing to pay you to buy your stand today!\n\n` +
+        `---\n\n`;
+
       return (
         `# SHAREHOLDERS' EQUITY: RESIDUAL CORPORATE NET WORTH\n\n` +
+        (isEli10 ? eli10Section : "") +
         `**Shareholders' Equity** (also termed Stockholders' Equity, Book Value, or Net Worth) represents the **residual interest in the assets of the company after deducting all its liabilities**.\n\n` +
         `\\[ \\mathbf{\\text{Shareholders' Equity}} = \\mathbf{\\text{Total Assets}} - \\mathbf{\\text{Total Liabilities}} \\]\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `If a company were to liquidate all its physical and liquid assets today and pay off every single bank loan, supplier invoice, and bondholder, the cash remaining would belong to the equity shareholders.\n\n` +
         `### 1. CORE ANATOMY OF EQUITY\n` +
         `1. **Contributed Capital (Common Stock & APIC):** The initial cash invested into the company by founders and venture/public investors during IPOs and secondary offerings.\n` +
@@ -212,15 +250,30 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "EBITDA // WALL STREET'S OPERATING CASH PROXY",
     category: "INCOME_STATEMENT",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.ebitda !== undefined;
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `Imagine on Saturday you sell 100 cups of lemonade for $1 each ($100 Revenue):\n` +
+        `• You spent $30 on lemons and sugar.\n` +
+        `• You paid your sister $10 to help pour cups.\n` +
+        `• You have **$60 left!** That $60 is your **EBITDA**!\n` +
+        `• It measures how much pure cash your stand makes from **just selling lemonade**, before you worry about:\n` +
+        `  - Taxes owed to the town government *(Taxes)*,\n` +
+        `  - Interest owed to your older brother for that loan *(Interest)*, or\n` +
+        `  - Worrying that your wooden table is getting scratched and older *(Depreciation)*.\n` +
+        `**Simple Rule for a 10-Year-Old:** *EBITDA tells you if the engine of your stand is making real money from customers everyday!*\n\n` +
+        `---\n\n`;
+
       return (
         `# EBITDA: EARNINGS BEFORE INTEREST, TAXES, DEPRECIATION & AMORTIZATION\n\n` +
+        (isEli10 ? eli10Section : "") +
         `**EBITDA** is the universal metric used across Wall Street, private equity firms, credit rating agencies, and syndicate banks to measure an enterprise's **pure operational earning power**, completely stripped of capital structure choices, tax regimes, and non-cash accounting charges.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. MATHEMATICAL FORMULATION\n\n` +
         `#### Top-Down Approach:\n` +
         `\\[ \\text{EBITDA} = \\text{Operating Income (EBIT)} + \\text{Depreciation} + \\text{Amortization} \\]\n\n` +
@@ -231,7 +284,7 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
         `2. **Tax Neutral:** Ignores differing regional tax holidays, R&D credits, or sovereign rates.\n` +
         `3. **The Universal Leverage Multiple:** Syndicated bank loans are governed by **Net Debt / EBITDA**. If Net Debt / EBITDA exceeds **3.5x**, the firm enters the supervisory watchlist zone!\n\n` +
         `### 3. THE FAMOUS CRITIQUE BY WARREN BUFFETT\n` +
-        `*"Does management think the tooth fairy pays for capital expenditures?"* — Charlie Munger & Warren Buffett famously warn that EBITDA can overstate real cash generation in capital-intensive industries (airlines, steel, telecom) where machinery wears out and requires billions in ongoing CapEx!\n\n` +
+        `*"Does management think the tooth fairy pays for capital expenditures?"* — Charlie Munger & Warren Buffett famously warn that EBITDA can overstate real cash generation in capital-intensive industries where machines wear out and require billions in ongoing CapEx!\n\n` +
         (hasData
           ? `### 4. LIVE EBITDA DISCLOSURES FOR ${comp?.name}\n` +
             `• **Operating Profit (EBIT):** ${formatFinancialValue(p.ebit, curr, scale)}\n` +
@@ -264,15 +317,26 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "REVENUE // THE TOP-LINE CASH ENGINE",
     category: "INCOME_STATEMENT",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.revenue !== undefined;
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `Every time a neighbor walks up and hands you a $2 coin for a fresh cold cup of lemonade, you hear 'CHA-CHING!' in your cash box!\n` +
+        `• If 50 people buy a cup today, you have **$100 in total coins** in your box.\n` +
+        `• That **$100 is your REVENUE** (also called Sales or the Top-Line)!\n` +
+        `• It is the **TOTAL money coming in through the front door** before you spend a single penny on lemons, sugar, cups, or snacks.\n` +
+        `**Simple Rule for a 10-Year-Old:** *Revenue is all the coins that drop into your register from customers!*\n\n` +
+        `---\n\n`;
+
       return (
         `# CONSOLIDATED REVENUE: THE TOP-LINE FINANCIAL DRIVER\n\n` +
+        (isEli10 ? eli10Section : "") +
         `**Revenue** (often referred to as Sales, Gross Turnover, or the "Top Line") represents the **total monetary gross inflow generated by a business from selling goods, delivering services, or licensing intellectual property** before any costs or expenses are subtracted.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. STATUTORY REVENUE RECOGNITION (ASC 606 & IND-AS 115)\n` +
         `Under modern international accounting standards, a company cannot book revenue simply because it received cash or signed a contract. Revenue is recognized through the strict **5-Step Model**:\n` +
         `1. Identify the contract with a customer.\n` +
@@ -314,14 +378,28 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "COGS & GROSS MARGIN // PRICING POWER & PRODUCTION EFFICIENCY",
     category: "INCOME_STATEMENT",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `To make **ONE cup** of lemonade, what do you actually need?\n` +
+        `• 1 Lemon: **50 cents**\n` +
+        `• Sugar & Ice: **20 cents**\n` +
+        `• Paper cup & straw: **10 cents**\n` +
+        `• Total ingredients: **80 cents** per cup! That 80 cents is your **COGS (Cost of Goods Sold)**!\n` +
+        `• If you sell each cup for **$2.00**, your **GROSS PROFIT is $1.20** ($2.00 - $0.80).\n` +
+        `• If a heatwave makes lemons expensive at $1.50 each, your COGS jumps to $1.80, and your profit almost vanishes!\n` +
+        `**Simple Rule for a 10-Year-Old:** *COGS is what it costs you in raw ingredients to bake the cookie or pour the cup!*\n\n` +
+        `---\n\n`;
+
       return (
         `# COST OF GOODS SOLD (COGS) & GROSS PROFIT MARGIN\n\n` +
+        (isEli10 ? eli10Section : "") +
         `**Cost of Goods Sold (COGS)** (or Cost of Sales) represents the **direct variable costs incurred to manufacture a product or deliver a service**.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. FORMULATION & THE GROSS MARGIN BRIDGE\n` +
         `\\[ \\text{Gross Profit} = \\text{Total Revenue} - \\text{COGS} \\]\n` +
         `\\[ \\text{Gross Margin \\%} = \\left( \\frac{\\text{Gross Profit}}{\\text{Total Revenue}} \\right) \\times 100 \\]\n\n` +
@@ -364,15 +442,29 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "NET INCOME // THE ACCOUNTING BOTTOM LINE",
     category: "INCOME_STATEMENT",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const curr = comp?.currency || "USD";
       const scale = comp?.scaleUnit || "Millions";
 
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (LEMONADE STAND ANALOGY)\n` +
+        `**Net Income is the actual money you get to take home and hide inside your secret piggy bank under your bed!**\n` +
+        `Let's trace your money on Saturday:\n` +
+        `• You collected **$100** from sales *(Revenue)*.\n` +
+        `• You spent **$30** on lemons and cups *(COGS)* &rarr; $70 left.\n` +
+        `• You paid your sister **$10** for helping *(Operating Expenses)* &rarr; $60 left.\n` +
+        `• You paid your brother **$5** interest for his loan *(Interest)* &rarr; $55 left.\n` +
+        `• You gave **$5** to the neighborhood club for a selling permit *(Taxes)* &rarr; **$50 left!**\n` +
+        `• That final **$50 is your NET INCOME** (The Bottom Line). It is 100% yours to keep, save, or buy toys with!\n\n` +
+        `---\n\n`;
+
       return (
         `# CONSOLIDATED NET INCOME: THE ULTIMATE BOTTOM-LINE PROFIT\n\n` +
+        (isEli10 ? eli10Section : "") +
         `**Net Income** (also known as Net Profit, Profit After Tax - PAT, or the "Bottom Line") represents the **final residual accounting profit remaining for equity shareholders after deducting all expenses**:\n\n` +
         `\\[ \\text{Net Income} = \\text{Revenue} - \\text{COGS} - \\text{Operating Expenses} - \\text{Interest Expense} - \\text{Taxes} \\pm \\text{Non-Operating Items} \\]\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. EARNINGS PER SHARE (EPS)\n` +
         `Dividing Net Income by total diluted shares gives **EPS**, which drives stock valuations and P/E multiples:\n` +
         `\\[ \\text{Diluted EPS} = \\frac{\\text{Net Income} - \\text{Preferred Dividends}}{\\text{Weighted Average Diluted Shares}} \\]\n\n` +
@@ -414,11 +506,26 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "CENTRAL BANK REPO RATE & MONETARY TRANSMISSION",
     category: "MACRO",
-    content: (comp) => {
+    content: (comp, prof, isEli10) => {
       const isInd = comp?.country === "IND" || comp?.symbol.endsWith(".NS");
+
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (SCHOOL PRINCIPAL ANALOGY)\n` +
+        `Imagine the **Central Bank** (like RBI in India or the Federal Reserve in the USA) is the **School Principal** for all the banks in the country:\n` +
+        `• When ordinary banks (like State Bank of India or HDFC or Chase) need extra pocket money for the weekend, they borrow from the Principal.\n` +
+        `• The interest rate the Principal charges them is called the **REPO RATE** (currently 5.50% in India)!\n` +
+        `• **What happens when the Principal hikes the rate to 6.00%?**\n` +
+        `  1. Banks say: *"Oh no, borrowing from the Principal is expensive!"*\n` +
+        `  2. So banks charge your parents higher interest on home loans and car loans.\n` +
+        `  3. People borrow less money, buy fewer luxury toys, and prices stop rising *(cooling down inflation)*!\n` +
+        `**Simple Rule for a 10-Year-Old:** *When the Repo Rate is high, borrowing money is expensive so everyone spends less candy money!*\n\n` +
+        `---\n\n`;
+
       return (
         `# CENTRAL BANK REPO RATE & CORPORATE MONETARY TRANSMISSION\n\n` +
+        (isEli10 ? eli10Section : "") +
         `The **Repo Rate** (Repurchase Option Rate) is the **benchmark interest rate at which the Sovereign Central Bank (Reserve Bank of India - RBI, or US Federal Reserve) lends short-term liquidity to commercial banks** against statutory government securities.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. CURRENT MONETARY POLICY CALIBRATION (2026)\n` +
         `• **Reserve Bank of India (RBI):** Benchmark Repo Rate stands at **5.50%**.\n` +
         `• **US Federal Reserve:** Benchmark Fed Funds Target Range stands at **5.25% - 5.50%**.\n` +
@@ -466,12 +573,24 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     keys: ["free cash flow", "fcf", "cash flow", "operating cash flow vs fcf", "what is fcf"],
     title: "FREE CASH FLOW (FCF) // THE ULTIMATE CORPORATE CURRENCY",
     category: "CASH_FLOW",
-    content: (comp, prof) => {
+    content: (comp, prof, isEli10) => {
       const p = prof?.periods?.[0];
       const hasData = p && p.freeCashFlow !== undefined;
+
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (ICE CREAM MONEY ANALOGY)\n` +
+        `**Free Cash Flow is real, jingling coins you can spend on anything you want without hurting your business!**\n` +
+        `• Imagine your lemonade stand brings in **$50 of cash** on Saturday afternoon.\n` +
+        `• But your wooden lemon squeezer cracked, and you MUST buy a new squeezer for **$20** so you can sell drinks next week *(CapEx / Reinvestment)*.\n` +
+        `• How much cash do you actually have left to buy comic books or ice cream? **$50 - $20 = $30!**\n` +
+        `• That **$30 is your FREE CASH FLOW!** Profit on paper is nice, but Free Cash Flow is real money that you can actually hold in your hand!\n\n` +
+        `---\n\n`;
+
       return (
         `# FREE CASH FLOW (FCF): CASH IS REALITY, PROFIT IS OPINION\n\n` +
+        (isEli10 ? eli10Section : "") +
         `Free Cash Flow represents the actual cash a company produces after paying all its operating expenses and reinvesting in its business (CapEx). Unlike Accounting Net Income, which is subject to accrual estimates and non-cash items, **FCF cannot be faked**.\n\n` +
+        (!isEli10 ? eli10Section : "") +
         `### 1. FORMULATION & CALCULATION\n` +
         `\\[ \\text{FCF} = \\text{Cash Flow from Operations (CFO)} - \\text{Capital Expenditures (CapEx)} \\]\n\n` +
         `• **Operating Cash Flow (CFO):** Cash generated directly from delivering core products and services.\n` +
@@ -507,22 +626,37 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     keys: ["wacc", "cost of capital", "discount rate", "hurdle rate", "what is wacc"],
     title: "WACC (WEIGHTED AVERAGE COST OF CAPITAL) // CORPORATE HURDLE RATE",
     category: "VALUATION",
-    content: () =>
-      `# WEIGHTED AVERAGE COST OF CAPITAL (WACC)\n\n` +
-      `WACC represents the average rate of return a company must generate across all its operations to satisfy both its lenders (debt holders) and its owners (equity shareholders).\n\n` +
-      `### 1. MATHEMATICAL FORMULA\n` +
-      `\\[ \\text{WACC} = \\left( \\frac{E}{V} \\times R_e \\right) + \\left( \\frac{D}{V} \\times R_d \\times (1 - T) \\right) \\]\n\n` +
-      `Where:\n` +
-      `• $E$ = Market Value of Equity (Market Cap)\n` +
-      `• $D$ = Market Value of Total Debt\n` +
-      `• $V = E + D$ (Total Enterprise Capital)\n` +
-      `• $R_e$ = Cost of Equity, computed via CAPM: $R_f + \\beta \\times (R_m - R_f)$\n` +
-      `• $R_d$ = Pre-tax Cost of Debt (effective yield on corporate bonds / loans)\n` +
-      `• $T$ = Marginal Corporate Tax Rate (interest is tax-deductible!)\n\n` +
-      `### 2. INSTITUTIONAL BENCHMARKS\n` +
-      `• **Mega-Cap Stable Firms (Apple, Microsoft):** WACC is typically $7.5\\% - 9.0\\%$.\n` +
-      `• **Emerging Market Blue Chips (TCS, Reliance):** WACC is typically $10.5\\% - 13.0\\%$ due to higher sovereign 10Y G-Sec yields (~6.8%) and country risk premiums.\n` +
-      `• **Golden Rule of Value Creation:** If **ROIC > WACC**, the firm creates economic value (EVA). If **ROIC < WACC**, every rupee or dollar invested destroys wealth!`,
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (CAPITAL BLEND ANALOGY)\n` +
+        `Imagine you need **$40** to start your lemonade stand:\n` +
+        `• You put in **$20 of your own birthday money** (Equity). You want to earn at least 15% return for your hard work.\n` +
+        `• You borrow **$20 from your cousin** (Debt). Your cousin demands 5% interest.\n` +
+        `• What is the blended average cost to gather all that $40? Exactly **10%!**\n` +
+        `• That 10% is your **WACC (Weighted Average Cost of Capital)**!\n` +
+        `• **The Golden Rule:** If your lemonade stand only earns 6%, you are losing money on the capital you gathered. You must beat your 10% hurdle to create real wealth!\n\n` +
+        `---\n\n`;
+
+      return (
+        `# WEIGHTED AVERAGE COST OF CAPITAL (WACC)\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `WACC represents the average rate of return a company must generate across all its operations to satisfy both its lenders (debt holders) and its owners (equity shareholders).\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. MATHEMATICAL FORMULA\n` +
+        `\\[ \\text{WACC} = \\left( \\frac{E}{V} \\times R_e \\right) + \\left( \\frac{D}{V} \\times R_d \\times (1 - T) \\right) \\]\n\n` +
+        `Where:\n` +
+        `• $E$ = Market Value of Equity (Market Cap)\n` +
+        `• $D$ = Market Value of Total Debt\n` +
+        `• $V = E + D$ (Total Enterprise Capital)\n` +
+        `• $R_e$ = Cost of Equity, computed via CAPM: $R_f + \\beta \\times (R_m - R_f)$\n` +
+        `• $R_d$ = Pre-tax Cost of Debt (effective yield on corporate bonds / loans)\n` +
+        `• $T$ = Marginal Corporate Tax Rate (interest is tax-deductible!)\n\n` +
+        `### 2. INSTITUTIONAL BENCHMARKS\n` +
+        `• **Mega-Cap Stable Firms (Apple, Microsoft):** WACC is typically $7.5\\% - 9.0\\%$.\n` +
+        `• **Emerging Market Blue Chips (TCS, Reliance):** WACC is typically $10.5\\% - 13.0\\%$ due to higher sovereign 10Y G-Sec yields (~6.8%) and country risk premiums.\n` +
+        `• **Golden Rule of Value Creation:** If **ROIC > WACC**, the firm creates economic value (EVA). If **ROIC < WACC**, every rupee or dollar invested destroys wealth!`
+      );
+    },
     followUps: [
       "Explain ROIC vs ROE and why ROIC is superior",
       "Explain DCF (Discounted Cash Flow) valuation",
@@ -547,28 +681,43 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ],
     title: "DEBT COVENANTS // SYNDICATED LOAN CONTRACT RESTRICTIONS",
     category: "DEBT",
-    content: () =>
-      `# DEBT COVENANTS: CONTRACTUAL CREDITOR PROTECTIONS\n\n` +
-      `A **Debt Covenant** is a legally binding contractual clause embedded within loan agreements or bond indentures, designed by lenders to protect their capital by restricting the borrower's actions and mandating financial health thresholds.\n\n` +
-      `### 1. THE THREE CATEGORIES OF COVENANTS\n\n` +
-      `#### A. Financial Maintenance Covenants (Ongoing Ratio Testing)\n` +
-      `The borrower must continuously prove compliance at each fiscal quarter end:\n` +
-      `• **Maximum Net Debt / EBITDA Ceiling:** (e.g., must stay $\\le 3.50\\text{x}$). Prevents the company from overleveraging.\n` +
-      `• **Minimum EBIT Interest Coverage Floor:** (e.g., must stay $\\ge 2.50\\text{x}$). Ensures sufficient operating profit to service interest.\n` +
-      `• **Minimum Liquidity Buffer:** Requires maintaining at least $\\$500\\text{M}$ or 6 months of cash runway.\n\n` +
-      `#### B. Negative Covenants (Forbidden Actions)\n` +
-      `• **Negative Pledge Clause:** The borrower cannot pledge its prime assets (factories, IP) as collateral to other new lenders.\n` +
-      `• **Restricted Payments:** Forbids paying dividends or buying back shares if covenant headroom drops below 15%.\n` +
-      `• **M&A Limitation:** Cannot acquire other firms without prior syndicate lender consent.\n\n` +
-      `#### C. Affirmative Covenants (Mandatory Obligations)\n` +
-      `• Provide audited GAAP/Ind-AS financial statements within 90 days of fiscal year end.\n` +
-      `• Maintain adequate insurance on all collateralized physical property.\n\n` +
-      `### 2. WHAT HAPPENS WHEN A COVENANT BREACHES?\n` +
-      `A covenant breach is an immediate **Event of Default**: Banks do not immediately liquidate the borrower, but gain immense leverage to:\n` +
-      `1. Hike loan interest rate margins (+150 to +300 bps penalty spread),\n` +
-      `2. Demand an upfront cash waiver fee (0.50% - 1.00%),\n` +
-      `3. Freeze remaining revolving credit line access, or\n` +
-      `4. Demand immediate acceleration and full loan payoff.`,
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (HOUSE RULES ANALOGY)\n` +
+        `Imagine your Dad lends you $50 to buy an electric scooter for your morning paper route:\n` +
+        `• He says: *"I will lend you the $50, but you must follow these 3 strict rules:"*\n` +
+        `  1. **Rule 1:** You must always keep at least $10 in your pocket for emergencies *(Minimum Liquidity)*.\n` +
+        `  2. **Rule 2:** You cannot let your careless friend Bobby ride your scooter *(Negative Pledge / Asset Protection)*.\n` +
+        `  3. **Rule 3:** If your math grade drops below a B, I take the scooter keys back immediately *(Covenant Default)*!\n` +
+        `• Those house rules are **COVENANTS**! Banks give these exact legal promises to big companies so the companies don't waste the borrowed money.\n\n` +
+        `---\n\n`;
+
+      return (
+        `# DEBT COVENANTS: CONTRACTUAL CREDITOR PROTECTIONS\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `A **Debt Covenant** is a legally binding contractual clause embedded within loan agreements or bond indentures, designed by lenders to protect their capital by restricting the borrower's actions and mandating financial health thresholds.\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. THE THREE CATEGORIES OF COVENANTS\n\n` +
+        `#### A. Financial Maintenance Covenants (Ongoing Ratio Testing)\n` +
+        `The borrower must continuously prove compliance at each fiscal quarter end:\n` +
+        `• **Maximum Net Debt / EBITDA Ceiling:** (e.g., must stay $\\le 3.50\\text{x}$). Prevents the company from overleveraging.\n` +
+        `• **Minimum EBIT Interest Coverage Floor:** (e.g., must stay $\\ge 2.50\\text{x}$). Ensures sufficient operating profit to service interest.\n` +
+        `• **Minimum Liquidity Buffer:** Requires maintaining at least $\\$500\\text{M}$ or 6 months of cash runway.\n\n` +
+        `#### B. Negative Covenants (Forbidden Actions)\n` +
+        `• **Negative Pledge Clause:** The borrower cannot pledge its prime assets (factories, IP) as collateral to other new lenders.\n` +
+        `• **Restricted Payments:** Forbids paying dividends or buying back shares if covenant headroom drops below 15%.\n` +
+        `• **M&A Limitation:** Cannot acquire other firms without prior syndicate lender consent.\n\n` +
+        `#### C. Affirmative Covenants (Mandatory Obligations)\n` +
+        `• Provide audited GAAP/Ind-AS financial statements within 90 days of fiscal year end.\n` +
+        `• Maintain adequate insurance on all collateralized physical property.\n\n` +
+        `### 2. WHAT HAPPENS WHEN A COVENANT BREACHES?\n` +
+        `A covenant breach is an immediate **Event of Default**: Banks do not immediately liquidate the borrower, but gain immense leverage to:\n` +
+        `1. Hike loan interest rate margins (+150 to +300 bps penalty spread),\n` +
+        `2. Demand an upfront cash waiver fee (0.50% - 1.00%),\n` +
+        `3. Freeze remaining revolving credit line access, or\n` +
+        `4. Demand immediate acceleration and full loan payoff.`
+      );
+    },
     followUps: [
       "Explain Net Debt to EBITDA 3.5x hurdle",
       "Explain EBIT Interest Coverage floor",
@@ -583,20 +732,34 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     keys: ["dcf", "discounted cash flow", "intrinsic value", "terminal value", "what is dcf"],
     title: "DISCOUNTED CASH FLOW (DCF) // INTRINSIC ENTERPRISE VALUATION",
     category: "VALUATION",
-    content: () =>
-      `# DISCOUNTED CASH FLOW (DCF) VALUATION METHODOLOGY\n\n` +
-      `A **DCF** is Wall Street's gold-standard intrinsic valuation model, built on the financial axiom that **a business is worth exactly the present value of all future cash flows it can produce**.\n\n` +
-      `### 1. MATHEMATICAL FORMULATION\n` +
-      `\\[ \\text{Enterprise Value} = \\sum_{t=1}^{n} \\frac{\\text{Unlevered Free Cash Flow}_t}{(1 + \\text{WACC})^t} + \\frac{\\text{Terminal Value}}{(1 + \\text{WACC})^n} \\]\n\n` +
-      `### 2. THE THREE BUILDING BLOCKS\n` +
-      `1. **Unlevered Free Cash Flow (UFCF):** Cash produced by the core business available to all capital providers: $\\text{EBIT} \\times (1 - T) + \\text{D\\&A} - \\text{CapEx} - \\Delta\\text{NWC}$.\n` +
-      `2. **Discount Rate (WACC):** Reflects the blended opportunity cost of equity and cost of debt.\n` +
-      `3. **Terminal Value (Perpetuity Growth):** Evaluates cash flows beyond Year 5 or 10 using Gordon Growth:\n` +
-      `\\[ \\text{Terminal Value} = \\frac{\\text{FCF}_{n} \\times (1 + g)}{\\text{WACC} - g} \\]\n` +
-      `*(Where $g$ is long-term sustainable GDP growth rate, typically 2.0% - 3.0%)*.\n\n` +
-      `### 3. FROM ENTERPRISE VALUE TO PER-SHARE TARGET PRICE\n` +
-      `\\[ \\text{Equity Value} = \\text{Enterprise Value} - \\text{Total Debt} + \\text{Cash} \\]\n` +
-      `\\[ \\text{Fair Value Per Share} = \\frac{\\text{Equity Value}}{\\text{Diluted Shares Outstanding}} \\]`,
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (TIME MACHINE CASH ANALOGY)\n` +
+        `Would you rather have **$10 right now in your hand**, or **$10 five years from now**?\n` +
+        `• **Right now!** Because in five years, $10 buys fewer chocolate bars, or you could have saved it in a piggy bank to earn interest.\n` +
+        `• A **Discounted Cash Flow (DCF)** is like a financial time machine!\n` +
+        `• It looks into the future: Year 1 ($100), Year 2 ($120), Year 3 ($150)... and **shrinks every future dollar backwards** to see what that entire future stream of money is worth in cold hard cash **TODAY**!\n` +
+        `**Simple Rule for a 10-Year-Old:** *A company is worth whatever total cash it can put into your pockets between today and forever, discounted for waiting!*\n\n` +
+        `---\n\n`;
+
+      return (
+        `# DISCOUNTED CASH FLOW (DCF) VALUATION METHODOLOGY\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `A **DCF** is Wall Street's gold-standard intrinsic valuation model, built on the financial axiom that **a business is worth exactly the present value of all future cash flows it can produce**.\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. MATHEMATICAL FORMULATION\n` +
+        `\\[ \\text{Enterprise Value} = \\sum_{t=1}^{n} \\frac{\\text{Unlevered Free Cash Flow}_t}{(1 + \\text{WACC})^t} + \\frac{\\text{Terminal Value}}{(1 + \\text{WACC})^n} \\]\n\n` +
+        `### 2. THE THREE BUILDING BLOCKS\n` +
+        `1. **Unlevered Free Cash Flow (UFCF):** Cash produced by the core business available to all capital providers: $\\text{EBIT} \\times (1 - T) + \\text{D\\&A} - \\text{CapEx} - \\Delta\\text{NWC}$.\n` +
+        `2. **Discount Rate (WACC):** Reflects the blended opportunity cost of equity and cost of debt.\n` +
+        `3. **Terminal Value (Perpetuity Growth):** Evaluates cash flows beyond Year 5 or 10 using Gordon Growth:\n` +
+        `\\[ \\text{Terminal Value} = \\frac{\\text{FCF}_{n} \\times (1 + g)}{\\text{WACC} - g} \\]\n` +
+        `*(Where $g$ is long-term sustainable GDP growth rate, typically 2.0% - 3.0%)*.\n\n` +
+        `### 3. FROM ENTERPRISE VALUE TO PER-SHARE TARGET PRICE\n` +
+        `\\[ \\text{Equity Value} = \\text{Enterprise Value} - \\text{Total Debt} + \\text{Cash} \\]\n` +
+        `\\[ \\text{Fair Value Per Share} = \\frac{\\text{Equity Value}}{\\text{Diluted Shares Outstanding}} \\]`
+      );
+    },
     followUps: [
       "Explain WACC and how it is calculated",
       "Explain Free Cash Flow (FCF)",
@@ -611,20 +774,35 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     keys: ["bond", "bonds", "what is a bond", "what are bonds", "coupon", "yield to maturity", "ytm", "fixed income", "debenture"],
     title: "BONDS & FIXED INCOME INSTRUMENTS // CAPITAL DEBT MARKETS",
     category: "DEBT",
-    content: () =>
-      `# CORPORATE & SOVEREIGN BONDS: FIXED INCOME ARCHITECTURE\n\n` +
-      `A **Bond** is a fixed-income debt instrument under which the issuer (corporation or sovereign government) borrows capital from investors for a defined period at a variable or fixed interest coupon.\n\n` +
-      `### 1. THE ANATOMY OF A BOND\n` +
-      `• **Face Value (Par Value):** The principal amount the issuer promises to repay bondholders at maturity (typically $1,000 or ₹1,00,000).\n` +
-      `• **Coupon Rate:** The contractual annual interest rate paid to the investor (e.g., 6.50% semi-annually).\n` +
-      `• **Maturity Date:** The date the final coupon and the original principal are returned.\n` +
-      `• **Yield to Maturity (YTM):** The total anticipated annualized return if the investor buys the bond at its current market price and holds it until maturity.\n\n` +
-      `### 2. THE INVERSE PRICE-YIELD RELATIONSHIP\n` +
-      `Bonds trade on an exact teeter-totter:\n` +
-      `• **When interest rates rise** &rarr; Newly issued bonds pay higher yields &rarr; Older bonds with lower coupons become less attractive &rarr; **Older bond market prices FALL**.\n` +
-      `• **When interest rates fall** &rarr; Older bonds with generous coupons become prized &rarr; **Older bond market prices RISE**.\n\n` +
-      `### 3. BONDS VS EQUITIES (STOCKS)\n` +
-      `• Bondholders are **creditors**, not owners. They receive no voting power or share in equity growth, but enjoy **senior legal priority** over stockholders in bankruptcy!`,
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (OFFICIAL I.O.U. ANALOGY)\n` +
+        `Imagine your school wants to build an awesome new treehouse playground that costs $1,000:\n` +
+        `• Instead of asking one rich kid, they print 10 official certificates called **BONDS** for $100 each.\n` +
+        `• You give the school $100. In return, the school promises:\n` +
+        `  1. Every December, they give you **$5 in candy money** *(The Coupon Interest)*.\n` +
+        `  2. After 5 years, they give your **full $100 back** *(The Principal / Par Value)*!\n` +
+        `• You are NOT an owner of the treehouse; you are a **lender** who gets paid before anyone else!\n\n` +
+        `---\n\n`;
+
+      return (
+        `# CORPORATE & SOVEREIGN BONDS: FIXED INCOME ARCHITECTURE\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `A **Bond** is a fixed-income debt instrument under which the issuer (corporation or sovereign government) borrows capital from investors for a defined period at a variable or fixed interest coupon.\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. THE ANATOMY OF A BOND\n` +
+        `• **Face Value (Par Value):** The principal amount the issuer promises to repay bondholders at maturity (typically $1,000 or ₹1,00,000).\n` +
+        `• **Coupon Rate:** The contractual annual interest rate paid to the investor (e.g., 6.50% semi-annually).\n` +
+        `• **Maturity Date:** The date the final coupon and the original principal are returned.\n` +
+        `• **Yield to Maturity (YTM):** The total anticipated annualized return if the investor buys the bond at its current market price and holds it until maturity.\n\n` +
+        `### 2. THE INVERSE PRICE-YIELD RELATIONSHIP\n` +
+        `Bonds trade on an exact teeter-totter:\n` +
+        `• **When interest rates rise** &rarr; Newly issued bonds pay higher yields &rarr; Older bonds with lower coupons become less attractive &rarr; **Older bond market prices FALL**.\n` +
+        `• **When interest rates fall** &rarr; Older bonds with generous coupons become prized &rarr; **Older bond market prices RISE**.\n\n` +
+        `### 3. BONDS VS EQUITIES (STOCKS)\n` +
+        `• Bondholders are **creditors**, not owners. They receive no voting power or share in equity growth, but enjoy **senior legal priority** over stockholders in bankruptcy!`
+      );
+    },
     followUps: [
       "Explain Credit Ratings from AAA to Junk (D)",
       "Explain the Inverted Yield Curve recession indicator",
@@ -639,20 +817,125 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     keys: ["stock", "stocks", "what is a stock", "what are stocks", "shares", "equity shares", "dividend", "dividends", "dividend yield"],
     title: "STOCKS & COMMON EQUITY // PUBLIC CAPITAL MARKETS",
     category: "VALUATION",
-    content: () =>
-      `# STOCKS & PUBLIC EQUITIES: OWNERSHIP IN THE MODERN CORPORATION\n\n` +
-      `A **Stock** (or Share) represents **fractional equity ownership** in a publicly listed corporation. When you purchase 1 share of Apple, Reliance, or Microsoft, you become a legal part-owner of the enterprise.\n\n` +
-      `### 1. TWO WAYS INVESTORS EARN MONEY FROM STOCKS\n` +
-      `1. **Capital Appreciation:** Selling the share at a higher price than what you bought it for as company revenue and earnings compound.\n` +
-      `2. **Dividends:** Direct cash distributions paid out of quarterly net profits to shareholders.\n` +
-      `\\[ \\text{Dividend Yield} = \\left( \\frac{\\text{Annual Cash Dividend Per Share}}{\\text{Current Share Price}} \\right) \\times 100 \\]\n\n` +
-      `### 2. COMMON STOCK VS PREFERRED STOCK\n` +
-      `• **Common Stock:** Carries voting rights for the Board of Directors and full upside in corporate growth, but sits last in line in insolvency.\n` +
-      `• **Preferred Stock:** Pays a fixed, guaranteed dividend priority ahead of common stockholders, but typically carries no voting rights.`,
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (PIZZA SLICE ANALOGY)\n` +
+        `Imagine a gigantic, delicious pizza cut into **1,000,000 tiny slices**:\n` +
+        `• A company like Apple, Microsoft, or Tata is that pizza!\n` +
+        `• If you buy **1 share of stock**, you legally own **1 slice of that pizza**!\n` +
+        `• If the pizza parlor sells twice as many pizzas next year, your single slice becomes way more valuable *(Stock Price Goes Up!)*.\n` +
+        `• And every 3 months, the manager might hand you a delicious pepperoni slice from their profits *(Dividends!)*.\n` +
+        `**Simple Rule for a 10-Year-Old:** *Buying a stock means you are a real part-owner of the company!*\n\n` +
+        `---\n\n`;
+
+      return (
+        `# STOCKS & PUBLIC EQUITIES: OWNERSHIP IN THE MODERN CORPORATION\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `A **Stock** (or Share) represents **fractional equity ownership** in a publicly listed corporation. When you purchase 1 share of Apple, Reliance, or Microsoft, you become a legal part-owner of the enterprise.\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. TWO WAYS INVESTORS EARN MONEY FROM STOCKS\n` +
+        `1. **Capital Appreciation:** Selling the share at a higher price than what you bought it for as company revenue and earnings compound.\n` +
+        `2. **Dividends:** Direct cash distributions paid out of quarterly net profits to shareholders.\n` +
+        `\\[ \\text{Dividend Yield} = \\left( \\frac{\\text{Annual Cash Dividend Per Share}}{\\text{Current Share Price}} \\right) \\times 100 \\]\n\n` +
+        `### 2. COMMON STOCK VS PREFERRED STOCK\n` +
+        `• **Common Stock:** Carries voting rights for the Board of Directors and full upside in corporate growth, but sits last in line in insolvency.\n` +
+        `• **Preferred Stock:** Pays a fixed, guaranteed dividend priority ahead of common stockholders, but typically carries no voting rights.`
+      );
+    },
     followUps: [
       "Explain Price-to-Earnings (P/E) ratio",
       "Explain Enterprise Value vs Market Capitalization",
       "What is Free Cash Flow and how is it calculated?",
+    ],
+  },
+
+  // =========================================================================
+  // 15. WORKING CAPITAL & LIQUIDITY RUNWAY
+  // =========================================================================
+  {
+    keys: ["working capital", "current ratio", "liquidity", "runway", "quick ratio", "acid test", "what is working capital"],
+    title: "WORKING CAPITAL & SHORT-TERM LIQUIDITY BUFFER",
+    category: "BALANCE_SHEET",
+    content: (comp, prof, isEli10) => {
+      const p = prof?.periods?.[0];
+      const r = prof?.latestRatios;
+      const curr = comp?.currency || "USD";
+      const scale = comp?.scaleUnit || "Millions";
+
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (POCKET MONEY VS WEEKLY CHORES ANALOGY)\n` +
+        `**Working Capital is the breathing room in your wallet!**\n` +
+        `• Imagine you have **$15 in cash and fresh lemons** right now *(Current Assets)*.\n` +
+        `• But you promised to pay your Mom **$10 this Friday** for the table rental *(Current Liabilities)*.\n` +
+        `• What is your cushion? **$15 - $10 = +$5 Working Capital!**\n` +
+        `• If you had only $8 and owed $10 (-$2), you would be in a panic on Friday!\n` +
+        `**Simple Rule for a 10-Year-Old:** *Positive working capital means you have plenty of cash to pay your bills without asking for an emergency loan!*\n\n` +
+        `---\n\n`;
+
+      return (
+        `# NET WORKING CAPITAL (NWC) & LIQUIDITY BUFFER\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `**Net Working Capital** measures the short-term operating liquidity available to a business to fund daily operations and satisfy bills coming due within 12 months.\n\n` +
+        `\\[ \\text{Net Working Capital} = \\text{Current Assets} - \\text{Current Liabilities} \\]\n` +
+        `\\[ \\text{Current Ratio} = \\frac{\\text{Current Assets}}{\\text{Current Liabilities}} \\]\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. INSTITUTIONAL BENCHMARKS\n` +
+        `• **Current Ratio $\\ge 1.20\\text{x}$ (Safe):** Strong short-term cushion.\n` +
+        `• **Quick Ratio $\\ge 1.00\\text{x}$ (Acid Test):** Solvency buffer excluding slower-moving inventory.\n` +
+        `• **Negative Working Capital:** Common in supermarkets (Walmart) and software firms where customers pay upfront in cash, while suppliers are paid 60 days later!\n\n` +
+        (p
+          ? `### 2. LIVE METRICS FOR ${comp?.name}\n` +
+            `• **Current Assets:** ${formatFinancialValue(p.totalCurrentAssets, curr, scale)}\n` +
+            `• **Current Liabilities:** ${formatFinancialValue(p.totalCurrentLiabilities, curr, scale)}\n` +
+            `• **Current Ratio:** **${r?.currentRatio ? `${r.currentRatio.toFixed(2)}x` : "N/D"}** *(Benchmark: ≥ 1.10x)*\n` +
+            `• **Quick Ratio:** **${r?.quickRatio ? `${r.quickRatio.toFixed(2)}x` : "N/D"}**`
+          : "")
+      );
+    },
+    followUps: [
+      "Explain Cash Conversion Cycle",
+      "Explain Net Debt to EBITDA 3.5x hurdle",
+      "Analyze credit risk & solvency for this company",
+    ],
+  },
+
+  // =========================================================================
+  // 16. BALANCE SHEET (Answering "what is balance sheet")
+  // =========================================================================
+  {
+    keys: ["balance sheet", "what is balance sheet", "what is a balance sheet", "financial statement", "financial statements"],
+    title: "THE BALANCE SHEET // CAPITAL ARCHITECTURE SNAPSHOT",
+    category: "BALANCE_SHEET",
+    content: (comp, prof, isEli10) => {
+      const eli10Section =
+        `### 🎈 EXPLAIN LIKE I'M 10 (THE FINANCIAL BACKPACK SNAPSHOT)\n` +
+        `**A Balance Sheet is a single photograph taken of your financial backpack on one specific afternoon!**\n` +
+        `• Open up your backpack:\n` +
+        `  1. **Left Side (What You HAVE):** Your bicycle, your baseball glove, and $20 in pocket change *(Your Assets)*.\n` +
+        `  2. **Right Side (How You PAID for It):** $10 you borrowed from your Dad *(Your Liabilities)* + $10 of your own saved allowance *(Your Equity)*.\n` +
+        `• Notice something? **$20 What You Have = $10 Borrowed + $10 Your Own!** Both sides ALWAYS balance perfectly!\n\n` +
+        `---\n\n`;
+
+      return (
+        `# THE BALANCE SHEET: SYSTEMIC ACCOUNTING ARCHITECTURE\n\n` +
+        (isEli10 ? eli10Section : "") +
+        `The **Balance Sheet** (Statement of Financial Position) is a core financial statement that summarizes a company's assets, liabilities, and shareholders' equity at a **single specific point in time**.\n\n` +
+        `\\[ \\mathbf{\\text{Total Assets}} = \\mathbf{\\text{Total Liabilities}} + \\mathbf{\\text{Shareholders' Equity}} \\]\n\n` +
+        (!isEli10 ? eli10Section : "") +
+        `### 1. THE THREE FUNDAMENTAL BLOCKS\n` +
+        `1. **Assets (Economic Resources):** Cash, receivables, inventory, factories, intellectual property.\n` +
+        `2. **Liabilities (Creditor Claims):** Bank loans, supplier accounts payable, corporate bonds, leases.\n` +
+        `3. **Equity (Residual Owner Value):** Common stock, paid-in capital, and accumulated retained earnings.\n\n` +
+        `### 2. THE THREE FINANCIAL STATEMENTS INTERCONNECTION\n` +
+        `• **Income Statement** explains how Net Income was earned over the period.\n` +
+        `• Net Income flows directly into the **Balance Sheet** under Retained Earnings.\n` +
+        `• **Cash Flow Statement** reconciles the opening cash balance to the closing cash balance on the Balance Sheet.`
+      );
+    },
+    followUps: [
+      "What is Assets and how are they classified?",
+      "What is Liabilities and how do they differ from debt?",
+      "Explain the Income Statement vs Cash Flow Statement",
     ],
   },
 ];
@@ -674,16 +957,21 @@ function normalizeQuery(raw: string): string {
 export function resolveFinanceIntelligence(
   rawQuery: string,
   activeCompany?: CompanyEntity,
-  activeProfile?: CompanyRiskProfile
+  activeProfile?: CompanyRiskProfile,
+  isEli10: boolean = false
 ): { response: string; followUps: string[] } {
   const q = rawQuery.toLowerCase().trim();
   const normalized = normalizeQuery(rawQuery);
+
+  const queryWantsEli10 =
+    isEli10 ||
+    /\b(10|eli10|kid|child|lemonade|pizza|simple|easy|explain like|beginner)\b/.test(q);
 
   // 1. Check exact key matches across all knowledge topics
   for (const topic of FINANCIAL_KNOWLEDGE_TOPICS) {
     if (topic.keys.some((k) => q.includes(k) || normalized === k || normalized.includes(k))) {
       return {
-        response: topic.content(activeCompany, activeProfile),
+        response: topic.content(activeCompany, activeProfile, queryWantsEli10),
         followUps: topic.followUps,
       };
     }
