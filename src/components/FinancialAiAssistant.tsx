@@ -530,11 +530,17 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
   if (!isOpen) return null;
 
   return (
-    <div
-      className={`fixed top-0 bottom-0 right-0 z-50 bg-[#0A0E17] border-l border-[#1E2536] shadow-2xl flex flex-col font-mono text-xs transition-all duration-200 ${
-        isExpanded ? "w-full md:w-[780px]" : "w-full sm:w-[540px]"
-      }`}
-    >
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/70 z-40 backdrop-blur-sm sm:hidden transition-opacity"
+      />
+      <div
+        className={`fixed top-0 bottom-0 right-0 z-50 bg-[#0A0E17] border-l border-[#1E2536] shadow-2xl flex flex-col font-mono text-xs transition-all duration-200 ${
+          isExpanded ? "w-full md:w-[780px]" : "w-full sm:w-[540px]"
+        }`}
+      >
       {/* Top Header */}
       <div className="p-3.5 bg-[#0D111A] border-b border-[#1E2536] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -585,10 +591,40 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
       <div className="p-2.5 bg-[#080B10] border-b border-[#1E2536] flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[10px]">
         <span className="text-[#64748B] text-[9.5px] uppercase whitespace-nowrap mr-1">TOP TOPICS:</span>
         <button
+          onClick={() => handleSend("What is assets and how are they classified on the balance sheet?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold rounded whitespace-nowrap transition-colors"
+        >
+          🏛️ What is Assets?
+        </button>
+        <button
+          onClick={() => handleSend("What are liabilities and how do they differ from total debt?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          ⚖️ Liabilities &amp; Debt
+        </button>
+        <button
+          onClick={() => handleSend("What is EBITDA and why do lenders and Wall Street use it?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          📊 What is EBITDA?
+        </button>
+        <button
+          onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          🇮🇳 RBI Repo Rate
+        </button>
+        <button
           onClick={() => handleSend(`Analyze credit risk for ${company?.name || "current company"}`)}
           className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] rounded whitespace-nowrap transition-colors"
         >
           🔍 Underwriting Memo
+        </button>
+        <button
+          onClick={() => handleSend("What is a debt covenant and what happens when it breaches?")}
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+        >
+          📜 Debt Covenants
         </button>
         <button
           onClick={() => handleSend("Explain Altman Z-Score formula and default thresholds")}
@@ -601,24 +637,6 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
           className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           🕵️ Beneish M-Score
-        </button>
-        <button
-          onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          🇮🇳 RBI Repo Rate
-        </button>
-        <button
-          onClick={() => handleSend("Explain Net Debt to EBITDA 3.5x hurdle")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          📊 Net Debt/EBITDA
-        </button>
-        <button
-          onClick={() => handleSend("Explain DuPont 3-part and 5-part decomposition")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
-        >
-          📈 DuPont Analysis
         </button>
         <button
           onClick={() => handleSend("Explain Free Cash Flow and how it differs from Net Income")}
@@ -736,5 +754,6 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
         </button>
       </form>
     </div>
+  </>
   );
 }

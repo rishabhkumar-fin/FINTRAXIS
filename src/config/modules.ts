@@ -5,56 +5,63 @@ export interface ModuleConfig {
   shortDesc: string;
   iconName: string;
   componentKey: string;
+  deskTag: string;
 }
 
 export const MODULE_REGISTRY: ModuleConfig[] = [
   {
     id: "hub",
     number: "01",
-    name: "Security Master",
-    shortDesc: "Global Ingestion & Live HUD",
+    name: "Securities Directory",
+    shortDesc: "Global Master & Multi-Currency Ingestion",
     iconName: "Building2",
     componentKey: "CompanyHub",
+    deskTag: "SECURITIES MASTER",
   },
   {
     id: "ledger",
     number: "02",
-    name: "Financial Ledger & XBRL",
-    shortDesc: "3-Statement Audit Trail",
+    name: "Financial Statements & XBRL",
+    shortDesc: "3-Statement Multi-Period Ledger",
     iconName: "FileSpreadsheet",
     componentKey: "StatementsLedger",
+    deskTag: "XBRL AUDIT TRAIL",
   },
   {
     id: "health",
     number: "03",
-    name: "Solvency & Health DAG",
-    shortDesc: "Deterministic Ratio Engine",
+    name: "Credit Risk & Solvency",
+    shortDesc: "Default Health & Capital Multiples",
     iconName: "Activity",
     componentKey: "HealthRatios",
+    deskTag: "SOLVENCY HEALTH",
   },
   {
     id: "vulnerability",
     number: "04",
-    name: "Vulnerability Monitor",
-    shortDesc: "Basel III & Covenant Flags",
+    name: "Early Warning Surveillance",
+    shortDesc: "Basel III & Covenant Trigger Flags",
     iconName: "ShieldAlert",
     componentKey: "VulnerabilityMonitor",
+    deskTag: "BASEL III EWS",
   },
   {
     id: "stress",
     number: "05",
-    name: "Stress Simulator",
-    shortDesc: "Parametric Shock Engine",
+    name: "Macro Stress Testing",
+    shortDesc: "Stagflation & Monetary Shock Lab",
     iconName: "SlidersHorizontal",
     componentKey: "StressSimulator",
+    deskTag: "CAPITAL SIMULATION",
   },
   {
     id: "ic",
     number: "06",
-    name: "IC Underwriting Dossier",
-    shortDesc: "Boardroom Credit Tearsheet",
+    name: "Investment Committee Memo & PDF",
+    shortDesc: "Boardroom Credit Tearsheet & Deck",
     iconName: "FileText",
     componentKey: "ICDossier",
+    deskTag: "IC BOARDROOM MEMO",
   },
 ];
 

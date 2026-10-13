@@ -283,7 +283,7 @@ Synchronized live on FINTRAXIS Terminal.`;
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#F8FAFC] tracking-wider uppercase text-xs">
-                MODULE 06 // BOARDROOM CREDIT RISK &amp; IC DOSSIER
+                INVESTMENT COMMITTEE // BOARDROOM CREDIT RISK DOSSIER &amp; DECK
               </span>
               <span className="px-2 py-0.5 bg-[#162033] border border-[#C5A880]/40 text-[#C5A880] text-[10px] font-bold rounded">
                 CLASSY PRESENTATION DECK

@@ -166,7 +166,7 @@ export function CommandPalette({
                 <Cpu className="w-3 h-3" />
                 <span>STRESS</span>
               </span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 05 SIMULATOR</span>
+              <span className="text-[10px] text-[#5A687D]">MACRO STRESS LAB</span>
             </button>
 
             <button

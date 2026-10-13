@@ -63,8 +63,8 @@ export function WorkflowBanner({ activeTab, onSelectTab, selectedTicker }: Workf
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-bold ${isCurrent ? "text-[#C5A880]" : "text-[#64748B]"}`}>
-                    MODULE {mod.number}
+                  <span className={`text-[9.5px] font-bold ${isCurrent ? "text-[#C5A880]" : "text-[#64748B]"}`}>
+                    {mod.deskTag || `STAGE 0${idx + 1}`}
                   </span>
                   {idx < MODULE_REGISTRY.length - 1 && <ArrowRight className="w-3 h-3 text-[#475569] hidden lg:block" />}
                 </div>

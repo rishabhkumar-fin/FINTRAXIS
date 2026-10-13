@@ -14,7 +14,7 @@ interface GuideContent {
 
 const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
   "01_HUB": {
-    title: "MODULE 01: GLOBAL SECURITY MASTER & ENTITY RESOLUTION",
+    title: "SECURITIES DIRECTORY: GLOBAL SECURITY MASTER & ENTITY RESOLUTION",
     badge: "OMNICHANNEL RESOLUTION",
     purpose:
       "Universal entity resolution across USA (SEC EDGAR), India (NSE/BSE), Japan (TSE), and European exchanges. Ingests raw reported financials, maintains native currency preservation, and maps securities to local SQLite master database.",
@@ -27,7 +27,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 1.1: Financial figures must strictly maintain native as-reported reporting currency (ISO 4217). Cross-border comparisons require auditable, timestamped reference FX rates.",
   },
   "02_STATEMENTS": {
-    title: "MODULE 02: MULTI-PERIOD FINANCIAL LEDGER & XBRL AUDIT",
+    title: "FINANCIAL STATEMENTS: MULTI-PERIOD LEDGER & XBRL AUDIT TRAIL",
     badge: "LINE-ITEM PROVENANCE",
     purpose:
       "Full 3-statement provenance engine (Income Statement, Balance Sheet, Cash Flow) across multi-period annual filings with cell-level XBRL audit lineage.",
@@ -40,8 +40,8 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 2.1: An unaudited line item is inadmissible for institutional underwriting. Every statement cell must tie back to a verified SEC EDGAR or statutory filing tag.",
   },
   "03_HEALTH": {
-    title: "MODULE 03: DETERMINISTIC SOLVENCY & HEALTH DAG MATRIX",
-    badge: "MATHEMATICAL DETERMINISM",
+    title: "CREDIT RISK & SOLVENCY: DEFAULT HEALTH & CAPITAL MULTIPLES",
+    badge: "SOLVENCY HEALTH",
     purpose:
       "Evaluates capital structure robustness, cash flow quality, debt service capacity, and DuPont ROE breakdown through a directed acyclic graph (DAG) of non-coerced accounting formulas.",
     actions: [
@@ -53,7 +53,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 3.1: Altman Z-Score < 1.81 signifies imminent distress (Red Zone). Interest Coverage < 2.50x triggers automatic credit facility covenant review.",
   },
   "04_VULNERABILITY": {
-    title: "MODULE 04: BASEL III EARLY WARNING SYSTEM & COVENANT SURVEILLANCE",
+    title: "SURVEILLANCE DESK: BASEL III EARLY WARNING SYSTEM & COVENANTS",
     badge: "BREACH SURVEILLANCE",
     purpose:
       "Continuous algorithmic surveillance monitoring capital erosion, aggressive accounting red-flags, liquidity contraction, and covenant proximity.",
@@ -66,7 +66,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 4.1: Two or more CRITICAL flags require mandatory Investment Committee Escalation and temporary freeze on credit facility expansions.",
   },
   "05_SIMULATOR": {
-    title: "MODULE 05: DETERMINISTIC MACRO STRESS SIMULATOR",
+    title: "CAPITAL STRESS LAB: MACROECONOMIC SENSITIVITY & SHOCK SIMULATION",
     badge: "PRO-FORMA SENSITIVITY",
     purpose:
       "Simulates enterprise resilience under severe macroeconomic shocks (+/- revenue haircut, operating margin contraction, and benchmark monetary rate hikes).",
@@ -79,7 +79,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 5.1: If stressed liquidity runway drops below 6.0 months under a 20% revenue shock and +200 bps rate hike, mandatory cash collateral is required.",
   },
   "06_MEMO": {
-    title: "MODULE 06: FORMAL CREDIT RISK & IC UNDERWRITING DOSSIER",
+    title: "INVESTMENT COMMITTEE: CREDIT UNDERWRITING MEMO & BOARDROOM DECK",
     badge: "BOARDROOM DELIVERABLE",
     purpose:
       "Credit committee investment memorandum synthesizing executive risk tier (BlackRock Aladdin rating scale), covenant compliance matrix, stress results, and underwriter attestations.",

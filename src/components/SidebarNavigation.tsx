@@ -229,8 +229,8 @@ export function SidebarNavigation({
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0 flex items-center justify-between">
                     <div className="truncate mr-1">
-                      <div className="text-xs font-semibold truncate leading-tight">
-                        {mod.number} {mod.name}
+                      <div className="text-xs font-semibold truncate leading-tight text-[#F8FAFC]">
+                        {mod.name}
                       </div>
                       <div className="text-[9.5px] text-[#64748B] truncate">
                         {mod.shortDesc}

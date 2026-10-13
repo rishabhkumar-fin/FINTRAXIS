@@ -27,28 +27,28 @@ export function NavigationTabs({
   const tabs = [
     {
       id: "01_HUB" as ModuleTab,
-      label: "01: Company Hub",
+      label: "Securities Directory",
       hotkey: "[1]",
       icon: Building2,
-      badge: null,
+      badge: "MASTER",
     },
     {
       id: "02_STATEMENTS" as ModuleTab,
-      label: "02: Statements & XBRL",
+      label: "Financial Statements",
       hotkey: "[2]",
       icon: FileSpreadsheet,
-      badge: "AUDITABLE",
+      badge: "XBRL",
     },
     {
       id: "03_HEALTH" as ModuleTab,
-      label: "03: Health & Ratios",
+      label: "Credit Risk & Solvency",
       hotkey: "[3]",
       icon: Activity,
-      badge: riskTier ? riskTier.replace("TIER_", "T").replace(/_/g, " ") : "DAG",
+      badge: riskTier ? riskTier.replace("TIER_", "T").replace(/_/g, " ") : "HEALTH",
     },
     {
       id: "04_VULNERABILITY" as ModuleTab,
-      label: "04: Vulnerability Monitor",
+      label: "Early Warning Surveillance",
       hotkey: "[4]",
       icon: AlertTriangle,
       badge: earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "0 FLAGS",
@@ -56,17 +56,17 @@ export function NavigationTabs({
     },
     {
       id: "05_SIMULATOR" as ModuleTab,
-      label: "05: Stress Simulator",
+      label: "Macro Stress Testing",
       hotkey: "[5]",
       icon: Cpu,
-      badge: "PRO-FORMA",
+      badge: "SIMULATION",
     },
     {
       id: "06_MEMO" as ModuleTab,
-      label: "06: IC Briefing Memo",
+      label: "IC Credit Memo & PDF",
       hotkey: "[6]",
       icon: FileText,
-      badge: "EXPORT",
+      badge: "DECK",
     },
   ];
 

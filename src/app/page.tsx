@@ -327,7 +327,7 @@ export default function FintraxisTerminalPage() {
           {/* Contextual Institutional Field Guide for Active Module */}
           <ModuleGuide moduleKey={activeTab} />
 
-          {/* Module 01: Global Security Master & Real-Time Market HUD */}
+          {/* Desk 01: Global Securities Directory & Master */}
           {activeTab === "01_HUB" && (
             <CompanyHub
               companies={companies}
@@ -339,7 +339,7 @@ export default function FintraxisTerminalPage() {
             />
           )}
 
-          {/* Module 02: Multi-Period Statement Ledger & XBRL Line-Item Audit */}
+          {/* Desk 02: Multi-Period Financial Statements & XBRL Line-Item Audit */}
           {activeTab === "02_STATEMENTS" && profile && (
             <StatementsLedger
               profile={profile}
@@ -348,7 +348,7 @@ export default function FintraxisTerminalPage() {
             />
           )}
 
-          {/* Module 03: Deterministic Solvency & Health DAG Matrix */}
+          {/* Desk 03: Credit Risk & Solvency Assessment */}
           {activeTab === "03_HEALTH" && profile && (
             <HealthRatios
               profile={profile}
@@ -356,17 +356,17 @@ export default function FintraxisTerminalPage() {
             />
           )}
 
-          {/* Module 04: Vulnerability Monitor & Basel III Early Warning System */}
+          {/* Desk 04: Early Warning Surveillance & Basel III Accord */}
           {activeTab === "04_VULNERABILITY" && profile && (
             <VulnerabilityMonitor profile={profile} session={session} />
           )}
 
-          {/* Module 05: Deterministic Stress Simulator [SIMULATED - HYPOTHETICAL] */}
+          {/* Desk 05: Macro Stress Testing & Capital Lab */}
           {activeTab === "05_SIMULATOR" && profile && (
             <StressSimulator profile={profile} />
           )}
 
-          {/* Module 06: Formal Credit Risk & IC Underwriting Dossier */}
+          {/* Desk 06: Investment Committee Credit Memorandum & Boardroom Deck */}
           {activeTab === "06_MEMO" && profile && (
             <ICDossier profile={profile} session={session} />
           )}
