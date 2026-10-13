@@ -44,6 +44,7 @@ export async function autoIngestCompany(symbolInput: string): Promise<CompanyEnt
     let realPrice = 150.0;
     let currencyName = "USD";
     let exchangeName = "GLOBAL";
+    let resolvedName = cleanSymbol;
 
     try {
       const chartResp = await fetch(
@@ -69,6 +70,11 @@ export async function autoIngestCompany(symbolInput: string): Promise<CompanyEnt
         if (meta?.exchangeName) {
           exchangeName = meta.exchangeName;
         }
+        if (meta?.longName) {
+          resolvedName = meta.longName;
+        } else if (meta?.shortName) {
+          resolvedName = meta.shortName;
+        }
       }
     } catch (chartErr) {
       console.warn("Chart fetch error for autoIngest:", chartErr);
@@ -82,7 +88,7 @@ export async function autoIngestCompany(symbolInput: string): Promise<CompanyEnt
     let fxRate = 1.0;
     let fxTimestamp = "Anchor USD";
     let exchange = exchangeName !== "GLOBAL" ? exchangeName : "NASDAQ / NYSE";
-    const companyName = cleanSymbol;
+    const companyName = resolvedName;
 
     if (cleanSymbol.endsWith(".NS") || cleanSymbol.endsWith(".BO") || currencyName === "INR") {
       country = "IND";
