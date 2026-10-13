@@ -104,6 +104,21 @@ export const auditLineItems = sqliteTable("audit_line_items", {
   notes: text("notes"),
 });
 
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  salt: text("salt").notNull(),
+  desk: text("desk").notNull(),
+  avatar: text("avatar").notNull().default("crest"),
+  netDebtEbitdaHurdle: real("net_debt_ebitda_hurdle").default(3.50),
+  interestCoverageHurdle: real("interest_coverage_hurdle").default(2.50),
+  currentRatioHurdle: real("current_ratio_hurdle").default(1.10),
+  createdAt: text("created_at").notNull(),
+});
+
 export type Company = typeof companies.$inferSelect;
 export type FinancialPeriod = typeof financialPeriods.$inferSelect;
 export type AuditLineItem = typeof auditLineItems.$inferSelect;
+export type User = typeof users.$inferSelect;

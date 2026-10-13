@@ -1,26 +1,117 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #080B10;
+  --foreground: #F8FAFC;
+  --terminal-canvas: #080B10;
+  --terminal-surface: #111622;
+  --terminal-surface-hover: #182030;
+  --terminal-border: #1F293D;
+  --terminal-border-light: #2A364F;
+  --gold-accent: #C5A880;
+  --platinum-accent: #E2E8F0;
+  --tier-stable: #10B981;
+  --tier-watchlist: #F59E0B;
+  --tier-critical: #F43F5E;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--terminal-canvas);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  color-scheme: dark;
+}
+
+/* Institutional Monospace Numeric Typography */
+.font-mono-numbers,
+.font-mono {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline borders */
+.border-hairline {
+  border-color: #1F293D;
+}
+
+.border-hairline-light {
+  border-color: #2A364F;
+}
+
+/* Custom terminal scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080B10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F293D;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C5A880;
+}
+
+/* Refined Institutional Cell Highlight for Audit Click */
+.audit-cell {
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.audit-cell:hover {
+  background-color: rgba(226, 232, 240, 0.06);
+  color: #F8FAFC;
+  outline: 1px solid rgba(212, 175, 55, 0.5);
+}
+
+.audit-cell.active-audit {
+  background-color: rgba(212, 175, 55, 0.12);
+  color: #C5A880;
+  outline: 1px solid #C5A880;
+}
+
+/* Boardroom A4 Print Engine */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0.5in;
+  }
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .print-clean-canvas {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  .print-clean-surface {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+  }
+  .print-clean-text {
+    color: #0f172a !important;
+  }
+  .print-clean-muted {
+    color: #475569 !important;
+  }
 }

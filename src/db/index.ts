@@ -26,6 +26,23 @@ const sqlite =
 sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("synchronous = NORMAL");
 
+// Ensure users table exists
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    salt TEXT NOT NULL,
+    desk TEXT NOT NULL,
+    avatar TEXT NOT NULL DEFAULT 'crest',
+    net_debt_ebitda_hurdle REAL DEFAULT 3.50,
+    interest_coverage_hurdle REAL DEFAULT 2.50,
+    current_ratio_hurdle REAL DEFAULT 1.10,
+    created_at TEXT NOT NULL
+  );
+`);
+
 if (process.env.NODE_ENV !== "production") {
   globalForDb.sqlite = sqlite;
 }
