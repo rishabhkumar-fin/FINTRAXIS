@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Sliders, User, Database, Check, RefreshCw } from "lucide-react";
+import { X, Sliders, User, Database, Check, RefreshCw, Upload, Trash2 } from "lucide-react";
 import { WallStreetAvatar, AVATAR_PRESETS, AvatarPresetId } from "./WallStreetAvatar";
 
 export interface OperatorSettings {
@@ -10,6 +10,7 @@ export interface OperatorSettings {
   email: string;
   desk: string;
   avatar: string;
+  avatarCustomUrl?: string;
   netDebtEbitdaHurdle: number;
   interestCoverageHurdle: number;
   currentRatioHurdle: number;
@@ -44,6 +45,7 @@ export function SettingsModal({
   const [email, setEmail] = useState(settings.email);
   const [desk, setDesk] = useState(settings.desk || DESK_OPTIONS[0]);
   const [avatar, setAvatar] = useState<string>(settings.avatar || "crest");
+  const [customAvatarUrl, setCustomAvatarUrl] = useState<string>(settings.avatarCustomUrl || "");
   const [netDebtHurdle, setNetDebtHurdle] = useState<number>(settings.netDebtEbitdaHurdle ?? 3.5);
   const [interestCovHurdle, setInterestCovHurdle] = useState<number>(settings.interestCoverageHurdle ?? 2.5);
   const [currentRatioHurdle, setCurrentRatioHurdle] = useState<number>(settings.currentRatioHurdle ?? 1.1);
@@ -53,6 +55,22 @@ export function SettingsModal({
   const [reseedStatus, setReseedStatus] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      alert("File size exceeds 3MB limit. Please choose a smaller image.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setCustomAvatarUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +83,7 @@ export function SettingsModal({
         email: email.trim(),
         desk,
         avatar,
+        avatarCustomUrl: customAvatarUrl || undefined,
         netDebtEbitdaHurdle: Number(netDebtHurdle),
         interestCoverageHurdle: Number(interestCovHurdle),
         currentRatioHurdle: Number(currentRatioHurdle),
@@ -101,6 +120,7 @@ export function SettingsModal({
         email: email.trim(),
         desk,
         avatar,
+        avatarCustomUrl: customAvatarUrl || undefined,
         netDebtEbitdaHurdle: Number(netDebtHurdle),
         interestCoverageHurdle: Number(interestCovHurdle),
         currentRatioHurdle: Number(currentRatioHurdle),
@@ -261,6 +281,55 @@ export function SettingsModal({
                       </button>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Custom Photo Upload Card */}
+              <div className="space-y-2 pt-3 border-t border-[#1E2536]">
+                <label className="text-[10px] text-[#94A3B8] uppercase flex items-center justify-between">
+                  <span>CUSTOM PROFILE PHOTO</span>
+                  <span className="text-[#10B981]">{customAvatarUrl ? "Custom Image Active" : "Preset Avatar Active"}</span>
+                </label>
+
+                <div className="p-3 bg-[#090D14] border border-[#1E2536] rounded-lg flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full border border-[#C5A880]/50 overflow-hidden bg-[#162033] flex items-center justify-center shrink-0">
+                    {customAvatarUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={customAvatarUrl} alt="Custom Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <WallStreetAvatar avatarId={avatar as AvatarPresetId} size="md" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <label className="px-3 py-1.5 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] text-[10px] font-bold rounded cursor-pointer transition-colors flex items-center gap-1.5">
+                        <Upload className="w-3 h-3" />
+                        <span>Upload Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {customAvatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomAvatarUrl("")}
+                          className="px-2.5 py-1.5 bg-[#1F1316] hover:bg-[#2D161B] border border-[#F43F5E]/40 text-[#F43F5E] text-[10px] rounded transition-colors flex items-center gap-1"
+                          title="Remove custom photo"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Reset</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-[9px] text-[#64748B]">
+                      Upload JPG, PNG, or WebP. Appears on your analyst badge, reports, and IC Dossier sign-off.
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

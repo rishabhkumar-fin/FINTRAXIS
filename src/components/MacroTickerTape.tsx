@@ -108,6 +108,9 @@ export function MacroTickerTape({
   selectedCountry,
 }: MacroTickerTapeProps) {
   const [utcTime, setUtcTime] = useState<string>("");
+  const [localTime, setLocalTime] = useState<string>("");
+  const [tzName, setTzName] = useState<string>("LOCAL");
+  const [showUtcPrimary, setShowUtcPrimary] = useState<boolean>(false);
   const [activeRegion, setActiveRegion] = useState<MacroRegion>("IND");
   const [isManualOverride, setIsManualOverride] = useState<boolean>(false);
 
@@ -135,11 +138,30 @@ export function MacroTickerTape({
   }, [selectedCountry, selectedTicker, isManualOverride]);
 
   useEffect(() => {
+    // Detect local timezone abbreviation or offset
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const shortTz = new Date().toLocaleTimeString("en-us", { timeZoneName: "short" }).split(" ")[2] || tz;
+      setTzName(shortTz);
+    } catch {
+      setTzName("LOCAL");
+    }
+
     const updateTime = () => {
       const now = new Date();
+      // 1. UTC format
       const iso = now.toISOString();
-      const formatted = iso.replace("T", " ").substring(0, 19) + " UTC";
-      setUtcTime(formatted);
+      const formattedUtc = iso.substring(11, 19) + " UTC";
+      setUtcTime(formattedUtc);
+
+      // 2. Local format (e.g. 11:26:41 PM)
+      const formattedLocal = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+      setLocalTime(formattedLocal);
     };
 
     updateTime();
@@ -214,13 +236,33 @@ export function MacroTickerTape({
             <span className="text-[#10B981] font-bold">ONLINE</span>
           </div>
 
-          {/* Live UTC Clock */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#080B10] border border-[#1E2536] text-[11px] text-[#F8FAFC] rounded">
+          {/* Live Workstation & Global Market Clock (Interactive Local / UTC Toggle) */}
+          <button
+            onClick={() => setShowUtcPrimary(!showUtcPrimary)}
+            className="flex items-center gap-2 px-2.5 py-1 bg-[#080B10] hover:bg-[#111622] border border-[#1E2536] hover:border-[#C5A880]/50 text-[11px] text-[#F8FAFC] rounded transition-colors cursor-pointer group"
+            title="Click to toggle between Local Workstation Time and UTC Global Market Time"
+          >
             <Clock className="w-3 h-3 text-[#C5A880] shrink-0" />
-            <span className="font-mono font-medium tabular-nums tracking-wider">
-              {utcTime || "2026-10-13 09:30:00 UTC"}
-            </span>
-          </div>
+            <div className="flex items-center gap-1.5 font-mono tabular-nums tracking-wide">
+              {showUtcPrimary ? (
+                <>
+                  <span className="text-[9px] px-1 py-0.2 bg-[#172033] text-[#38BDF8] border border-[#38BDF8]/30 rounded font-bold">
+                    UTC
+                  </span>
+                  <span className="font-bold text-[#F8FAFC]">{utcTime}</span>
+                  <span className="text-[#64748B] text-[10px] hidden md:inline">({localTime} {tzName})</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[9px] px-1 py-0.2 bg-[#172033] text-[#C5A880] border border-[#C5A880]/30 rounded font-bold">
+                    {tzName}
+                  </span>
+                  <span className="font-bold text-[#F8FAFC]">{localTime || "11:26:41 PM"}</span>
+                  <span className="text-[#64748B] text-[10px] hidden md:inline">({utcTime})</span>
+                </>
+              )}
+            </div>
+          </button>
 
           {/* Settings Calibration */}
           {onOpenSettings && (

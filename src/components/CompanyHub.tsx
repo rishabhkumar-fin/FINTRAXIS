@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Globe2, ArrowRight, Loader2, Database } from "lucide-react";
+import { Search, Globe2, ArrowRight, Loader2, Database, BarChart3 } from "lucide-react";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { VisualAnalyticsDashboard } from "./VisualAnalyticsDashboard";
+import { CompanyChartModal } from "./CompanyChartModal";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
 import { NormalizedMarketSearchItem } from "@/app/api/market/search/route";
 
@@ -30,6 +31,7 @@ export function CompanyHub({
   const [isSearchingMarket, setIsSearchingMarket] = useState(false);
   const [quote, setQuote] = useState<NormalizedMarketQuote | null>(null);
   const [isQuoteLoading, setIsQuoteLoading] = useState(false);
+  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
   const selected = activeProfile?.company;
 
@@ -284,13 +286,24 @@ export function CompanyHub({
                 </div>
               </div>
 
-              <button
-                onClick={() => onNavigateToTab("02_STATEMENTS")}
-                className="flex items-center gap-2 px-4 py-3 bg-[#C5A880] hover:bg-[#F3E5AB] text-[#07090E] font-mono font-bold text-xs transition-colors shadow-[0_0_12px_rgba(212,175,55,0.25)]"
-              >
-                <span>OPEN STATEMENTS LEDGER</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsChartModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-3 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/50 text-[#C5A880] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
+                  title="Open Power BI Deep Interactive Chart Explorer"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>DEEP CHARTS</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigateToTab("02_STATEMENTS")}
+                  className="flex items-center gap-2 px-4 py-3 bg-[#C5A880] hover:bg-[#F3E5AB] text-[#07090E] font-mono font-bold text-xs transition-colors shadow-[0_0_12px_rgba(212,175,55,0.25)] rounded cursor-pointer"
+                >
+                  <span>STATEMENTS LEDGER</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -503,16 +516,30 @@ export function CompanyHub({
                       {c.fxRateToUsd.toFixed(5)}
                     </td>
                     <td className="py-3 px-3 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectCompany(c.id);
-                          onNavigateToTab("02_STATEMENTS");
-                        }}
-                        className="px-2.5 py-1 bg-[#12161F] hover:bg-[#1E2638] border border-[#232B3A] hover:border-[#C5A880] text-[10px] text-[#C5A880] font-bold transition-colors"
-                      >
-                        LOAD LEDGER
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectCompany(c.id);
+                            setIsChartModalOpen(true);
+                          }}
+                          className="px-2 py-1 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[10px] text-[#C5A880] font-bold rounded transition-colors flex items-center gap-1 cursor-pointer"
+                          title="View Power BI interactive charts"
+                        >
+                          <BarChart3 className="w-3 h-3" />
+                          <span>CHART</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectCompany(c.id);
+                            onNavigateToTab("02_STATEMENTS");
+                          }}
+                          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2638] border border-[#232B3A] hover:border-[#C5A880] text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] font-bold transition-colors rounded cursor-pointer"
+                        >
+                          LEDGER
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -528,6 +555,14 @@ export function CompanyHub({
           </table>
         </div>
       </div>
+
+      {/* Power BI Deep Interactive Chart Inspector Modal */}
+      <CompanyChartModal
+        isOpen={isChartModalOpen}
+        onClose={() => setIsChartModalOpen(false)}
+        company={selected || null}
+        profile={activeProfile}
+      />
     </div>
   );
 }
