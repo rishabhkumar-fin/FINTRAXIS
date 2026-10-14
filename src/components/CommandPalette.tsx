@@ -111,12 +111,12 @@ export function CommandPalette({
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-start justify-center pt-24 px-4 font-mono select-none">
       <div
-        className="w-full max-w-2xl bg-[#0A0D12] border border-[#C5A880] shadow-[0_0_50px_rgba(212,175,55,0.25)] overflow-hidden"
+        className="w-full max-w-2xl bg-[#0A0D12] border border-[#38BDF8] shadow-[0_0_50px_rgba(212,175,55,0.25)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Command Input Bar */}
         <div className="p-3 bg-[#12161F] border-b border-[#232B3A] flex items-center gap-3">
-          <Terminal className="w-4 h-4 text-[#C5A880]" />
+          <Terminal className="w-4 h-4 text-[#38BDF8]" />
           <input
             ref={inputRef}
             type="text"
@@ -128,7 +128,7 @@ export function CommandPalette({
           />
           <button
             onClick={() => handleExecute()}
-            className="px-2 py-1 bg-[#C5A880] hover:bg-[#F3E5AB] text-[#07090E] font-bold text-[10px] flex items-center gap-1 transition-colors"
+            className="px-2 py-1 bg-[#38BDF8] hover:bg-[#60A5FA] text-[#07090E] font-bold text-[10px] flex items-center gap-1 transition-colors"
           >
             <span>EXEC</span>
             <CornerDownLeft className="w-3 h-3" />
@@ -146,7 +146,7 @@ export function CommandPalette({
               onClick={() => handleExecute("NVDA <GO>")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#C5A880] font-bold">NVDA &lt;GO&gt;</span>
+              <span className="text-[#38BDF8] font-bold">NVDA &lt;GO&gt;</span>
               <span className="text-[10px] text-[#5A687D]">LOAD NVIDIA TICKER</span>
             </button>
 
@@ -154,7 +154,7 @@ export function CommandPalette({
               onClick={() => handleExecute("RELIANCE.NS <GO>")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#C5A880] font-bold">RELIANCE.NS &lt;GO&gt;</span>
+              <span className="text-[#38BDF8] font-bold">RELIANCE.NS &lt;GO&gt;</span>
               <span className="text-[10px] text-[#5A687D]">LOAD RELIANCE NSE</span>
             </button>
 
@@ -204,7 +204,7 @@ export function CommandPalette({
         {/* Modal Footer Keybinds */}
         <div className="p-2.5 bg-[#05070A] border-t border-[#1E2638] flex items-center justify-between text-[10px] text-[#5A687D]">
           <span>PRESS ESC TO DISMISS</span>
-          <span className="text-[#C5A880]">HOTKEY: CTRL + K / CMD + K</span>
+          <span className="text-[#38BDF8]">HOTKEY: CTRL + K / CMD + K</span>
         </div>
       </div>
     </div>

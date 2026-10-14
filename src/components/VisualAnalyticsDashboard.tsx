@@ -70,7 +70,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
       <div className="p-4 bg-[#0B0F17] border border-[#1E2536] rounded-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#1E2536]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#C5A880]/10 border border-[#C5A880]/30 rounded text-[#C5A880]">
+            <div className="p-2 bg-[#38BDF8]/10 border border-[#38BDF8]/30 rounded text-[#38BDF8]">
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
@@ -78,7 +78,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                 <span className="font-bold text-sm text-[#F8FAFC]">
                   VISUAL PERFORMANCE &amp; SOLVENCY DASHBOARD
                 </span>
-                <span className="text-[10px] px-2 py-0.5 bg-[#172033] border border-[#C5A880]/30 text-[#C5A880] font-bold rounded">
+                <span className="text-[10px] px-2 py-0.5 bg-[#172033] border border-[#38BDF8]/30 text-[#38BDF8] font-bold rounded">
                   2022 &ndash; 2026E
                 </span>
               </div>
@@ -94,7 +94,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
               onClick={() => setActiveMetricTab("TRENDS")}
               className={`px-3 py-1.5 text-[11px] font-bold rounded flex items-center gap-1.5 transition-all whitespace-nowrap ${
                 activeMetricTab === "TRENDS"
-                  ? "bg-[#172033] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#172033] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#64748B] hover:text-[#CBD5E1]"
               }`}
             >
@@ -105,7 +105,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
               onClick={() => setActiveMetricTab("CAPITAL")}
               className={`px-3 py-1.5 text-[11px] font-bold rounded flex items-center gap-1.5 transition-all whitespace-nowrap ${
                 activeMetricTab === "CAPITAL"
-                  ? "bg-[#172033] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#172033] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#64748B] hover:text-[#CBD5E1]"
               }`}
             >
@@ -116,7 +116,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
               onClick={() => setActiveMetricTab("MARGINS")}
               className={`px-3 py-1.5 text-[11px] font-bold rounded flex items-center gap-1.5 transition-all whitespace-nowrap ${
                 activeMetricTab === "MARGINS"
-                  ? "bg-[#172033] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#172033] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#64748B] hover:text-[#CBD5E1]"
               }`}
             >
@@ -127,7 +127,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
               onClick={() => setActiveMetricTab("PEERS")}
               className={`px-3 py-1.5 text-[11px] font-bold rounded flex items-center gap-1.5 transition-all whitespace-nowrap ${
                 activeMetricTab === "PEERS"
-                  ? "bg-[#172033] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#172033] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#64748B] hover:text-[#CBD5E1]"
               }`}
             >
@@ -143,7 +143,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
           <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg relative overflow-hidden">
             <div className="flex items-center justify-between text-[10px] text-[#94A3B8]">
               <span>NET DEBT / EBITDA</span>
-              <span className="text-[#C5A880]">Hurdle: &le; 3.50x</span>
+              <span className="text-[#38BDF8]">Hurdle: &le; 3.50x</span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
               <span className="text-xl font-bold text-[#F8FAFC] tabular-nums">
@@ -191,7 +191,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
           <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg">
             <div className="flex items-center justify-between text-[10px] text-[#94A3B8]">
               <span>INTEREST COVERAGE</span>
-              <span className="text-[#C5A880]">Hurdle: &ge; 2.50x</span>
+              <span className="text-[#38BDF8]">Hurdle: &ge; 2.50x</span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
               <span className="text-xl font-bold text-[#F8FAFC] tabular-nums">
@@ -232,7 +232,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
           <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg">
             <div className="flex items-center justify-between text-[10px] text-[#94A3B8]">
               <span>CURRENT RATIO</span>
-              <span className="text-[#C5A880]">Hurdle: &ge; 1.10x</span>
+              <span className="text-[#38BDF8]">Hurdle: &ge; 1.10x</span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
               <span className="text-xl font-bold text-[#F8FAFC] tabular-nums">
@@ -275,7 +275,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
           <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg">
             <div className="flex items-center justify-between text-[10px] text-[#94A3B8]">
               <span>SOLVENCY HEALTH SCORE</span>
-              <span className="text-[#C5A880]">Scale: 0-100</span>
+              <span className="text-[#38BDF8]">Scale: 0-100</span>
             </div>
             <div className="flex items-baseline gap-2 mt-1.5">
               <span className="text-xl font-bold text-[#F8FAFC] tabular-nums">
@@ -329,7 +329,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                   <span className="text-[#94A3B8]">Revenue</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 bg-[#C5A880] rounded-sm" />
+                  <span className="w-3 h-3 bg-[#38BDF8] rounded-sm" />
                   <span className="text-[#94A3B8]">EBIT (Op Profit)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -357,8 +357,8 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                     >
                       {/* Tooltip on hover */}
                       {hoveredIndex === idx && (
-                        <div className="absolute -top-16 z-20 bg-[#080B10] border border-[#C5A880] p-2 rounded shadow-xl text-center whitespace-nowrap min-w-[140px]">
-                          <div className="text-[10px] text-[#C5A880] font-bold">{p.period}</div>
+                        <div className="absolute -top-16 z-20 bg-[#080B10] border border-[#38BDF8] p-2 rounded shadow-xl text-center whitespace-nowrap min-w-[140px]">
+                          <div className="text-[10px] text-[#38BDF8] font-bold">{p.period}</div>
                           <div className="text-[10px] text-[#F8FAFC]">
                             Rev: {formatFinancialValue(p.revenue, curr, scale)}
                           </div>
@@ -390,10 +390,10 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                           className={`w-1/2 rounded-t transition-all duration-300 relative ${
                             isStressed
                               ? "bg-gradient-to-t from-[#F59E0B]/40 to-[#F59E0B] border-t border-x border-[#F59E0B]"
-                              : "bg-gradient-to-t from-[#92734C] to-[#C5A880] hover:brightness-110"
+                              : "bg-gradient-to-t from-[#1D4ED8] to-[#38BDF8] hover:brightness-110"
                           }`}
                         >
-                          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-[#C5A880] opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-[#38BDF8] opacity-0 group-hover:opacity-100 transition-opacity">
                             {formatFinancialValue(p.ebit, curr, scale)}
                           </span>
                         </div>
@@ -507,7 +507,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
 
               {/* Working Capital & Runway Box */}
               <div className="p-4 bg-[#080B10] border border-[#1E2536] rounded-lg space-y-3">
-                <div className="text-xs font-bold text-[#C5A880] uppercase">
+                <div className="text-xs font-bold text-[#38BDF8] uppercase">
                   LIQUIDITY RUNWAY &amp; WORKING CAPITAL
                 </div>
 
@@ -535,7 +535,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
 
                   <div className="p-2.5 bg-[#111622] rounded border border-[#1E2536]">
                     <div className="text-[9.5px] text-[#64748B] uppercase">RUNWAY STATUS</div>
-                    <div className="font-bold text-[#C5A880] mt-0.5">
+                    <div className="font-bold text-[#38BDF8] mt-0.5">
                       {simulation.cashBurnRunwayMonths
                         ? `${simulation.cashBurnRunwayMonths.toFixed(1)} Months`
                         : "SELF-SUSTAINING"}
@@ -565,7 +565,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                   <span className="text-[#94A3B8]">Gross Margin</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#C5A880]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8]" />
                   <span className="text-[#94A3B8]">Operating Margin</span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -590,7 +590,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                   >
                     <div className="flex items-center justify-between border-b border-[#1E2536] pb-2">
                       <span className="font-bold text-[#F8FAFC] text-xs">{p.period}</span>
-                      <span className="text-[10px] text-[#C5A880]">Audited Filing</span>
+                      <span className="text-[10px] text-[#38BDF8]">Audited Filing</span>
                     </div>
 
                     <div className="space-y-2">
@@ -609,13 +609,13 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
 
                       <div className="flex justify-between items-center text-xs pt-1">
                         <span className="text-[#94A3B8]">Operating Margin:</span>
-                        <span className="font-bold text-[#C5A880] font-mono tabular-nums">
+                        <span className="font-bold text-[#38BDF8] font-mono tabular-nums">
                           {op.toFixed(1)}%
                         </span>
                       </div>
                       <div className="w-full bg-[#111622] h-1.5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#C5A880] rounded-full"
+                          className="h-full bg-[#38BDF8] rounded-full"
                           style={{ width: `${Math.min(100, op)}%` }}
                         />
                       </div>
@@ -652,7 +652,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                   Solvency, Operating Margins, and Leverage relative to institutional industry leaders
                 </p>
               </div>
-              <span className="text-[10px] text-[#C5A880] border border-[#C5A880]/30 px-2.5 py-1 bg-[#111622] rounded">
+              <span className="text-[10px] text-[#38BDF8] border border-[#38BDF8]/30 px-2.5 py-1 bg-[#111622] rounded">
                 Active Benchmark: {company.symbol}
               </span>
             </div>
@@ -672,8 +672,8 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                 <tbody className="divide-y divide-[#1E2536]/50">
                   {/* Current Active Company Highlighted */}
                   <tr className="bg-[#172033]/60 font-semibold">
-                    <td className="py-3 px-3 text-left text-[#C5A880] flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#C5A880]" />
+                    <td className="py-3 px-3 text-left text-[#38BDF8] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
                       <span>{company.name} ({company.symbol})</span>
                     </td>
                     <td className="py-3 px-3 text-left text-[#F8FAFC]">{company.sector}</td>
@@ -712,7 +712,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                         <td className="py-2.5 px-3 text-right font-mono tabular-nums text-[#94A3B8]">
                           {pLev <= 0 ? "0.00x (Cash)" : `${pLev.toFixed(2)}x`}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono tabular-nums text-[#C5A880]">
+                        <td className="py-2.5 px-3 text-right font-mono tabular-nums text-[#38BDF8]">
                           {pMargin.toFixed(1)}%
                         </td>
                         <td className="py-2.5 px-3 text-center">

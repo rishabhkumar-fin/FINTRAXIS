@@ -36,7 +36,7 @@ export function PeacockLogo({
           y1="8"
           x2="20"
           y2="34"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -44,14 +44,14 @@ export function PeacockLogo({
         {/* Upper Outer Feather Curves */}
         <path
           d="M20 10 C13 13, 8 20, 20 28"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="1"
           strokeLinecap="round"
           strokeOpacity="0.85"
         />
         <path
           d="M20 10 C27 13, 32 20, 20 28"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="1"
           strokeLinecap="round"
           strokeOpacity="0.85"
@@ -60,14 +60,14 @@ export function PeacockLogo({
         {/* Mid Contour Curves */}
         <path
           d="M20 14 C15 17, 12 22, 20 28"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="0.8"
           strokeLinecap="round"
           strokeOpacity="0.6"
         />
         <path
           d="M20 14 C25 17, 28 22, 20 28"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="0.8"
           strokeLinecap="round"
           strokeOpacity="0.6"
@@ -79,11 +79,11 @@ export function PeacockLogo({
           cy="20"
           rx="4.5"
           ry="3"
-          stroke="#C5A880"
+          stroke="#38BDF8"
           strokeWidth="1"
-          fill="#0D111A"
+          fill="#0B111E"
         />
-        <circle cx="20" cy="20" r="1.5" fill="#C5A880" />
+        <circle cx="20" cy="20" r="1.5" fill="#38BDF8" />
       </svg>
 
       {/* Single-Line Pure Typography Lockup */}

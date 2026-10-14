@@ -27,13 +27,13 @@ export function WorkflowBanner({ activeTab, onSelectTab, selectedTicker }: Workf
     <div className="mb-4 bg-[#0D111A] border border-[#1E2536] overflow-hidden font-mono text-xs select-none no-print rounded">
       <div className="px-3.5 py-2 flex items-center justify-between border-b border-[#1E2536] bg-[#111622]">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
+          <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
           <span className="font-bold text-[#F8FAFC] tracking-wider text-[11px] uppercase">
             INSTITUTIONAL UNDERWRITING WORKFLOW
           </span>
           {selectedTicker && (
             <span className="text-[10px] text-[#94A3B8]">
-              &bull; Active Subject: <strong className="text-[#C5A880]">{selectedTicker}</strong>
+              &bull; Active Subject: <strong className="text-[#38BDF8]">{selectedTicker}</strong>
             </span>
           )}
         </div>
@@ -58,12 +58,12 @@ export function WorkflowBanner({ activeTab, onSelectTab, selectedTicker }: Workf
                 onClick={() => onSelectTab(targetTab)}
                 className={`p-2.5 text-left border transition-all rounded ${
                   isCurrent
-                    ? "bg-[#162033] border-[#C5A880] shadow-sm text-[#F8FAFC]"
+                    ? "bg-[#162033] border-[#38BDF8] shadow-sm text-[#F8FAFC]"
                     : "bg-[#0D111A] border-[#1E2536] hover:border-[#2A364F] text-[#94A3B8] hover:text-[#F8FAFC]"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[9.5px] font-bold ${isCurrent ? "text-[#C5A880]" : "text-[#64748B]"}`}>
+                  <span className={`text-[9.5px] font-bold ${isCurrent ? "text-[#38BDF8]" : "text-[#64748B]"}`}>
                     {mod.deskTag || `STAGE 0${idx + 1}`}
                   </span>
                   {idx < MODULE_REGISTRY.length - 1 && <ArrowRight className="w-3 h-3 text-[#475569] hidden lg:block" />}

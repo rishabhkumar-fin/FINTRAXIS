@@ -262,7 +262,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
             onClick={() => setActiveView("POWER_BI")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
               activeView === "POWER_BI"
-                ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                 : "text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
@@ -273,7 +273,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
             onClick={() => setActiveView("TILES")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
               activeView === "TILES"
-                ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                 : "text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
@@ -286,8 +286,8 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
       {/* EXECUTIVE SYNTHESIS: WHAT THIS DESK TELLS YOU (Direct Plain-English Takeaways) */}
       <div className="p-4 bg-[#0A0E17] border border-[#1E2536] rounded-xl space-y-3">
         <div className="flex items-center justify-between border-b border-[#1E2536] pb-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#C5A880] uppercase tracking-wider">
-            <Info className="w-4 h-4 text-[#C5A880]" />
+          <div className="flex items-center gap-2 text-xs font-bold text-[#38BDF8] uppercase tracking-wider">
+            <Info className="w-4 h-4 text-[#38BDF8]" />
             <span>EXECUTIVE SYNTHESIS: WHAT THESE RATIOS MEAN IN BUSINESS REALITY</span>
           </div>
           <span className="text-[10px] text-[#64748B]">BLACKROCK ALADDIN BENCHMARKS</span>
@@ -348,7 +348,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1E2536] pb-3">
             <div>
               <div className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-[#C5A880]" />
+                <BarChart3 className="w-4 h-4 text-[#38BDF8]" />
                 <span>POWER BI COMPARATIVE BENCHMARK MATRIX (COMPANY VS PEERS VS HURDLE)</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] mt-0.5">
@@ -358,7 +358,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
 
             <div className="flex items-center gap-3 text-[10px]">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-[#C5A880]"></span>
+                <span className="w-3 h-3 rounded bg-[#38BDF8]"></span>
                 <span className="text-[#F8FAFC] font-bold">{company.symbol}</span>
               </span>
               <span className="flex items-center gap-1.5">
@@ -406,11 +406,11 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
                   <div className="space-y-1.5">
                     {/* Target Entity Bar */}
                     <div className="flex items-center gap-3">
-                      <span className="w-24 text-[10px] text-[#C5A880] font-bold truncate">{company.symbol}</span>
+                      <span className="w-24 text-[10px] text-[#38BDF8] font-bold truncate">{company.symbol}</span>
                       <div className="flex-1 bg-[#080B10] h-5 rounded overflow-hidden border border-[#1E2536] relative">
                         <div
                           style={{ width: `${compWidth}%` }}
-                          className="h-full bg-gradient-to-r from-[#9A7B4F] to-[#C5A880] rounded transition-all duration-500 flex items-center justify-end pr-2"
+                          className="h-full bg-gradient-to-r from-[#9A7B4F] to-[#38BDF8] rounded transition-all duration-500 flex items-center justify-end pr-2"
                         >
                           <span className="text-[10px] font-extrabold text-[#080B10] font-mono">
                             {item.companyVal.toFixed(2)}{item.unit}
@@ -456,7 +456,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
           {ratioCards.map((group, gIdx) => (
             <div key={gIdx} className="space-y-2">
               <div className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider flex items-center gap-2">
-                <Layers className="w-3 h-3 text-[#C5A880]" />
+                <Layers className="w-3 h-3 text-[#38BDF8]" />
                 <span>{group.group}</span>
               </div>
 
@@ -465,10 +465,10 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
                   <div
                     key={item.key}
                     onClick={() => onAuditMetric(item.key, latestPeriod, item.label, null)}
-                    className="p-4 bg-[#0F1420] border border-[#1E2536] hover:border-[#C5A880] cursor-pointer transition-all space-y-2.5 rounded-lg group"
+                    className="p-4 bg-[#0F1420] border border-[#1E2536] hover:border-[#38BDF8] cursor-pointer transition-all space-y-2.5 rounded-lg group"
                   >
                     <div className="flex items-start justify-between">
-                      <span className="text-xs font-semibold text-[#F8FAFC] group-hover:text-[#C5A880] transition-colors">
+                      <span className="text-xs font-semibold text-[#F8FAFC] group-hover:text-[#38BDF8] transition-colors">
                         {item.label}
                       </span>
                       <span className={`text-[9px] px-1.5 py-0.5 border rounded ${getStatusColor(item.status)}`}>
@@ -484,13 +484,13 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
                     <div className="w-full bg-[#080B10] h-1.5 rounded-full overflow-hidden border border-[#1E2536]">
                       <div
                         style={{ width: `${item.progressPct}%` }}
-                        className="h-full bg-gradient-to-r from-[#9A7B4F] to-[#C5A880] transition-all duration-300"
+                        className="h-full bg-gradient-to-r from-[#9A7B4F] to-[#38BDF8] transition-all duration-300"
                       />
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-[#64748B]">
                       <span>{item.benchmark}</span>
-                      <span className="text-[9px] text-[#C5A880] opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[9px] text-[#38BDF8] opacity-0 group-hover:opacity-100 transition-opacity">
                         AUDIT FORMULA &rarr;
                       </span>
                     </div>

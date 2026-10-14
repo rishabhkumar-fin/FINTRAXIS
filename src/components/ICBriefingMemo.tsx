@@ -87,7 +87,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
       {/* Header Actions */}
       <div className="p-3 bg-[#0E131A] border border-[#1E2638] flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#D4AF37]" />
+          <FileText className="w-4 h-4 text-[#2563EB]" />
           <div>
             <div className="font-bold text-[#E1E7EC] tracking-wider uppercase">
               INVESTMENT COMMITTEE (IC) TEARSHEET BRIEFING MEMO
@@ -101,14 +101,14 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#232B3A] hover:border-[#D4AF37] text-[#E1E7EC] text-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#232B3A] hover:border-[#2563EB] text-[#E1E7EC] text-xs transition-colors"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#D4AF37]" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#2563EB]" />}
             <span>{copied ? "COPIED" : "COPY MARKDOWN"}</span>
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] hover:bg-[#F3E5AB] text-[#07090E] font-bold text-xs transition-colors shadow-[0_0_10px_rgba(212,175,55,0.25)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-[#60A5FA] text-[#07090E] font-bold text-xs transition-colors shadow-[0_0_10px_rgba(212,175,55,0.25)]"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>EXPORT / PRINT TEARSHEET</span>
@@ -121,7 +121,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         {/* Memo Header */}
         <div className="border-b border-[#1E2638] pb-4 flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
-            <div className="text-[10px] text-[#D4AF37] tracking-[0.2em] uppercase font-bold">
+            <div className="text-[10px] text-[#2563EB] tracking-[0.2em] uppercase font-bold">
               FINTRAXIS // INVESTMENT COMMITTEE BRIEFING DOSSIER
             </div>
             <h1 className="text-xl font-bold font-mono tracking-wider mt-1 text-[#E1E7EC]">
@@ -137,7 +137,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
           </div>
 
           <div className="text-right space-y-1">
-            <div className="inline-block px-2.5 py-1 border text-xs font-bold border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]">
+            <div className="inline-block px-2.5 py-1 border text-xs font-bold border-[#2563EB] bg-[#2563EB]/10 text-[#2563EB]">
               {riskTier.replace(/_/g, " ")}
             </div>
             <div className="text-[10px] text-[#5A687D]">
@@ -148,7 +148,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
 
         {/* Section 1: Executive Solvency & Capital Structure */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider border-b border-[#1E2638] pb-1">
+          <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
             01. EXECUTIVE SOLVENCY &amp; CAPITAL STRUCTURE
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -172,7 +172,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
             </div>
             <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
               <div className="text-[10px] text-[#5A687D]">NET DEBT / EBITDA</div>
-              <div className="text-sm font-bold font-mono-numbers text-[#D4AF37] mt-0.5">
+              <div className="text-sm font-bold font-mono-numbers text-[#2563EB] mt-0.5">
                 {formatRatio(latestRatios.netDebtToEbitda)}
               </div>
             </div>
@@ -181,7 +181,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
 
         {/* Section 2: Early Warning & Vulnerabilities */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider border-b border-[#1E2638] pb-1">
+          <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
             02. EARLY WARNING SURVEILLANCE &amp; COVENANT DIAGNOSIS
           </div>
           {earlyWarningFlags.length > 0 ? (
@@ -211,7 +211,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
 
         {/* Section 3: Stressed Pro-Forma Sensitivity */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider border-b border-[#1E2638] pb-1 flex justify-between">
+          <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1 flex justify-between">
             <span>03. DETERMINISTIC STRESS SENSITIVITY</span>
             <span className="text-[#EF4444] text-[10px]">[SIMULATED - HYPOTHETICAL]</span>
           </div>
@@ -230,7 +230,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
             </div>
             <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
               <div className="text-[10px] text-[#5A687D]">STRESSED INTEREST COVERAGE</div>
-              <div className="text-sm font-bold font-mono-numbers text-[#D4AF37] mt-0.5">
+              <div className="text-sm font-bold font-mono-numbers text-[#2563EB] mt-0.5">
                 {formatRatio(simulation.simulatedInterestCoverage)}
               </div>
             </div>
@@ -239,7 +239,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
 
         {/* Section 4: Regulatory Chain of Custody */}
         <div className="space-y-3">
-          <div className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider border-b border-[#1E2638] pb-1">
+          <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
             04. AUDIT PROVENANCE &amp; REGULATORY ATTESTATION
           </div>
           <div className="p-3 bg-[#12161F] border border-[#232B3A] space-y-1.5 text-[11px]">
@@ -257,7 +257,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
                 href={latest?.filingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#D4AF37] hover:underline flex items-center gap-1"
+                className="text-[#2563EB] hover:underline flex items-center gap-1"
               >
                 <span>OPEN REGULATORY FILING</span>
                 <ExternalLink className="w-3 h-3" />

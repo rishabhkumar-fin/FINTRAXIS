@@ -586,7 +586,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
       {/* Top Header */}
       <div className="p-3.5 bg-[#0D111A] border-b border-[#1E2536] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded bg-[#C5A880]/15 border border-[#C5A880]/40 flex items-center justify-center text-[#C5A880]">
+          <div className="w-7 h-7 rounded bg-[#38BDF8]/15 border border-[#38BDF8]/40 flex items-center justify-center text-[#38BDF8]">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -639,7 +639,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
               onClick={() => setExplainMode("PRO")}
               className={`px-2.5 py-1 rounded text-[10px] font-bold transition-all ${
                 explainMode === "PRO"
-                  ? "bg-[#C5A880] text-[#080B10] shadow-sm"
+                  ? "bg-[#38BDF8] text-[#080B10] shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
             >
@@ -658,7 +658,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
             </button>
           </div>
         </div>
-        <span className="text-[9px] text-[#C5A880] font-medium hidden sm:inline">
+        <span className="text-[9px] text-[#38BDF8] font-medium hidden sm:inline">
           {explainMode === "ELI10" ? "Simple Lemonade Stand & Pizza Analogies" : "Institutional Formulas & Basel III Standards"}
         </span>
       </div>
@@ -721,37 +721,37 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
           <>
             <button
               onClick={() => handleSend("What is assets and how are they classified on the balance sheet?")}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] font-bold rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#38BDF8] font-bold rounded whitespace-nowrap transition-colors"
             >
               🏛️ What is Assets?
             </button>
             <button
               onClick={() => handleSend("What are liabilities and how do they differ from total debt?")}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
             >
               ⚖️ Liabilities &amp; Debt
             </button>
             <button
               onClick={() => handleSend("What is EBITDA and why do lenders and Wall Street use it?")}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
             >
               📊 What is EBITDA?
             </button>
             <button
               onClick={() => handleSend("What does RBI Repo Rate 5.50% mean for corporate borrowing?")}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
             >
               🇮🇳 RBI Repo Rate
             </button>
             <button
               onClick={() => handleSend(`Analyze credit risk for ${company?.name || "current company"}`)}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#C5A880] rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#38BDF8] rounded whitespace-nowrap transition-colors"
             >
               🔍 Underwriting Memo
             </button>
             <button
               onClick={() => handleSend("What is a debt covenant and what happens when it breaches?")}
-              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+              className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
             >
               📜 Debt Covenants
             </button>
@@ -759,37 +759,37 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
         )}
         <button
           onClick={() => handleSend("Explain Altman Z-Score formula and default thresholds")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           📉 Altman Z-Score
         </button>
         <button
           onClick={() => handleSend("Explain Beneish M-Score for earnings fraud")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           🕵️ Beneish M-Score
         </button>
         <button
           onClick={() => handleSend("Explain Free Cash Flow and how it differs from Net Income")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           💰 Free Cash Flow (FCF)
         </button>
         <button
           onClick={() => handleSend("Explain WACC and how it is calculated")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           ⚖️ WACC &amp; Hurdle
         </button>
         <button
           onClick={() => handleSend("Explain corporate bankruptcy Chapter 11 and creditor priority")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           🏛️ Bankruptcy &amp; Restructuring
         </button>
         <button
           onClick={() => handleSend("How does FINTRAXIS work and how to navigate the 6 modules?")}
-          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#C5A880] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
+          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2536] border border-[#232B3A] hover:border-[#38BDF8] text-[#94A3B8] hover:text-[#F8FAFC] rounded whitespace-nowrap transition-colors"
         >
           💡 Platform Guide
         </button>
@@ -811,7 +811,7 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
             <div
               className={`p-4 rounded-lg max-w-[95%] leading-relaxed text-xs relative group ${
                 m.sender === "user"
-                  ? "bg-[#C5A880] text-[#080B10] font-semibold"
+                  ? "bg-[#38BDF8] text-[#080B10] font-semibold"
                   : "bg-[#0E131A] border border-[#1E2536] text-[#E2E8F0]"
               }`}
             >
@@ -837,8 +837,8 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
               {/* Follow-up Question Chips */}
               {m.followUps && m.followUps.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-[#1E2536] space-y-1.5">
-                  <div className="text-[9.5px] text-[#C5A880] font-bold uppercase flex items-center gap-1">
-                    <Lightbulb className="w-3 h-3 text-[#C5A880]" />
+                  <div className="text-[9.5px] text-[#38BDF8] font-bold uppercase flex items-center gap-1">
+                    <Lightbulb className="w-3 h-3 text-[#38BDF8]" />
                     <span>RECOMMENDED FOLLOW-UP ANALYSES:</span>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -846,10 +846,10 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
                       <button
                         key={idx}
                         onClick={() => handleSend(fu)}
-                        className="text-left px-2.5 py-1.5 bg-[#12161F] hover:bg-[#1A2233] border border-[#1E2536] hover:border-[#C5A880]/50 text-[#CBD5E1] text-[10.5px] rounded transition-colors flex items-center justify-between"
+                        className="text-left px-2.5 py-1.5 bg-[#12161F] hover:bg-[#1A2233] border border-[#1E2536] hover:border-[#38BDF8]/50 text-[#CBD5E1] text-[10.5px] rounded transition-colors flex items-center justify-between"
                       >
                         <span>{fu}</span>
-                        <span className="text-[#C5A880] text-[10px]">&rarr;</span>
+                        <span className="text-[#38BDF8] text-[10px]">&rarr;</span>
                       </button>
                     ))}
                   </div>
@@ -873,12 +873,12 @@ export function FinancialAiAssistant({ isOpen, onClose, activeProfile }: Financi
           value={inputQuery}
           onChange={(e) => setInputQuery(e.target.value)}
           placeholder="Ask any question, term, formula, or company analysis..."
-          className="flex-1 px-3.5 py-2.5 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] placeholder-[#475569] text-xs font-mono rounded focus:border-[#C5A880] focus:outline-none transition-colors"
+          className="flex-1 px-3.5 py-2.5 bg-[#080B10] border border-[#1E2536] text-[#F8FAFC] placeholder-[#475569] text-xs font-mono rounded focus:border-[#38BDF8] focus:outline-none transition-colors"
         />
         <button
           type="submit"
           disabled={!inputQuery.trim()}
-          className="px-4 py-2.5 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-xs rounded transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-sm"
+          className="px-4 py-2.5 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] font-bold text-xs rounded transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-sm"
         >
           <span>Ask</span>
           <Send className="w-3.5 h-3.5" />

@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080B10;
+  --background: #05070B;
   --foreground: #F8FAFC;
-  --terminal-canvas: #080B10;
-  --terminal-surface: #111622;
-  --terminal-surface-hover: #182030;
-  --terminal-border: #1F293D;
-  --terminal-border-light: #2A364F;
-  --gold-accent: #C5A880;
-  --platinum-accent: #E2E8F0;
+  --terminal-canvas: #05070B;
+  --terminal-surface: #0B111E;
+  --terminal-surface-hover: #131D31;
+  --terminal-border: #1E293B;
+  --terminal-border-light: #2A3B57;
+  --navy-accent: #2563EB;
+  --blue-primary: #3B82F6;
+  --blue-sky: #38BDF8;
+  --platinum-accent: #F1F5F9;
   --tier-stable: #10B981;
   --tier-watchlist: #F59E0B;
-  --tier-critical: #F43F5E;
+  --tier-critical: #EF4444;
 }
 
 body {
@@ -47,16 +49,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #080B10;
+  background: #05070B;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1F293D;
-  border-radius: 0px;
+  background: #1E293B;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C5A880;
+  background: #2563EB;
 }
 
 /* Refined Institutional Cell Highlight for Audit Click */
@@ -66,15 +68,15 @@ body {
 }
 
 .audit-cell:hover {
-  background-color: rgba(226, 232, 240, 0.06);
-  color: #F8FAFC;
-  outline: 1px solid rgba(212, 175, 55, 0.5);
+  background-color: rgba(37, 99, 235, 0.08);
+  color: #FFFFFF;
+  outline: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 .audit-cell.active-audit {
-  background-color: rgba(212, 175, 55, 0.12);
-  color: #C5A880;
-  outline: 1px solid #C5A880;
+  background-color: rgba(37, 99, 235, 0.18);
+  color: #38BDF8;
+  outline: 1px solid #3B82F6;
 }
 
 /* Continuous Smooth Ticker Marquee */
@@ -104,17 +106,17 @@ body {
   animation-play-state: paused;
 }
 
-/* Royal Wall Street Glass & Border Styling */
+/* Royal Wall Street Glass & Border Styling - Classy Black & Navy Blue */
 .royal-glass {
-  background: rgba(13, 17, 26, 0.85);
+  background: rgba(11, 17, 30, 0.90);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(197, 168, 128, 0.25);
-  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(197, 168, 128, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(37, 99, 235, 0.2);
 }
 
-.gold-glow {
-  box-shadow: 0 0 20px rgba(197, 168, 128, 0.2);
+.blue-glow {
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.28);
 }
 
 /* Boardroom A4 Print Engine */

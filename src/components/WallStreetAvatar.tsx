@@ -89,19 +89,19 @@ export function WallStreetAvatar({
         >
           <rect width="48" height="48" rx="4" fill="#0A0E17" />
           {/* Triangular Pediment */}
-          <polygon points="24,8 6,17 42,17" fill="#C5A880" fillOpacity="0.2" stroke="#C5A880" strokeWidth="1.5" />
-          <circle cx="24" cy="13.5" r="1.5" fill="#C5A880" />
+          <polygon points="24,8 6,17 42,17" fill="#38BDF8" fillOpacity="0.2" stroke="#38BDF8" strokeWidth="1.5" />
+          <circle cx="24" cy="13.5" r="1.5" fill="#38BDF8" />
           {/* Entablature */}
-          <rect x="7" y="17" width="34" height="2.5" fill="#1E2536" stroke="#C5A880" strokeWidth="1" />
+          <rect x="7" y="17" width="34" height="2.5" fill="#1E2536" stroke="#38BDF8" strokeWidth="1" />
           {/* Classical Columns */}
           <line x1="11" y1="19.5" x2="11" y2="38" stroke="#E2E8F0" strokeWidth="1.8" />
           <line x1="16" y1="19.5" x2="16" y2="38" stroke="#CBD5E1" strokeWidth="1.8" />
-          <line x1="21.5" y1="19.5" x2="21.5" y2="38" stroke="#C5A880" strokeWidth="1.8" />
-          <line x1="26.5" y1="19.5" x2="26.5" y2="38" stroke="#C5A880" strokeWidth="1.8" />
+          <line x1="21.5" y1="19.5" x2="21.5" y2="38" stroke="#38BDF8" strokeWidth="1.8" />
+          <line x1="26.5" y1="19.5" x2="26.5" y2="38" stroke="#38BDF8" strokeWidth="1.8" />
           <line x1="32" y1="19.5" x2="32" y2="38" stroke="#CBD5E1" strokeWidth="1.8" />
           <line x1="37" y1="19.5" x2="37" y2="38" stroke="#E2E8F0" strokeWidth="1.8" />
           {/* Base Plinth Steps */}
-          <rect x="7" y="38" width="34" height="3" fill="#1E2536" stroke="#C5A880" strokeWidth="1" />
+          <rect x="7" y="38" width="34" height="3" fill="#1E2536" stroke="#38BDF8" strokeWidth="1" />
           <rect x="5" y="41" width="38" height="2" fill="#080B10" stroke="#2A364F" strokeWidth="1" />
         </svg>
       </div>
@@ -120,19 +120,19 @@ export function WallStreetAvatar({
           <rect width="48" height="48" rx="4" fill="#080B10" />
           {/* Charging Bull Silhouette Vector */}
           {/* Left Horn */}
-          <path d="M12 18 C10 13, 14 9, 18 13 C16 16, 14 17, 12 18 Z" fill="#C5A880" />
+          <path d="M12 18 C10 13, 14 9, 18 13 C16 16, 14 17, 12 18 Z" fill="#38BDF8" />
           {/* Right Horn */}
-          <path d="M36 18 C38 13, 34 9, 30 13 C32 16, 34 17, 36 18 Z" fill="#C5A880" />
+          <path d="M36 18 C38 13, 34 9, 30 13 C32 16, 34 17, 36 18 Z" fill="#38BDF8" />
           {/* Muscular Head & Brow */}
           <path
             d="M17 14 L31 14 L34 23 L28 32 L20 32 L14 23 Z"
             fill="#172033"
-            stroke="#C5A880"
+            stroke="#38BDF8"
             strokeWidth="1.5"
             strokeLinejoin="round"
           />
           {/* Snout & Nostrils */}
-          <rect x="20" y="27" width="8" height="4" rx="2" fill="#C5A880" fillOpacity="0.3" stroke="#C5A880" strokeWidth="1" />
+          <rect x="20" y="27" width="8" height="4" rx="2" fill="#38BDF8" fillOpacity="0.3" stroke="#38BDF8" strokeWidth="1" />
           <circle cx="22.5" cy="29" r="0.8" fill="#F8FAFC" />
           <circle cx="25.5" cy="29" r="0.8" fill="#F8FAFC" />
           {/* Eyes of Vigilance */}
@@ -159,11 +159,11 @@ export function WallStreetAvatar({
           <path
             d="M24 7 L39 12 C39 26, 31 38, 24 41 C17 38, 9 26, 9 12 Z"
             fill="#111622"
-            stroke="#C5A880"
+            stroke="#38BDF8"
             strokeWidth="1.5"
           />
           {/* Inner Golden Ratio Oval */}
-          <ellipse cx="24" cy="22" rx="8" ry="10" stroke="#C5A880" strokeWidth="1" strokeOpacity="0.5" />
+          <ellipse cx="24" cy="22" rx="8" ry="10" stroke="#38BDF8" strokeWidth="1" strokeOpacity="0.5" />
           {/* Monogram FX / Alpha Symbol */}
           <text
             x="24"
@@ -178,7 +178,7 @@ export function WallStreetAvatar({
             FX
           </text>
           {/* Sovereign Star */}
-          <polygon points="24,11 25.2,14 28,14.5 26,16.5 26.5,19.5 24,18 21.5,19.5 22,16.5 20,14.5 22.8,14" fill="#C5A880" />
+          <polygon points="24,11 25.2,14 28,14.5 26,16.5 26.5,19.5 24,18 21.5,19.5 22,16.5 20,14.5 22.8,14" fill="#38BDF8" />
         </svg>
       </div>
     );
@@ -201,20 +201,20 @@ export function WallStreetAvatar({
         <rect x="33" y="18" width="8" height="26" fill="#162033" />
         {/* Central One WTC / Spire Tower */}
         <polygon points="24,5 23,12 25,12" fill="#38BDF8" />
-        <rect x="20" y="12" width="8" height="32" fill="#1E2B45" stroke="#C5A880" strokeWidth="1" />
+        <rect x="20" y="12" width="8" height="32" fill="#1E2B45" stroke="#38BDF8" strokeWidth="1" />
         {/* Secondary Front Skyscraper */}
         <rect x="11" y="25" width="8" height="19" fill="#253554" stroke="#2A364F" strokeWidth="0.8" />
         <rect x="29" y="22" width="9" height="22" fill="#253554" stroke="#2A364F" strokeWidth="0.8" />
         {/* Illuminated Window Matrix Points */}
-        <circle cx="22" cy="18" r="0.7" fill="#C5A880" />
-        <circle cx="26" cy="18" r="0.7" fill="#C5A880" />
+        <circle cx="22" cy="18" r="0.7" fill="#38BDF8" />
+        <circle cx="26" cy="18" r="0.7" fill="#38BDF8" />
         <circle cx="22" cy="24" r="0.7" fill="#F8FAFC" />
         <circle cx="26" cy="24" r="0.7" fill="#F8FAFC" />
-        <circle cx="22" cy="30" r="0.7" fill="#C5A880" />
-        <circle cx="26" cy="30" r="0.7" fill="#C5A880" />
+        <circle cx="22" cy="30" r="0.7" fill="#38BDF8" />
+        <circle cx="26" cy="30" r="0.7" fill="#38BDF8" />
         <circle cx="14" cy="29" r="0.6" fill="#38BDF8" />
-        <circle cx="16" cy="34" r="0.6" fill="#C5A880" />
-        <circle cx="32" cy="27" r="0.6" fill="#C5A880" />
+        <circle cx="16" cy="34" r="0.6" fill="#38BDF8" />
+        <circle cx="32" cy="27" r="0.6" fill="#38BDF8" />
         <circle cx="35" cy="33" r="0.6" fill="#38BDF8" />
         {/* Water Reflection Line */}
         <line x1="5" y1="44" x2="43" y2="44" stroke="#38BDF8" strokeWidth="1" strokeOpacity="0.4" />

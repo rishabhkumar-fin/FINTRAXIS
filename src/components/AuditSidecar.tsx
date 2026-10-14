@@ -39,7 +39,7 @@ export function AuditSidecar({
       {/* Drawer Header */}
       <div className="p-4 border-b border-[#1E2638] bg-[#0A0D12] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Binary className="w-4 h-4 text-[#C5A880]" />
+          <Binary className="w-4 h-4 text-[#38BDF8]" />
           <div>
             <span className="font-bold text-[#E1E7EC] tracking-wider text-xs">
               AUDIT SIDECAR // LINE-ITEM PROVENANCE
@@ -66,7 +66,7 @@ export function AuditSidecar({
             <div className="p-3 bg-[#12161F] border border-[#232B3A] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-[#5A687D] uppercase">METRIC NAME</span>
-                <span className="px-1.5 py-0.5 text-[9px] bg-[#07090E] border border-[#1E2638] text-[#C5A880]">
+                <span className="px-1.5 py-0.5 text-[9px] bg-[#07090E] border border-[#1E2638] text-[#38BDF8]">
                   {auditItem.period} AUDITED
                 </span>
               </div>
@@ -75,7 +75,7 @@ export function AuditSidecar({
               </div>
               <div className="flex items-baseline justify-between pt-1 border-t border-[#1E2638]">
                 <span className="text-[10px] text-[#5A687D]">REPORTED VALUE:</span>
-                <span className="text-base font-bold font-mono text-[#C5A880]">
+                <span className="text-base font-bold font-mono text-[#38BDF8]">
                   {auditItem.currency === "USD" ? "$" : auditItem.currency === "INR" ? "₹" : "¥"}
                   {auditItem.reportedValue?.toLocaleString() ?? "N/D"}{" "}
                   <span className="text-xs text-[#9BA8B8]">{auditItem.scaleUnit}</span>
@@ -86,7 +86,7 @@ export function AuditSidecar({
             {/* Regulatory Filing Provenance */}
             <div className="p-3 bg-[#0E131A] border border-[#1E2638] space-y-2.5">
               <div className="flex items-center gap-1.5 text-[#9BA8B8] text-[11px] font-bold">
-                <FileCheck className="w-3.5 h-3.5 text-[#C5A880]" />
+                <FileCheck className="w-3.5 h-3.5 text-[#38BDF8]" />
                 <span>REGULATORY FILING PROVENANCE</span>
               </div>
 
@@ -101,7 +101,7 @@ export function AuditSidecar({
                 </div>
                 <div className="flex justify-between py-1 border-b border-[#1E2638]/50">
                   <span className="text-[#5A687D]">Accounting Regime:</span>
-                  <span className="text-[#C5A880]">{company?.accountingStandard || "US-GAAP"}</span>
+                  <span className="text-[#38BDF8]">{company?.accountingStandard || "US-GAAP"}</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-[#5A687D]">Jurisdiction:</span>
@@ -120,7 +120,7 @@ export function AuditSidecar({
                   href={auditItem.filingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 flex items-center justify-center gap-2 w-full py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#C5A880]/50 text-[#C5A880] hover:text-[#F3E5AB] transition-colors text-[11px]"
+                  className="mt-2 flex items-center justify-center gap-2 w-full py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#38BDF8]/50 text-[#38BDF8] hover:text-[#60A5FA] transition-colors text-[11px]"
                 >
                   <span>VIEW OFFICIAL REGULATORY FILING</span>
                   <ExternalLink className="w-3 h-3" />
@@ -145,12 +145,12 @@ export function AuditSidecar({
             {/* Deterministic Formula DAG Breakdown */}
             <div className="p-3 bg-[#0E131A] border border-[#1E2638] space-y-2">
               <div className="flex items-center gap-1.5 text-[#9BA8B8] text-[11px] font-bold">
-                <Calculator className="w-3.5 h-3.5 text-[#C5A880]" />
+                <Calculator className="w-3.5 h-3.5 text-[#38BDF8]" />
                 <span>FORMULA & CALCULATION DAG</span>
               </div>
 
               {auditItem.formula && (
-                <div className="p-2 bg-[#12161F] border border-[#232B3A] text-[11px] text-[#F3E5AB]">
+                <div className="p-2 bg-[#12161F] border border-[#232B3A] text-[11px] text-[#60A5FA]">
                   {auditItem.formula}
                 </div>
               )}
@@ -162,7 +162,7 @@ export function AuditSidecar({
                     {parsedTree.components.map((comp: ComponentItem, idx: number) => (
                       <div key={idx} className="flex justify-between items-center text-[10px] py-0.5">
                         <span className="text-[#9BA8B8]">{comp.name}:</span>
-                        <span className="text-[#C5A880] font-mono">{comp.value}</span>
+                        <span className="text-[#38BDF8] font-mono">{comp.value}</span>
                       </div>
                     ))}
                   </div>

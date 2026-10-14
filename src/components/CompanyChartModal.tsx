@@ -39,11 +39,11 @@ export function CompanyChartModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 font-mono select-none animate-in fade-in duration-150">
-      <div className="w-full max-w-5xl bg-[#0B0F17] border border-[#C5A880]/30 shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-5xl bg-[#0B0F17] border border-[#38BDF8]/30 shadow-2xl rounded-xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header Lockup */}
         <div className="p-4 bg-[#0E131E] border-b border-[#1E2536] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#C5A880]/15 border border-[#C5A880]/40 rounded text-[#C5A880]">
+            <div className="p-2 bg-[#38BDF8]/15 border border-[#38BDF8]/40 rounded text-[#38BDF8]">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
@@ -51,7 +51,7 @@ export function CompanyChartModal({
                 <h3 className="font-bold text-base text-[#F8FAFC]">
                   {company.name}
                 </h3>
-                <span className="px-2 py-0.5 bg-[#172033] border border-[#C5A880]/40 text-[#C5A880] text-xs font-bold rounded">
+                <span className="px-2 py-0.5 bg-[#172033] border border-[#38BDF8]/40 text-[#38BDF8] text-xs font-bold rounded">
                   {company.symbol}
                 </span>
                 <span className="text-[10px] text-[#64748B] hidden sm:inline">
@@ -63,7 +63,7 @@ export function CompanyChartModal({
                 <span>&bull;</span>
                 <span>Base Currency: {curr} ({scale})</span>
                 <span>&bull;</span>
-                <span className="text-[#C5A880] font-semibold">
+                <span className="text-[#38BDF8] font-semibold">
                   Health Score: {riskScore}/100 ({profile.riskTier})
                 </span>
               </div>
@@ -88,7 +88,7 @@ export function CompanyChartModal({
               onClick={() => setActiveVisual("WATERFALL")}
               className={`px-2.5 py-1 text-[10.5px] font-bold rounded transition-all ${
                 activeVisual === "WATERFALL"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
             >
@@ -98,7 +98,7 @@ export function CompanyChartModal({
               onClick={() => setActiveVisual("GROWTH")}
               className={`px-2.5 py-1 text-[10.5px] font-bold rounded transition-all ${
                 activeVisual === "GROWTH"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
             >
@@ -108,7 +108,7 @@ export function CompanyChartModal({
               onClick={() => setActiveVisual("BALANCE_SHEET")}
               className={`px-2.5 py-1 text-[10.5px] font-bold rounded transition-all ${
                 activeVisual === "BALANCE_SHEET"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
             >
@@ -118,7 +118,7 @@ export function CompanyChartModal({
               onClick={() => setActiveVisual("MARGINS")}
               className={`px-2.5 py-1 text-[10.5px] font-bold rounded transition-all ${
                 activeVisual === "MARGINS"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
             >
@@ -129,7 +129,7 @@ export function CompanyChartModal({
           {/* Period Slicer */}
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-[#64748B] uppercase font-bold flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[#C5A880]" />
+              <Calendar className="w-3 h-3 text-[#38BDF8]" />
               <span>PERIOD:</span>
             </span>
             <div className="flex items-center gap-1 bg-[#111622] p-0.5 border border-[#1E2536] rounded">
@@ -139,7 +139,7 @@ export function CompanyChartModal({
                   onClick={() => setSelectedPeriodIndex(idx)}
                   className={`px-2 py-0.5 text-[10px] font-bold rounded transition-all ${
                     selectedPeriodIndex === idx
-                      ? "bg-[#C5A880] text-[#080B10]"
+                      ? "bg-[#38BDF8] text-[#080B10]"
                       : "text-[#94A3B8] hover:text-[#F8FAFC]"
                   }`}
                 >
@@ -164,7 +164,7 @@ export function CompanyChartModal({
 
             <div className="p-3 bg-[#0E131E] border border-[#1E2536] rounded-lg">
               <div className="text-[9.5px] text-[#64748B] uppercase">OPERATING EBIT</div>
-              <div className="text-base font-bold font-mono text-[#C5A880] mt-0.5">
+              <div className="text-base font-bold font-mono text-[#38BDF8] mt-0.5">
                 {formatFinancialValue(currentPeriod.ebit, curr, scale)}
               </div>
               <div className="text-[9px] text-[#94A3B8] mt-0.5">
@@ -187,7 +187,7 @@ export function CompanyChartModal({
               <div className="text-base font-bold font-mono text-[#10B981] mt-0.5">
                 {latestRatios.interestCoverage !== null ? `${latestRatios.interestCoverage.toFixed(2)}x` : "&infin;"}
               </div>
-              <div className="text-[9px] text-[#C5A880] mt-0.5">
+              <div className="text-[9px] text-[#38BDF8] mt-0.5">
                 Hurdle: &ge; 2.50x
               </div>
             </div>
@@ -205,7 +205,7 @@ export function CompanyChartModal({
                     Breakdown from Top-Line Gross Revenue down to Operating EBIT and Net Income
                   </p>
                 </div>
-                <span className="text-[10.5px] text-[#C5A880] font-bold">
+                <span className="text-[10.5px] text-[#38BDF8] font-bold">
                   {curr} {scale}
                 </span>
               </div>
@@ -285,15 +285,15 @@ export function CompanyChartModal({
                 {/* 5. Operating Profit (EBIT) */}
                 <div className="space-y-1 pt-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#C5A880] font-bold">5. Operating EBIT</span>
-                    <span className="font-mono font-bold text-[#C5A880]">
+                    <span className="text-[#38BDF8] font-bold">5. Operating EBIT</span>
+                    <span className="font-mono font-bold text-[#38BDF8]">
                       {formatFinancialValue(currentPeriod.ebit, curr, scale)} (
                       {currentPeriod.revenue ? (((currentPeriod.ebit ?? 0) / currentPeriod.revenue) * 100).toFixed(1) : 0}%)
                     </span>
                   </div>
                   <div className="w-full bg-[#111622] h-4 rounded-full overflow-hidden p-0.5">
                     <div
-                      className="h-full bg-gradient-to-r from-[#92734C] to-[#C5A880] rounded-full"
+                      className="h-full bg-gradient-to-r from-[#1D4ED8] to-[#38BDF8] rounded-full"
                       style={{
                         width: `${Math.min(100, currentPeriod.revenue ? ((currentPeriod.ebit ?? 0) / currentPeriod.revenue) * 100 : 0)}%`,
                       }}
@@ -322,7 +322,7 @@ export function CompanyChartModal({
                     <span className="text-[#94A3B8]">Revenue</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-[#C5A880]" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-[#38BDF8]" />
                     <span className="text-[#94A3B8]">EBIT</span>
                   </div>
                 </div>
@@ -346,9 +346,9 @@ export function CompanyChartModal({
                         </div>
                         <div
                           style={{ height: `${ebitH}%` }}
-                          className="w-1/2 bg-gradient-to-t from-[#92734C] to-[#C5A880] rounded-t transition-all group-hover:brightness-110 relative"
+                          className="w-1/2 bg-gradient-to-t from-[#1D4ED8] to-[#38BDF8] rounded-t transition-all group-hover:brightness-110 relative"
                         >
-                          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-[#C5A880] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-mono text-[#38BDF8] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                             {formatFinancialValue(p.ebit, curr, scale)}
                           </span>
                         </div>
@@ -439,7 +439,7 @@ export function CompanyChartModal({
 
                   return (
                     <div key={idx} className="p-3.5 bg-[#0E131E] border border-[#1E2536] rounded-lg space-y-2.5">
-                      <div className="font-bold text-xs text-[#C5A880] border-b border-[#1E2536] pb-1">
+                      <div className="font-bold text-xs text-[#38BDF8] border-b border-[#1E2536] pb-1">
                         {p.period}
                       </div>
                       <div className="flex justify-between text-xs">
@@ -448,7 +448,7 @@ export function CompanyChartModal({
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-[#94A3B8]">Operating:</span>
-                        <span className="font-bold text-[#C5A880]">{op.toFixed(1)}%</span>
+                        <span className="font-bold text-[#38BDF8]">{op.toFixed(1)}%</span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-[#94A3B8]">Net:</span>
@@ -470,7 +470,7 @@ export function CompanyChartModal({
           </div>
           <button
             onClick={onClose}
-            className="px-3 py-1 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] text-[#C5A880] font-bold rounded transition-colors"
+            className="px-3 py-1 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] text-[#38BDF8] font-bold rounded transition-colors"
           >
             Done
           </button>

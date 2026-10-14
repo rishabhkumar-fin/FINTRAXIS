@@ -83,11 +83,11 @@ export function NavigationTabs({
               onClick={() => onSelectTab(tab.id)}
               className={`flex items-center gap-2 px-3 py-2 text-xs font-mono transition-colors border-b-2 whitespace-nowrap ${
                 isActive
-                  ? "border-[#D4AF37] text-[#D4AF37] bg-[#12161F]/80 font-bold"
-                  : "border-transparent text-[#9BA8B8] hover:text-[#E1E7EC] hover:bg-[#12161F]/40"
+                  ? "border-[#2563EB] text-[#38BDF8] bg-[#0E1524] font-bold"
+                  : "border-transparent text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0B111E]/40"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#D4AF37]" : "text-[#5A687D]"}`} />
+              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#38BDF8]" : "text-[#64748B]"}`} />
               <span>{tab.label}</span>
               <span className="text-[9.5px] text-[#5A687D] font-mono">{tab.hotkey}</span>
               {tab.badge && (

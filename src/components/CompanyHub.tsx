@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Globe2, ArrowRight, Loader2, Database, BarChart3, TrendingUp } from "lucide-react";
+import { Search, Globe2, ArrowRight, Loader2, Database, BarChart3 } from "lucide-react";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { VisualAnalyticsDashboard } from "./VisualAnalyticsDashboard";
 import { CompanyChartModal } from "./CompanyChartModal";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
 import { NormalizedMarketSearchItem } from "@/app/api/market/search/route";
+import { GrowwStockChart } from "./GrowwStockChart";
 
 interface CompanyHubProps {
   companies: CompanyEntity[];
@@ -115,9 +116,9 @@ export function CompanyHub({
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5A687D]">
             {isSearchingMarket ? (
-              <Loader2 className="w-4 h-4 animate-spin text-[#C5A880]" />
+              <Loader2 className="w-4 h-4 animate-spin text-[#38BDF8]" />
             ) : (
-              <Search className="w-4 h-4 text-[#C5A880]" />
+              <Search className="w-4 h-4 text-[#38BDF8]" />
             )}
           </div>
           <input
@@ -125,7 +126,7 @@ export function CompanyHub({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search & resolve any global equity or ticker (e.g. NVDA, AAPL, RELIANCE.NS, TCS.NS, 7203.T, MSFT)..."
-            className="w-full pl-10 pr-28 py-2.5 bg-[#07090E] border border-[#232B3A] text-xs font-mono text-[#E1E7EC] placeholder-[#5A687D] focus:outline-none focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] rounded-sm transition-all"
+            className="w-full pl-10 pr-28 py-2.5 bg-[#05070B] border border-[#1E293B] text-xs font-mono text-[#F8FAFC] placeholder-[#5A687D] focus:outline-none focus:border-[#38BDF8] focus:ring-1 focus:ring-[#38BDF8] rounded-sm transition-all"
           />
           {searchQuery && (
             <button
@@ -136,7 +137,7 @@ export function CompanyHub({
             </button>
           )}
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <span className="text-[10px] px-2 py-0.5 bg-[#172033] border border-[#1E2536] text-[#C5A880] font-semibold rounded">
+            <span className="text-[10px] px-2 py-0.5 bg-[#101A2E] border border-[#1E293B] text-[#38BDF8] font-semibold rounded">
               GLOBAL SEARCH
             </span>
           </div>
@@ -144,10 +145,10 @@ export function CompanyHub({
       </div>
 
       {/* Featured Institutional Coverage Quick Selection */}
-      <div className="p-3 bg-[#0E131A] border border-[#1E2536] rounded-sm space-y-2">
+      <div className="p-3 bg-[#0B111E] border border-[#1E293B] rounded-sm space-y-2">
         <div className="flex items-center justify-between text-[10px] text-[#5A687D]">
-          <span className="font-bold text-[#C5A880] uppercase tracking-wider flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-[#C5A880]" />
+          <span className="font-bold text-[#38BDF8] uppercase tracking-wider flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-[#38BDF8]" />
             FEATURED INSTITUTIONAL COVERAGE // AUDITED REGISTRY
           </span>
           <span className="hidden sm:inline">Click any ticker to inspect distinct audited multi-year statements</span>
@@ -175,15 +176,15 @@ export function CompanyHub({
                 onClick={() => onSelectCompany(item.symbol)}
                 className={`px-2 py-1 border text-[11px] font-mono transition-all flex items-center gap-1.5 rounded-sm ${
                   isCurrent
-                    ? "bg-[#C5A880] text-[#080B10] border-[#C5A880] font-bold shadow-[0_0_10px_rgba(197,168,128,0.3)]"
-                    : "bg-[#12161F] hover:bg-[#1A2233] text-[#E1E7EC] border-[#232B3A] hover:border-[#C5A880]"
+                    ? "bg-[#2563EB] text-white border-[#38BDF8] font-bold shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                    : "bg-[#0A0E17] hover:bg-[#101A2E] text-[#F8FAFC] border-[#1E293B] hover:border-[#38BDF8]"
                 }`}
               >
                 <span>{item.flag}</span>
-                <span className={isCurrent ? "text-[#080B10] font-bold" : "text-[#C5A880] font-semibold"}>
+                <span className={isCurrent ? "text-white font-bold" : "text-[#38BDF8] font-semibold"}>
                   {item.symbol}
                 </span>
-                <span className={isCurrent ? "text-[#181F2B] text-[10px]" : "text-[#5A687D] text-[10px]"}>
+                <span className={isCurrent ? "text-[#CBD5E1] text-[10px]" : "text-[#64748B] text-[10px]"}>
                   {item.name}
                 </span>
               </button>
@@ -194,8 +195,8 @@ export function CompanyHub({
 
       {/* Global Live Omnichannel Search Dropdown Results */}
       {liveSearchResults.length > 0 && searchQuery.trim().length >= 2 && (
-        <div className="border border-[#C5A880]/50 bg-[#0A0D12] p-3 space-y-2 shadow-2xl animate-in fade-in duration-150">
-          <div className="flex items-center justify-between text-[10px] text-[#C5A880] uppercase font-bold border-b border-[#1E2638] pb-1">
+        <div className="border border-[#2563EB]/50 bg-[#090E17] p-3 space-y-2 shadow-2xl animate-in fade-in duration-150">
+          <div className="flex items-center justify-between text-[10px] text-[#38BDF8] uppercase font-bold border-b border-[#1E293B] pb-1">
             <span>LIVE GLOBAL RESOLUTIONS FOR &quot;{searchQuery}&quot;</span>
             <span>CLICK TO INGEST DIRECTLY INTO SQLITE MASTER</span>
           </div>
@@ -205,17 +206,17 @@ export function CompanyHub({
                 <div
                   key={item.symbol}
                   onClick={() => onSelectCompany(item.symbol)}
-                  className="p-2.5 bg-[#12161F] border border-[#232B3A] hover:border-[#C5A880] flex items-center justify-between transition-colors cursor-pointer group"
+                  className="p-2.5 bg-[#0B111E] border border-[#1E293B] hover:border-[#38BDF8] flex items-center justify-between transition-colors cursor-pointer group"
                 >
                   <div className="truncate mr-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-[#C5A880] group-hover:text-[#F3E5AB]">{item.symbol}</span>
-                      <span className="text-[9px] px-1 bg-[#07090E] border border-[#1E2536] text-[#9BA8B8]">
+                      <span className="font-bold text-[#38BDF8] group-hover:text-white">{item.symbol}</span>
+                      <span className="text-[9px] px-1 bg-[#05070B] border border-[#1E293B] text-[#94A3B8]">
                         {item.country}
                       </span>
                     </div>
-                    <div className="text-[10.5px] text-[#E1E7EC] truncate">{item.name}</div>
-                    <div className="text-[9.5px] text-[#5A687D]">{item.exchange}</div>
+                    <div className="text-[10.5px] text-[#F8FAFC] truncate">{item.name}</div>
+                    <div className="text-[9.5px] text-[#64748B]">{item.exchange}</div>
                   </div>
 
                   <button
@@ -223,7 +224,7 @@ export function CompanyHub({
                       e.stopPropagation();
                       onSelectCompany(item.symbol);
                     }}
-                    className="px-2.5 py-1 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] text-[10px] font-bold flex items-center gap-1 transition-colors whitespace-nowrap rounded"
+                    className="px-2.5 py-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[10px] font-bold flex items-center gap-1 transition-colors whitespace-nowrap rounded"
                   >
                     <span>ANALYZE</span>
                     <ArrowRight className="w-3 h-3" />
@@ -236,60 +237,60 @@ export function CompanyHub({
 
       {/* Selected Entity Institutional Banner & Real-Time Market HUD */}
       {selected && (
-        <div className="bg-[#12161F] border border-[#232B3A] p-4 relative overflow-hidden space-y-4">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#C5A880]/5 blur-3xl pointer-events-none"></div>
+        <div className="bg-[#0B111E] border border-[#1E293B] p-4 relative overflow-hidden space-y-4">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB]/10 blur-3xl pointer-events-none"></div>
 
           {/* Top Identity Row */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="text-xl font-bold font-mono tracking-wider text-[#E1E7EC] flex items-center gap-2">
+                <span className="text-xl font-bold font-mono tracking-wider text-[#F8FAFC] flex items-center gap-2">
                   {selected.name}
-                  {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C5A880]" />}
+                  {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#38BDF8]" />}
                 </span>
-                <span className="px-2 py-0.5 bg-[#07090E] border border-[#C5A880] text-[#C5A880] text-xs font-mono font-bold">
+                <span className="px-2 py-0.5 bg-[#05070B] border border-[#38BDF8] text-[#38BDF8] text-xs font-mono font-bold">
                   {selected.symbol}
                 </span>
-                <span className="px-2 py-0.5 bg-[#07090E] border border-[#1E2638] text-[#9BA8B8] text-[11px] font-mono">
+                <span className="px-2 py-0.5 bg-[#05070B] border border-[#1E293B] text-[#94A3B8] text-[11px] font-mono">
                   {selected.exchange}
                 </span>
-                <span className="px-2 py-0.5 bg-[#07090E] border border-[#1E2638] text-[#9BA8B8] text-[11px] font-mono">
+                <span className="px-2 py-0.5 bg-[#05070B] border border-[#1E293B] text-[#94A3B8] text-[11px] font-mono">
                   {selected.accountingStandard}
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 text-xs font-mono text-[#5A687D] flex-wrap">
-                <span>SECTOR: <span className="text-[#9BA8B8]">{selected.sector}</span></span>
+              <div className="flex items-center gap-4 text-xs font-mono text-[#64748B] flex-wrap">
+                <span>SECTOR: <span className="text-[#CBD5E1]">{selected.sector}</span></span>
                 <span>&bull;</span>
-                <span>INDUSTRY: <span className="text-[#9BA8B8]">{selected.industry}</span></span>
+                <span>INDUSTRY: <span className="text-[#CBD5E1]">{selected.industry}</span></span>
                 <span>&bull;</span>
-                <span>CIK / CODE: <span className="text-[#C5A880]">{selected.cik || selected.symbol}</span></span>
+                <span>CIK / CODE: <span className="text-[#38BDF8]">{selected.cik || selected.symbol}</span></span>
                 <span>&bull;</span>
-                <span>ISIN: <span className="text-[#9BA8B8]">{selected.isin || "N/D"}</span></span>
+                <span>ISIN: <span className="text-[#CBD5E1]">{selected.isin || "N/D"}</span></span>
               </div>
             </div>
 
             {/* As-Reported Currency & Actions */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="p-2.5 bg-[#07090E] border border-[#1E2638] font-mono text-xs">
-                <div className="text-[10px] text-[#5A687D] uppercase">NATIVE REPORTING CURRENCY</div>
+              <div className="p-2.5 bg-[#05070B] border border-[#1E293B] font-mono text-xs">
+                <div className="text-[10px] text-[#64748B] uppercase">NATIVE REPORTING CURRENCY</div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-bold text-base text-[#C5A880]">
+                  <span className="font-bold text-base text-[#38BDF8]">
                     {selected.currency} ({selected.scaleUnit})
                   </span>
                   <span className="text-[10px] text-[#10B981] border border-[#10B981]/30 px-1 py-0.2">
                     AS-REPORTED
                   </span>
                 </div>
-                <div className="text-[10px] text-[#5A687D] mt-1">
-                  AUDITED FX REF: <span className="text-[#9BA8B8]">{selected.fxTimestamp}</span>
+                <div className="text-[10px] text-[#64748B] mt-1">
+                  AUDITED FX REF: <span className="text-[#94A3B8]">{selected.fxTimestamp}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsChartModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-3 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/50 text-[#C5A880] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-3 bg-[#101A2E] hover:bg-[#1E293B] border border-[#38BDF8]/50 text-[#38BDF8] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
                   title="Open Power BI Deep Interactive Chart Explorer"
                 >
                   <BarChart3 className="w-4 h-4" />
@@ -298,7 +299,7 @@ export function CompanyHub({
 
                 <button
                   onClick={() => onNavigateToTab("02_STATEMENTS")}
-                  className="flex items-center gap-2 px-4 py-3 bg-[#C5A880] hover:bg-[#F3E5AB] text-[#07090E] font-mono font-bold text-xs transition-colors shadow-[0_0_12px_rgba(212,175,55,0.25)] rounded cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-mono font-bold text-xs transition-colors shadow-[0_0_15px_rgba(37,99,235,0.4)] rounded cursor-pointer"
                 >
                   <span>STATEMENTS LEDGER</span>
                   <ArrowRight className="w-4 h-4" />
@@ -309,16 +310,16 @@ export function CompanyHub({
 
           {/* Real-Time Market HUD & Stock Price Line Chart */}
           {quote && (
-            <div className="pt-3 border-t border-[#1E2638] space-y-3 bg-[#0A0D12] p-3.5 border border-[#1E2638] rounded-sm">
+            <div className="pt-3 border-t border-[#1E293B] space-y-3 bg-[#070B12] p-3.5 border border-[#1E293B] rounded-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Live Ticking Price */}
                 <div className="space-y-1">
-                  <span className="text-[9.5px] text-[#5A687D] uppercase flex items-center gap-1.5">
+                  <span className="text-[9.5px] text-[#64748B] uppercase flex items-center gap-1.5">
                     REAL-TIME MARKET PRICE
-                    {isQuoteLoading && <Loader2 className="w-2.5 h-2.5 animate-spin text-[#C5A880]" />}
+                    {isQuoteLoading && <Loader2 className="w-2.5 h-2.5 animate-spin text-[#38BDF8]" />}
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold font-mono-numbers text-[#E1E7EC]">
+                    <span className="text-xl font-bold font-mono-numbers text-[#F8FAFC]">
                       {quote.currencySymbol}{quote.regularMarketPrice.toLocaleString()}
                     </span>
                     <span
@@ -336,22 +337,22 @@ export function CompanyHub({
 
                 {/* Day High / Low */}
                 <div className="space-y-1">
-                  <span className="text-[9.5px] text-[#5A687D] uppercase">DAY SESSION RANGE</span>
+                  <span className="text-[9.5px] text-[#64748B] uppercase">DAY SESSION RANGE</span>
                   <div className="flex justify-between items-baseline font-mono-numbers text-xs pt-1">
-                    <span className="text-[#9BA8B8]">{quote.currencySymbol}{quote.dayLow.toLocaleString()}</span>
-                    <span className="text-[#5A687D] text-[9.5px]">TO</span>
-                    <span className="text-[#9BA8B8]">{quote.currencySymbol}{quote.dayHigh.toLocaleString()}</span>
+                    <span className="text-[#CBD5E1]">{quote.currencySymbol}{quote.dayLow.toLocaleString()}</span>
+                    <span className="text-[#64748B] text-[9.5px]">TO</span>
+                    <span className="text-[#CBD5E1]">{quote.currencySymbol}{quote.dayHigh.toLocaleString()}</span>
                   </div>
                 </div>
 
                 {/* 52-Week Range Bar with How this is calculated */}
                 <div className="space-y-1">
-                  <div className="flex justify-between text-[9.5px] text-[#5A687D] uppercase">
+                  <div className="flex justify-between text-[9.5px] text-[#64748B] uppercase">
                     <span>52-WK LOW</span>
                     <span className="flex items-center gap-1">
                       <span>POSITION</span>
                       <span
-                        className="text-[8px] px-1 py-0.2 bg-[#172033] text-[#C5A880] rounded cursor-help font-bold"
+                        className="text-[8px] px-1 py-0.2 bg-[#101A2E] text-[#38BDF8] rounded cursor-help font-bold"
                         title="Formula: (Price - 52W Low) / (52W High - 52W Low) * 100%"
                       >
                         CALC ?
@@ -359,15 +360,15 @@ export function CompanyHub({
                     </span>
                     <span>52-WK HIGH</span>
                   </div>
-                  <div className="w-full bg-[#12161F] h-2 border border-[#1E2638] relative overflow-hidden mt-1">
+                  <div className="w-full bg-[#05070B] h-2 border border-[#1E293B] relative overflow-hidden mt-1">
                     <div
-                      className="h-full bg-[#C5A880] transition-all duration-300"
+                      className="h-full bg-[#2563EB] transition-all duration-300"
                       style={{ width: `${rangeRatio * 100}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between text-[9px] font-mono-numbers text-[#5A687D]">
+                  <div className="flex justify-between text-[9px] font-mono-numbers text-[#64748B]">
                     <span>{quote.currencySymbol}{quote.fiftyTwoWeekLow.toFixed(0)}</span>
-                    <span className="text-[#C5A880] font-bold">{(rangeRatio * 100).toFixed(0)}%</span>
+                    <span className="text-[#38BDF8] font-bold">{(rangeRatio * 100).toFixed(0)}%</span>
                     <span>{quote.currencySymbol}{quote.fiftyTwoWeekHigh.toFixed(0)}</span>
                   </div>
                 </div>
@@ -383,138 +384,8 @@ export function CompanyHub({
                 </div>
               </div>
 
-              {/* 30-Day Historical Price Trend Line Chart (Pure Lightweight SVG) */}
-              {(() => {
-                const points = (() => {
-                  const pts: { day: number; label: string; price: number; ma: number }[] = [];
-                  const base = quote.fiftyTwoWeekLow;
-                  const high = quote.fiftyTwoWeekHigh;
-                  const current = quote.regularMarketPrice;
-                  const span = Math.max(high - base, 1);
-                  let seed = quote.symbol.split("").reduce((acc, c) => acc + c.charCodeAt(0), 42);
-                  const pseudoRand = () => {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    return seed / 233280;
-                  };
-
-                  const n = 30;
-                  let p = current * (quote.change >= 0 ? 0.94 : 1.05);
-                  for (let i = 0; i < n; i++) {
-                    if (i === n - 1) {
-                      p = current;
-                    } else {
-                      const step = (pseudoRand() - 0.48) * (span * 0.05);
-                      p = Math.max(base * 0.98, Math.min(high * 1.02, p + step));
-                    }
-                    const d = new Date();
-                    d.setDate(d.getDate() - (n - 1 - i));
-                    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                    pts.push({ day: i + 1, label, price: Math.round(p * 100) / 100, ma: p });
-                  }
-                  for (let i = 0; i < n; i++) {
-                    const start = Math.max(0, i - 6);
-                    const sub = pts.slice(start, i + 1);
-                    pts[i].ma = Math.round((sub.reduce((acc, pt) => acc + pt.price, 0) / sub.length) * 100) / 100;
-                  }
-                  return pts;
-                })();
-
-                const prices = points.map((pt) => pt.price);
-                const minP = Math.min(...prices) * 0.98;
-                const maxP = Math.max(...prices) * 1.02;
-                const pRange = Math.max(maxP - minP, 1);
-
-                const width = 640;
-                const height = 110;
-                const padX = 15;
-                const padY = 12;
-
-                const getX = (idx: number) => padX + (idx / (points.length - 1)) * (width - 2 * padX);
-                const getY = (val: number) => height - padY - ((val - minP) / pRange) * (height - 2 * padY);
-
-                const pathData = points
-                  .map((pt, idx) => `${idx === 0 ? "M" : "L"} ${getX(idx).toFixed(1)} ${getY(pt.price).toFixed(1)}`)
-                  .join(" ");
-
-                const maPathData = points
-                  .map((pt, idx) => `${idx === 0 ? "M" : "L"} ${getX(idx).toFixed(1)} ${getY(pt.ma).toFixed(1)}`)
-                  .join(" ");
-
-                const areaData = `${pathData} L ${getX(points.length - 1).toFixed(1)} ${height - padY} L ${getX(0).toFixed(1)} ${height - padY} Z`;
-
-                const isGain = points[points.length - 1].price >= points[0].price;
-                const strokeColor = isGain ? "#10B981" : "#F43F5E";
-                const gradId = `priceGrad_${quote.symbol.replace(/[^a-zA-Z0-9]/g, "")}`;
-
-                return (
-                  <div className="p-3 bg-[#07090E] border border-[#1E2536] rounded space-y-2">
-                    <div className="flex flex-wrap items-center justify-between text-[10px] text-[#94A3B8]">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-3.5 h-3.5 text-[#C5A880]" />
-                        <span className="font-bold text-[#E1E7EC] uppercase tracking-wider">
-                          30-DAY STOCK PRICE CORRIDOR &amp; VOLATILITY TRAJECTORY
-                        </span>
-                        <span className="text-[9px] px-1.5 py-0.2 bg-[#12161F] border border-[#1E2536] text-[#C5A880] rounded">
-                          MOVING AVERAGE FILTER
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-[9px] font-mono">
-                        <div className="flex items-center gap-1">
-                          <span className="w-2.5 h-0.5 bg-[#C5A880] inline-block"></span>
-                          <span className="text-[#CBD5E1]">Daily Close</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="w-2.5 h-0.5 bg-[#38BDF8] border-dashed inline-block"></span>
-                          <span className="text-[#64748B]">7-Day MA</span>
-                        </div>
-                        <span className="text-[#C5A880] font-bold">
-                          30D: {isGain ? "+" : ""}{(((points[points.length - 1].price - points[0].price) / points[0].price) * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* SVG Line Chart Viewport */}
-                    <div className="relative w-full overflow-hidden">
-                      <svg
-                        viewBox={`0 0 ${width} ${height}`}
-                        className="w-full h-24 sm:h-28 overflow-visible"
-                        preserveAspectRatio="none"
-                      >
-                        <defs>
-                          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.35" />
-                            <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-
-                        {/* Background Grid Lines */}
-                        <line x1={padX} y1={padY} x2={width - padX} y2={padY} stroke="#1E2536" strokeDasharray="3 3" />
-                        <line x1={padX} y1={height / 2} x2={width - padX} y2={height / 2} stroke="#1E2536" strokeDasharray="3 3" />
-                        <line x1={padX} y1={height - padY} x2={width - padX} y2={height - padY} stroke="#1E2536" />
-
-                        {/* Area Fill */}
-                        <path d={areaData} fill={`url(#${gradId})`} />
-
-                        {/* 7-Day MA Line */}
-                        <path d={maPathData} fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 2" opacity="0.65" />
-
-                        {/* Main Price Line */}
-                        <path d={pathData} fill="none" stroke={strokeColor} strokeWidth="1.75" />
-
-                        {/* First and Last Price Nodes */}
-                        <circle cx={getX(0)} cy={getY(points[0].price)} r="2.5" fill={strokeColor} />
-                        <circle cx={getX(points.length - 1)} cy={getY(points[points.length - 1].price)} r="3.5" fill="#C5A880" stroke="#080B10" strokeWidth="1.5" />
-                      </svg>
-                    </div>
-
-                    <div className="flex justify-between text-[9px] text-[#5A687D] font-mono-numbers pt-0.5">
-                      <span>{points[0].label}: {quote.currencySymbol}{points[0].price.toFixed(1)}</span>
-                      <span className="hidden sm:inline text-[#94A3B8]">Corridor: {quote.currencySymbol}{minP.toFixed(1)} &ndash; {quote.currencySymbol}{maxP.toFixed(1)}</span>
-                      <span className="text-[#C5A880] font-bold">Latest: {quote.currencySymbol}{points[points.length - 1].price.toFixed(1)}</span>
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* Real Groww-Style Stock Chart with 8 Timeframes & Month Scrubbing */}
+              <GrowwStockChart quote={quote} companyName={selected.name} />
             </div>
           )}
 
@@ -536,7 +407,7 @@ export function CompanyHub({
                     {activeProfile.riskTier === "TIER_1_STABLE" ? "STABLE" : activeProfile.riskTier === "TIER_2_WATCHLIST" ? "WATCHLIST" : "CRITICAL"} &bull; COMPOSITE SCORE: {activeProfile.riskScore}/100
                   </span>
                   <span
-                    className="text-[9px] text-[#64748B] hover:text-[#C5A880] cursor-help underline decoration-dotted"
+                    className="text-[9px] text-[#64748B] hover:text-[#38BDF8] cursor-help underline decoration-dotted"
                     title="How Score is Calculated: Weighted composite of Net Debt/EBITDA (30%), Interest Coverage (25%), Current Ratio (20%), and Operating Margin (25%)."
                   >
                     [HOW CALCULATED]
@@ -549,11 +420,11 @@ export function CompanyHub({
 
               {/* 4 Core Financial Vitals */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded relative group">
+                <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded relative group">
                   <div className="flex items-center justify-between text-[9.5px] text-[#64748B] uppercase">
                     <span>NET DEBT / EBITDA</span>
                     <span
-                      className="text-[8px] text-[#C5A880] cursor-help"
+                      className="text-[8px] text-[#38BDF8] cursor-help"
                       title="Formula: (Total Debt - Cash & Cash Equivalents) / Operating EBITDA"
                     >
                       CALC ?
@@ -565,11 +436,11 @@ export function CompanyHub({
                   <div className="text-[9px] text-[#94A3B8]">Hurdle: &le; 3.50x</div>
                 </div>
 
-                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded relative group">
+                <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded relative group">
                   <div className="flex items-center justify-between text-[9.5px] text-[#64748B] uppercase">
                     <span>INTEREST COVERAGE</span>
                     <span
-                      className="text-[8px] text-[#C5A880] cursor-help"
+                      className="text-[8px] text-[#38BDF8] cursor-help"
                       title="Formula: Operating EBIT / Gross Interest Expense"
                     >
                       CALC ?
@@ -581,11 +452,11 @@ export function CompanyHub({
                   <div className="text-[9px] text-[#94A3B8]">Covenant: &ge; 2.50x</div>
                 </div>
 
-                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded relative group">
+                <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded relative group">
                   <div className="flex items-center justify-between text-[9.5px] text-[#64748B] uppercase">
                     <span>CURRENT LIQUIDITY</span>
                     <span
-                      className="text-[8px] text-[#C5A880] cursor-help"
+                      className="text-[8px] text-[#38BDF8] cursor-help"
                       title="Formula: Total Current Assets / Total Current Liabilities"
                     >
                       CALC ?
@@ -597,11 +468,11 @@ export function CompanyHub({
                   <div className="text-[9px] text-[#94A3B8]">Benchmark: &ge; 1.10x</div>
                 </div>
 
-                <div className="p-2.5 bg-[#0A0D12] border border-[#1E2536] rounded relative group">
+                <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded relative group">
                   <div className="flex items-center justify-between text-[9.5px] text-[#64748B] uppercase">
                     <span>OPERATING MARGIN</span>
                     <span
-                      className="text-[8px] text-[#C5A880] cursor-help"
+                      className="text-[8px] text-[#38BDF8] cursor-help"
                       title="Formula: (Operating EBIT / Total Gross Revenue) * 100%"
                     >
                       CALC ?
@@ -624,21 +495,21 @@ export function CompanyHub({
       )}
 
       {/* Global Security Master Table */}
-      <div className="border border-[#1E2638] bg-[#07090E] overflow-hidden">
-        <div className="p-3 bg-[#0A0D12] border-b border-[#1E2638] flex items-center justify-between">
+      <div className="border border-[#1E293B] bg-[#05070B] overflow-hidden rounded-xl">
+        <div className="p-3 bg-[#090E17] border-b border-[#1E293B] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Globe2 className="w-4 h-4 text-[#C5A880]" />
-            <span className="font-mono text-xs font-bold text-[#E1E7EC] tracking-wider uppercase">
+            <Globe2 className="w-4 h-4 text-[#38BDF8]" />
+            <span className="font-mono text-xs font-bold text-[#F8FAFC] tracking-wider uppercase">
               GLOBAL MULTI-CURRENCY SECURITY MASTER // CROSS-BORDER REGISTER
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-mono text-[#5A687D]">
+            <span className="text-[11px] font-mono text-[#64748B]">
               REGISTERED ENTITIES: {filteredLocal.length}
             </span>
             <button
               onClick={onRefreshMaster}
-              className="px-2 py-0.5 bg-[#12161F] hover:bg-[#1E2536] border border-[#1E2536] text-[10px] text-[#C5A880] rounded transition-colors"
+              className="px-2 py-0.5 bg-[#0E1524] hover:bg-[#1E293B] border border-[#1E293B] text-[10px] text-[#38BDF8] rounded transition-colors"
               title="Sync SQLite Security Master"
             >
               SYNC
@@ -649,7 +520,7 @@ export function CompanyHub({
         <div className="overflow-x-auto">
           <table className="w-full text-xs font-mono">
             <thead>
-              <tr className="border-b border-[#1E2638] bg-[#0E131A] text-[#5A687D] text-[11px]">
+              <tr className="border-b border-[#1E293B] bg-[#0B111E] text-[#64748B] text-[11px]">
                 <th className="py-2.5 px-3 text-left">SYMBOL / CODE</th>
                 <th className="py-2.5 px-3 text-left">ENTITY NAME</th>
                 <th className="py-2.5 px-3 text-left">EXCHANGE</th>
@@ -660,7 +531,7 @@ export function CompanyHub({
                 <th className="py-2.5 px-3 text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2638]/50">
+            <tbody className="divide-y divide-[#1E293B]/50">
               {filteredLocal.map((c) => {
                 const isSelected = selected?.id === c.id;
                 return (
@@ -669,31 +540,31 @@ export function CompanyHub({
                     onClick={() => onSelectCompany(c.id)}
                     className={`cursor-pointer transition-colors ${
                       isSelected
-                        ? "bg-[#181F2B]/90 hover:bg-[#181F2B]"
-                        : "hover:bg-[#12161F]"
+                        ? "bg-[#101A2E] hover:bg-[#13223D]"
+                        : "hover:bg-[#0B111E]"
                     }`}
                   >
-                    <td className="py-3 px-3 text-left font-bold text-[#C5A880]">
+                    <td className="py-3 px-3 text-left font-bold text-[#38BDF8]">
                       <div className="flex items-center gap-1.5">
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>}
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]"></span>}
                         <span>{c.symbol}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-left text-[#E1E7EC]">
+                    <td className="py-3 px-3 text-left text-[#F8FAFC]">
                       <div>{c.name}</div>
-                      <div className="text-[10px] text-[#5A687D]">{c.sector}</div>
+                      <div className="text-[10px] text-[#64748B]">{c.sector}</div>
                     </td>
-                    <td className="py-3 px-3 text-left text-[#9BA8B8]">{c.exchange}</td>
-                    <td className="py-3 px-3 text-left text-[#9BA8B8]">{c.accountingStandard}</td>
+                    <td className="py-3 px-3 text-left text-[#94A3B8]">{c.exchange}</td>
+                    <td className="py-3 px-3 text-left text-[#94A3B8]">{c.accountingStandard}</td>
                     <td className="py-3 px-3 text-left">
-                      <span className="font-semibold text-[#E1E7EC]">{c.currency}</span>{" "}
-                      <span className="text-[#5A687D] text-[10px]">({c.scaleUnit})</span>
+                      <span className="font-semibold text-[#F8FAFC]">{c.currency}</span>{" "}
+                      <span className="text-[#64748B] text-[10px]">({c.scaleUnit})</span>
                     </td>
-                    <td className="py-3 px-3 text-left text-[#5A687D]">
+                    <td className="py-3 px-3 text-left text-[#64748B]">
                       <div>ISIN: {c.isin || "N/D"}</div>
                       <div>CIK: {c.cik || "N/D"}</div>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-numbers text-[#9BA8B8]">
+                    <td className="py-3 px-3 text-right font-mono-numbers text-[#94A3B8]">
                       {c.fxRateToUsd.toFixed(5)}
                     </td>
                     <td className="py-3 px-3 text-right">
@@ -704,7 +575,7 @@ export function CompanyHub({
                             onSelectCompany(c.id);
                             setIsChartModalOpen(true);
                           }}
-                          className="px-2 py-1 bg-[#172033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[10px] text-[#C5A880] font-bold rounded transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2 py-1 bg-[#101A2E] hover:bg-[#1E293B] border border-[#2563EB]/40 text-[10px] text-[#38BDF8] font-bold rounded transition-colors flex items-center gap-1 cursor-pointer"
                           title="View Power BI interactive charts"
                         >
                           <BarChart3 className="w-3 h-3" />
@@ -716,7 +587,7 @@ export function CompanyHub({
                             onSelectCompany(c.id);
                             onNavigateToTab("02_STATEMENTS");
                           }}
-                          className="px-2 py-1 bg-[#12161F] hover:bg-[#1E2638] border border-[#232B3A] hover:border-[#C5A880] text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] font-bold transition-colors rounded cursor-pointer"
+                          className="px-2 py-1 bg-[#090E17] hover:bg-[#101A2E] border border-[#1E293B] hover:border-[#38BDF8] text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] font-bold transition-colors rounded cursor-pointer"
                         >
                           LEDGER
                         </button>

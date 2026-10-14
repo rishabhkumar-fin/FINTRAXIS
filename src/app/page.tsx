@@ -230,7 +230,7 @@ export default function FintraxisTerminalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F8FAFC] flex font-mono selection:bg-[#C5A880]/30 selection:text-[#F8FAFC]">
+    <div className="min-h-screen bg-[#080B10] text-[#F8FAFC] flex font-mono selection:bg-[#38BDF8]/30 selection:text-[#F8FAFC]">
       {/* Column 1: Vertical Institutional Left Sidebar */}
       <SidebarNavigation
         activeTab={activeTab}
@@ -254,7 +254,7 @@ export default function FintraxisTerminalPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMobileNavOpen(true)}
-              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#C5A880] rounded transition-colors"
+              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#38BDF8] rounded transition-colors"
               aria-label="Open Navigation Menu"
             >
               <Menu className="w-4 h-4" />
@@ -266,7 +266,7 @@ export default function FintraxisTerminalPage() {
               </span>
             </div>
             {profile?.company.symbol && (
-              <span className="ml-1 px-1.5 py-0.5 bg-[#111622] border border-[#C5A880]/30 text-[#C5A880] text-[10px] font-bold rounded">
+              <span className="ml-1 px-1.5 py-0.5 bg-[#111622] border border-[#38BDF8]/30 text-[#38BDF8] text-[10px] font-bold rounded">
                 {profile.company.symbol}
               </span>
             )}
@@ -282,7 +282,7 @@ export default function FintraxisTerminalPage() {
             </button>
             <button
               onClick={() => setIsAiOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-bold text-[11px] rounded transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] font-bold text-[11px] rounded transition-colors shadow-sm cursor-pointer"
             >
               <Sparkles className="w-3 h-3" />
               <span>AI</span>
@@ -374,7 +374,7 @@ export default function FintraxisTerminalPage() {
           {/* Fallback Loading State */}
           {isLoading && !profile && (
             <div className="py-24 flex flex-col items-center justify-center space-y-3 text-[#64748B]">
-              <Loader2 className="w-6 h-6 animate-spin text-[#C5A880]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#38BDF8]" />
               <div className="text-xs uppercase tracking-wider">
                 RESOLVING INSTITUTIONAL METRICS &bull; QUERYING SQLITE WAL...
               </div>
@@ -434,7 +434,7 @@ export default function FintraxisTerminalPage() {
         {/* Floating AI Financial Risk Copilot Trigger */}
         <button
           onClick={() => setIsAiOpen(true)}
-          className="fixed bottom-10 right-6 z-40 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(197,168,128,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
+          className="fixed bottom-10 right-6 z-40 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(37,99,235,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
           title="Open Financial AI Copilot (Ctrl + J)"
         >
           <Sparkles className="w-4 h-4 text-[#080B10]" />
@@ -466,7 +466,7 @@ export default function FintraxisTerminalPage() {
           <div className="flex items-center gap-3">
             <span>HOTKEYS: [1-6] MODULES &bull; CTRL+K SEARCH &bull; CTRL+J AI COPILOT &bull; CTRL+SHIFT+L LOCK</span>
             <span>&bull;</span>
-            <span className="text-[#C5A880]">FINTRAXIS INSTITUTIONAL</span>
+            <span className="text-[#38BDF8]">FINTRAXIS INSTITUTIONAL</span>
           </div>
         </footer>
       </div>

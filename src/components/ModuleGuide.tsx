@@ -111,8 +111,8 @@ export function ModuleGuide({ moduleKey }: ModuleGuideProps) {
         className="w-full px-3.5 py-2 flex items-center justify-between bg-[#0F1420] hover:bg-[#151C2C] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
       >
         <div className="flex items-center gap-2">
-          <HelpCircle className="w-3.5 h-3.5 text-[#C5A880]" />
-          <span className="font-bold tracking-wider text-[#C5A880] text-[11px] uppercase">
+          <HelpCircle className="w-3.5 h-3.5 text-[#38BDF8]" />
+          <span className="font-bold tracking-wider text-[#38BDF8] text-[11px] uppercase">
             HOW TO USE THIS MODULE
           </span>
           <span className="text-[#475569]">&bull;</span>
@@ -135,8 +135,8 @@ export function ModuleGuide({ moduleKey }: ModuleGuideProps) {
         <div className="p-4 bg-[#0A0D15] border-t border-[#1E2536] grid grid-cols-1 md:grid-cols-3 gap-3 animate-in fade-in duration-150">
           {/* Card 1: Purpose */}
           <div className="p-3 bg-[#111622] border border-[#1E2536] rounded space-y-2">
-            <div className="flex items-center gap-1.5 text-[#C5A880] text-[10.5px] font-bold uppercase tracking-wider">
-              <Target className="w-3.5 h-3.5 text-[#C5A880]" />
+            <div className="flex items-center gap-1.5 text-[#38BDF8] text-[10.5px] font-bold uppercase tracking-wider">
+              <Target className="w-3.5 h-3.5 text-[#38BDF8]" />
               <span>01. Operational Purpose</span>
             </div>
             <p className="text-[11px] text-[#CBD5E1] leading-relaxed">

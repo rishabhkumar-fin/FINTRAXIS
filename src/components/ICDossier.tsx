@@ -277,7 +277,7 @@ Synchronized live on FINTRAXIS Terminal.`;
          ========================================================================= */}
       <div className="p-3.5 bg-[#0F141F] border border-[#1E2536] rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-lg no-print">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#C5A880]/15 border border-[#C5A880]/40 rounded-lg text-[#C5A880]">
+          <div className="p-2 bg-[#38BDF8]/15 border border-[#38BDF8]/40 rounded-lg text-[#38BDF8]">
             <Presentation className="w-5 h-5" />
           </div>
           <div>
@@ -285,7 +285,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <span className="font-bold text-[#F8FAFC] tracking-wider uppercase text-xs">
                 INVESTMENT COMMITTEE // BOARDROOM CREDIT RISK DOSSIER &amp; DECK
               </span>
-              <span className="px-2 py-0.5 bg-[#162033] border border-[#C5A880]/40 text-[#C5A880] text-[10px] font-bold rounded">
+              <span className="px-2 py-0.5 bg-[#162033] border border-[#38BDF8]/40 text-[#38BDF8] text-[10px] font-bold rounded">
                 CLASSY PRESENTATION DECK
               </span>
             </div>
@@ -303,7 +303,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               onClick={() => setViewMode("DECK")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "DECK"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
               title="Slide-by-slide presentation deck view"
@@ -315,7 +315,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               onClick={() => setViewMode("SCROLL")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "SCROLL"
-                  ? "bg-[#1E2B45] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                   : "text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
               title="Full continuous boardroom dossier document"
@@ -327,33 +327,33 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           <button
             onClick={handleDownloadMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
             title="Download full Markdown Tearsheet file"
           >
-            <Download className="w-3.5 h-3.5 text-[#C5A880]" />
+            <Download className="w-3.5 h-3.5 text-[#38BDF8]" />
             <span className="hidden sm:inline">DOWNLOAD .MD</span>
           </button>
 
           <button
             onClick={handleShareSummary}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
             title="Copy shareable executive summary to clipboard"
           >
-            {shareCopied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Share2 className="w-3.5 h-3.5 text-[#C5A880]" />}
+            {shareCopied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Share2 className="w-3.5 h-3.5 text-[#38BDF8]" />}
             <span>{shareCopied ? "COPIED" : "SHARE MEMO"}</span>
           </button>
 
           <button
             onClick={handleCopyMemo}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#C5A880]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#C5A880]" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#38BDF8]" />}
             <span>{copied ? "COPIED" : "COPY MD"}</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#C5A880] hover:bg-[#D4B996] text-[#080B10] font-extrabold text-[11px] tracking-wide transition-colors rounded-lg shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] font-extrabold text-[11px] tracking-wide transition-colors rounded-lg shadow-md cursor-pointer"
             title="Export full multi-page boardroom PDF tearsheet"
           >
             <Printer className="w-3.5 h-3.5" />
@@ -394,7 +394,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                 onClick={() => setActiveSlide(s.idx)}
                 className={`px-2.5 py-1 text-[10px] font-bold rounded transition-all whitespace-nowrap ${
                   activeSlide === s.idx
-                    ? "bg-[#C5A880] text-[#080B10] shadow-sm"
+                    ? "bg-[#38BDF8] text-[#080B10] shadow-sm"
                     : "bg-[#111622] hover:bg-[#162033] text-[#94A3B8] hover:text-[#F8FAFC] border border-[#1E2536]"
                 }`}
               >
@@ -422,11 +422,11 @@ Synchronized live on FINTRAXIS Terminal.`;
                 <div className="text-[10px] font-bold text-[#F43F5E] print:text-slate-900 tracking-widest uppercase">
                   CONFIDENTIAL // IC BOARDROOM COPY #04
                 </div>
-                <div className="text-[9px] text-[#C5A880] print:text-slate-700 tracking-wider mt-0.5 font-bold">
+                <div className="text-[9px] text-[#38BDF8] print:text-slate-700 tracking-wider mt-0.5 font-bold">
                   SOVEREIGN CLEARANCE: LEVEL 3 &bull; NODE MUM-01
                 </div>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold">
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold">
                 SLIDE 01 / 06
               </div>
             </div>
@@ -436,7 +436,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             <div className="p-5 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-5">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#C5A880] print:text-slate-700 uppercase font-bold tracking-wider">
+                  <span className="text-[10px] text-[#38BDF8] print:text-slate-700 uppercase font-bold tracking-wider">
                     TARGET ISSUER CREDIT DOSSIER
                   </span>
                   <span className="text-[9px] px-2 py-0.5 bg-[#080B10] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 text-[#94A3B8] print:text-slate-700 rounded">
@@ -445,7 +445,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                 </div>
                 <div className="text-2xl font-extrabold text-[#F8FAFC] print:text-slate-900 flex items-center gap-3">
                   <span>{company.name}</span>
-                  <span className="text-xs px-2.5 py-1 border border-[#C5A880] text-[#C5A880] print:border-slate-800 print:text-slate-900 bg-[#080B10] print:bg-white font-mono rounded">
+                  <span className="text-xs px-2.5 py-1 border border-[#38BDF8] text-[#38BDF8] print:border-slate-800 print:text-slate-900 bg-[#080B10] print:bg-white font-mono rounded">
                     {company.symbol}
                   </span>
                 </div>
@@ -460,7 +460,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   {company.isin && (
                     <>
                       <span>&bull;</span>
-                      <span>ISIN: <strong className="text-[#C5A880] print:text-slate-900">{company.isin}</strong></span>
+                      <span>ISIN: <strong className="text-[#38BDF8] print:text-slate-900">{company.isin}</strong></span>
                     </>
                   )}
                 </div>
@@ -473,7 +473,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <div className="text-2xl font-extrabold font-mono tabular-nums text-[#F8FAFC] print:text-slate-900 mt-0.5">
                     {riskScore} <span className="text-xs text-[#64748B] print:text-slate-500">/ 100</span>
                   </div>
-                  <div className="text-[9px] text-[#C5A880] print:text-slate-700 font-semibold mt-0.5">
+                  <div className="text-[9px] text-[#38BDF8] print:text-slate-700 font-semibold mt-0.5">
                     {earlyWarningFlags.length} EWS {earlyWarningFlags.length === 1 ? "FLAG" : "FLAGS"}
                   </div>
                 </div>
@@ -532,7 +532,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
             {/* Core Scorecard Pillars */}
             <div className="space-y-3">
-              <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1">
+              <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1">
                 EXECUTIVE UNDERWRITING HIGHLIGHTS &amp; CAPITAL RATIOS
               </div>
 
@@ -554,7 +554,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <div className="text-sm font-extrabold font-mono text-[#F8FAFC] print:text-slate-900 mt-1">
                     {formatCurr(latest?.ebit)}
                   </div>
-                  <div className="text-[9px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                  <div className="text-[9px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                     Margin: {latestRatios.operatingMarginPct !== null ? `${latestRatios.operatingMarginPct.toFixed(1)}%` : "N/D"}
                   </div>
                 </div>
@@ -564,7 +564,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <div className="text-sm font-extrabold font-mono text-[#F8FAFC] print:text-slate-900 mt-1">
                     {formatRatio(latestRatios.netDebtToEbitda)}
                   </div>
-                  <div className="text-[9px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                  <div className="text-[9px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                     {(latestRatios.netDebtToEbitda ?? 0) <= 0 ? "Net Cash Fortress" : `Hurdle ≤ ${maxNetDebtHurdle}x`}
                   </div>
                 </div>
@@ -594,7 +594,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <div className="text-sm font-extrabold font-mono text-[#10B981] print:text-emerald-800 mt-1">
                     {simulation.cashBurnRunwayMonths ? `${simulation.cashBurnRunwayMonths.toFixed(1)} Mo` : "SELF-SUSTAINING"}
                   </div>
-                  <div className="text-[9px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                  <div className="text-[9px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                     {simulation.runwayStatus === "CRITICAL_BURN" ? "Critical Burn" : "Sufficient Buffer"}
                   </div>
                 </div>
@@ -615,15 +615,15 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
-                <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <FileSpreadsheet className="w-4 h-4 text-[#C5A880]" />
+                <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <FileSpreadsheet className="w-4 h-4 text-[#38BDF8]" />
                   <span>SLIDE 02 // MULTI-PERIOD AUDITED FINANCIAL LEDGER (3-YEAR XBRL AUDIT)</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Consolidated Income Statement, Balance Sheet &amp; Cash Flow verified against SEC 10-K / BSE / FSA filings
                 </div>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
                 SLIDE 02 / 06
               </div>
             </div>
@@ -646,7 +646,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                 </thead>
                 <tbody className="divide-y divide-[#1E2536]/40 print:divide-slate-200">
                   {/* Category Header: Income Statement */}
-                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#C5A880] print:text-slate-800 text-[10px]">
+                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#38BDF8] print:text-slate-800 text-[10px]">
                     <td colSpan={periods.length + 3} className="py-1.5 px-3 uppercase tracking-wider">
                       I. CONSOLIDATED REVENUE &amp; OPERATING EARNINGS
                     </td>
@@ -688,14 +688,14 @@ Synchronized live on FINTRAXIS Terminal.`;
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 px-3 font-bold text-[#C5A880] print:text-slate-900">Operating Profit (EBIT)</td>
+                    <td className="py-2 px-3 font-bold text-[#38BDF8] print:text-slate-900">Operating Profit (EBIT)</td>
                     <td className="py-2 px-2 text-[9px] text-[#64748B] print:text-slate-500 hidden sm:table-cell">{latest?.ebitXbrlTag || "us-gaap:OperatingIncomeLoss"}</td>
                     {periods.map((p) => (
-                      <td key={p.id} className="py-2 px-3 text-right font-bold text-[#C5A880] print:text-slate-900 tabular-nums">
+                      <td key={p.id} className="py-2 px-3 text-right font-bold text-[#38BDF8] print:text-slate-900 tabular-nums">
                         {formatCurr(p.ebit)}
                       </td>
                     ))}
-                    <td className="py-2 px-3 text-right font-bold text-[#C5A880] print:text-slate-800 tabular-nums">
+                    <td className="py-2 px-3 text-right font-bold text-[#38BDF8] print:text-slate-800 tabular-nums">
                       {latest?.ebit && prior?.ebit ? `${(((latest.ebit - prior.ebit) / Math.abs(prior.ebit)) * 100).toFixed(1)}%` : "N/A"}
                     </td>
                   </tr>
@@ -725,7 +725,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   </tr>
 
                   {/* Category Header: Balance Sheet */}
-                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#C5A880] print:text-slate-800 text-[10px]">
+                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#38BDF8] print:text-slate-800 text-[10px]">
                     <td colSpan={periods.length + 3} className="py-1.5 px-3 uppercase tracking-wider">
                       II. BALANCE SHEET &amp; CAPITAL OBLIGATIONS
                     </td>
@@ -780,7 +780,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   </tr>
 
                   {/* Category Header: Cash Flows */}
-                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#C5A880] print:text-slate-800 text-[10px]">
+                  <tr className="bg-[#111724]/60 print:bg-slate-50 font-bold text-[#38BDF8] print:text-slate-800 text-[10px]">
                     <td colSpan={periods.length + 3} className="py-1.5 px-3 uppercase tracking-wider">
                       III. STATUTORY CASH FLOWS &amp; CAPITAL EXPENDITURES
                     </td>
@@ -810,14 +810,14 @@ Synchronized live on FINTRAXIS Terminal.`;
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 px-3 font-bold text-[#C5A880] print:text-slate-900">Free Cash Flow (FCF)</td>
+                    <td className="py-2 px-3 font-bold text-[#38BDF8] print:text-slate-900">Free Cash Flow (FCF)</td>
                     <td className="py-2 px-2 text-[9px] text-[#64748B] print:text-slate-500 hidden sm:table-cell">OCF - CapEx</td>
                     {periods.map((p) => (
-                      <td key={p.id} className="py-2 px-3 text-right font-bold text-[#C5A880] print:text-slate-900 tabular-nums">
+                      <td key={p.id} className="py-2 px-3 text-right font-bold text-[#38BDF8] print:text-slate-900 tabular-nums">
                         {formatCurr(p.freeCashFlow)}
                       </td>
                     ))}
-                    <td className="py-2 px-3 text-right font-bold text-[#C5A880] print:text-slate-800 tabular-nums">
+                    <td className="py-2 px-3 text-right font-bold text-[#38BDF8] print:text-slate-800 tabular-nums">
                       {latest?.freeCashFlow && prior?.freeCashFlow ? `${(((latest.freeCashFlow - prior.freeCashFlow) / Math.abs(prior.freeCashFlow)) * 100).toFixed(1)}%` : "N/A"}
                     </td>
                   </tr>
@@ -828,7 +828,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Source Filing Provenance */}
             <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg flex flex-wrap items-center justify-between gap-3 text-[10px] text-[#94A3B8] print:text-slate-700">
               <div className="flex items-center gap-2">
-                <span className="text-[#C5A880] font-bold">XBRL PROVENANCE:</span>
+                <span className="text-[#38BDF8] font-bold">XBRL PROVENANCE:</span>
                 <span>Audited filings verified from official SEC / exchange repository</span>
               </div>
               <div className="flex items-center gap-3">
@@ -838,7 +838,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                     href={p.filingUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#C5A880] hover:underline flex items-center gap-1 font-mono"
+                    className="text-[#38BDF8] hover:underline flex items-center gap-1 font-mono"
                   >
                     <span>{p.period} {p.filingForm}</span>
                     <ExternalLink className="w-2.5 h-2.5" />
@@ -861,15 +861,15 @@ Synchronized live on FINTRAXIS Terminal.`;
           {/* Slide Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
             <div>
-              <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-[#C5A880]" />
+              <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#38BDF8]" />
                 <span>SLIDE 03 // CORPORATE VULNERABILITIES, DEPENDENCIES &amp; BASEL III EARLY WARNINGS</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                 Institutional surveillance across debt service burden, covenant headroom, working capital &amp; structural dependencies
               </div>
             </div>
-            <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+            <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
               SLIDE 03 / 06
             </div>
           </div>
@@ -939,7 +939,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           {/* Deep Insights 1: Debt Maturity Wall Schedule & Refinance Cliff */}
           <div className="space-y-2">
-            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+            <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
               <span>DEBT MATURITY WALL &amp; REFINANCING EXPOSURE SCHEDULE</span>
               <span className="text-[9.5px] text-[#64748B] print:text-slate-600">HOW CALCULATED: Contractual maturity buckets vs available liquidity</span>
             </div>
@@ -957,7 +957,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
               <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded">
                 <div className="text-[9px] text-[#94A3B8] print:text-slate-600 uppercase">1 &ndash; 3 YEARS (MEDIUM)</div>
-                <div className="text-sm font-bold font-mono text-[#C5A880] print:text-slate-900 mt-0.5">
+                <div className="text-sm font-bold font-mono text-[#38BDF8] print:text-slate-900 mt-0.5">
                   {formatFinancialValue((latest?.longTermDebt ?? 0) * 0.45, company.currency, company.scaleUnit)}
                 </div>
                 <div className="text-[8.5px] text-[#64748B] print:text-slate-600 mt-0.5">Syndicate Term Facility</div>
@@ -983,7 +983,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           {/* Deep Insights 2: Counterparty & Structural Dependencies Matrix */}
           <div className="space-y-2">
-            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+            <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
               <span>STRUCTURAL CORPORATE DEPENDENCY &amp; CONCENTRATION MATRIX</span>
               <span className="text-[9.5px] text-[#64748B] print:text-slate-600">HOW CALCULATED: Counterparty disclosures &amp; macro sensitivity</span>
             </div>
@@ -1000,7 +1000,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               </div>
 
               <div className="p-3 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded space-y-1">
-                <div className="text-[9px] font-bold text-[#C5A880] uppercase">SUPPLY CHAIN SENSITIVITY</div>
+                <div className="text-[9px] font-bold text-[#38BDF8] uppercase">SUPPLY CHAIN SENSITIVITY</div>
                 <div className="text-[11px] text-[#F8FAFC] print:text-slate-900 font-semibold">
                   Critical Input Dual-Sourcing: Verified
                 </div>
@@ -1023,7 +1023,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           {/* Early Warning Flags Audit Table */}
           <div className="space-y-3">
-            <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+            <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
               <span>AUDITED CORPORATE VULNERABILITIES &amp; BASEL III TRIGGERS ({earlyWarningFlags.length})</span>
               <span className="text-[10px] text-[#94A3B8] print:text-slate-600">SURVEILLANCE REGISTER</span>
             </div>
@@ -1083,7 +1083,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                           <td className="py-3 px-3 text-left text-[10.5px] text-[#CBD5E1] print:text-slate-800 leading-snug max-w-xs">
                             {flag.description}
                           </td>
-                          <td className="py-3 px-3 text-left text-[10.5px] text-[#C5A880] print:text-slate-700 leading-snug max-w-xs">
+                          <td className="py-3 px-3 text-left text-[10.5px] text-[#38BDF8] print:text-slate-700 leading-snug max-w-xs">
                             {isCrit
                               ? "Impose mandatory cash sweep, freeze junior distributions, and require weekly cash position reporting."
                               : isAmber
@@ -1113,7 +1113,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
-                <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-[#F43F5E]" />
                   <span>SLIDE 04 // PRO-FORMA ADVERSE MACROECONOMIC STRESS SENSITIVITY</span>
                 </div>
@@ -1121,7 +1121,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   Deterministic simulation under stagflationary shock: revenue contraction, COGS inflation &amp; +200 bps monetary rate shock
                 </div>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
                 SLIDE 04 / 06
               </div>
             </div>
@@ -1200,8 +1200,8 @@ Synchronized live on FINTRAXIS Terminal.`;
                   </tr>
 
                   <tr>
-                    <td className="py-2.5 px-3 font-bold text-[#C5A880] print:text-slate-900">Operating Profit (EBIT)</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums text-[#C5A880] print:text-slate-900">{formatCurr(latest?.ebit)}</td>
+                    <td className="py-2.5 px-3 font-bold text-[#38BDF8] print:text-slate-900">Operating Profit (EBIT)</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums text-[#38BDF8] print:text-slate-900">{formatCurr(latest?.ebit)}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#F43F5E] print:text-rose-800">{formatCurr(simulation.simulatedEbit)}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums text-[#F43F5E] print:text-rose-800">{formatCurr(simulation.simulatedEbit - (latest?.ebit ?? 0))}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums text-[#F43F5E] print:text-rose-800">
@@ -1230,13 +1230,13 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <tr>
                     <td className="py-2.5 px-3 font-bold text-[#10B981] print:text-emerald-800">EBIT Interest Coverage</td>
                     <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#10B981] print:text-emerald-800">{formatRatio(latestRatios.interestCoverage)}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#C5A880] print:text-slate-900">{formatRatio(simulation.simulatedInterestCoverage)}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums text-[#C5A880] print:text-slate-700">
+                    <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[#38BDF8] print:text-slate-900">{formatRatio(simulation.simulatedInterestCoverage)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums text-[#38BDF8] print:text-slate-700">
                       {latestRatios.interestCoverage && simulation.simulatedInterestCoverage
                         ? `${(simulation.simulatedInterestCoverage - latestRatios.interestCoverage).toFixed(2)}x`
                         : "N/A"}
                     </td>
-                    <td className="py-2.5 px-3 text-right tabular-nums text-[#C5A880] print:text-slate-700">Compressed</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums text-[#38BDF8] print:text-slate-700">Compressed</td>
                     <td className="py-2.5 px-3 text-center">
                       <span
                         className={`px-2 py-0.5 text-[9px] font-bold border rounded ${
@@ -1270,7 +1270,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
             {/* Stress Sensitivity Key Takeaways */}
             <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1.5">
-              <div className="text-[10px] text-[#C5A880] print:text-slate-900 uppercase font-bold">
+              <div className="text-[10px] text-[#38BDF8] print:text-slate-900 uppercase font-bold">
                 SUPERVISORY COMMITTEE STRESS SYNTHESIS
               </div>
               <p className="text-[11px] text-[#CBD5E1] print:text-slate-800 leading-relaxed">
@@ -1296,15 +1296,15 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
-                <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#C5A880]" />
+                <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#38BDF8]" />
                   <span>SLIDE 05 // CAPITAL STRUCTURE WATERFALL &amp; COVENANT COMPLIANCE AUDIT</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Senior credit facility governance, subordination ranking, and contractual covenant compliance tests
                 </div>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
                 SLIDE 05 / 06
               </div>
             </div>
@@ -1333,7 +1333,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
               <div className="p-4 bg-[#0F1420] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg space-y-1">
                 <div className="text-[9.5px] text-[#94A3B8] print:text-slate-600 uppercase font-bold">NET DEBT POSITION</div>
-                <div className="text-base font-extrabold font-mono text-[#C5A880] print:text-slate-900">
+                <div className="text-base font-extrabold font-mono text-[#38BDF8] print:text-slate-900">
                   {formatCurr((latest?.totalDebt ?? 0) - (latest?.cashAndEquivalents ?? 0))}
                 </div>
                 <div className="text-[9.5px] text-[#64748B] print:text-slate-600">
@@ -1354,7 +1354,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
             {/* Covenant Compliance Audit Table */}
             <div className="space-y-3">
-              <div className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
+              <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
                 <span>CONTRACTUAL CREDIT COVENANT COMPLIANCE MATRIX</span>
                 <span className="text-[10px] text-[#94A3B8] print:text-slate-600">SYNDICATE FACILITY AGREEMENT</span>
               </div>
@@ -1425,15 +1425,15 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] print:border-slate-300 pb-3 gap-2">
               <div>
-                <div className="text-xs font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-[#C5A880]" />
+                <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-[#38BDF8]" />
                   <span>SLIDE 06 // MANAGING DIRECTOR CREDIT THESIS &amp; EXECUTIVE SIGN-OFF</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Underwriting recommendation, syndicate terms, and sovereign multi-party supervisory clearance seals
                 </div>
               </div>
-              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#C5A880] print:text-slate-900 font-bold self-start sm:self-auto">
+              <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
                 SLIDE 06 / 06
               </div>
             </div>
@@ -1441,7 +1441,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Managing Director Risk Thesis Section */}
             <div className="space-y-2.5">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1E2536] print:border-slate-300 pb-1">
-                <span className="text-[11px] font-bold text-[#C5A880] print:text-slate-900 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider">
                   MANAGING DIRECTOR CREDIT THESIS &amp; UNDERWRITING MEMO
                 </span>
                 <div className="flex items-center gap-2 no-print">
@@ -1450,7 +1450,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                     <button
                       type="button"
                       onClick={() => loadThesisTemplate("CONSERVATIVE")}
-                      className="px-2 py-0.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] text-[9px] text-[#C5A880] rounded transition-colors"
+                      className="px-2 py-0.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] text-[9px] text-[#38BDF8] rounded transition-colors"
                       title="Load Conservative Thesis Preset"
                     >
                       Conservative
@@ -1494,13 +1494,13 @@ Synchronized live on FINTRAXIS Terminal.`;
                 onChange={(e) => handleCommentaryChange(e.target.value)}
                 rows={4}
                 placeholder="Enter credit thesis, syndicate pricing conditions, or negative pledge terms..."
-                className="w-full p-3.5 bg-[#080B10] border border-[#1E2536] text-xs font-mono text-[#F8FAFC] leading-relaxed focus:border-[#C5A880] focus:outline-none placeholder-[#64748B] rounded-lg no-print"
+                className="w-full p-3.5 bg-[#080B10] border border-[#1E2536] text-xs font-mono text-[#F8FAFC] leading-relaxed focus:border-[#38BDF8] focus:outline-none placeholder-[#64748B] rounded-lg no-print"
               />
             </div>
 
             {/* Multi-Party Boardroom Sign-Off Ledger */}
             <div className="border border-[#1E2536] print:border-slate-300 bg-[#0F1420] print:bg-slate-50 p-5 rounded-xl space-y-4">
-              <div className="text-[10px] text-[#C5A880] print:text-slate-900 font-bold uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-2 flex items-center justify-between">
+              <div className="text-[10px] text-[#38BDF8] print:text-slate-900 font-bold uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-2 flex items-center justify-between">
                 <span>INVESTMENT COMMITTEE SIGN-OFF &amp; CLEARANCE REPOSITORIES</span>
                 <span className="text-[#10B981] font-mono">STATUS: ATTESTED</span>
               </div>
@@ -1508,13 +1508,13 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-[10px]">
                 {/* 1. Primary Underwriting Officer */}
                 <div className="space-y-2.5 p-3 bg-[#080B10] print:bg-white border border-[#1E2536] print:border-slate-300 rounded-lg">
-                  <div className="text-[9px] uppercase tracking-wider text-[#C5A880] print:text-slate-900 font-bold flex items-center justify-between">
+                  <div className="text-[9px] uppercase tracking-wider text-[#38BDF8] print:text-slate-900 font-bold flex items-center justify-between">
                     <span>PRIMARY UNDERWRITER</span>
                     <span className="text-[#10B981]">LEAD</span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border border-[#C5A880]/50 overflow-hidden bg-[#162033] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full border border-[#38BDF8]/50 overflow-hidden bg-[#162033] flex items-center justify-center shrink-0">
                       {session?.avatarCustomUrl ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={session.avatarCustomUrl} alt="Analyst Avatar" className="w-full h-full object-cover" />
@@ -1532,7 +1532,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                       <div className="text-[9px] text-[#94A3B8] print:text-slate-600 truncate">
                         {session?.userEmail || "analyst@fintraxis.terminal"}
                       </div>
-                      <div className="text-[8.5px] text-[#C5A880] print:text-slate-700 truncate mt-0.5">
+                      <div className="text-[8.5px] text-[#38BDF8] print:text-slate-700 truncate mt-0.5">
                         {session?.desk || "Global Credit Risk & Surveillance"}
                       </div>
                     </div>
@@ -1558,7 +1558,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                     <div className="text-[9px] text-[#94A3B8] print:text-slate-600">
                       klaus.meier@fintraxis.sovereign
                     </div>
-                    <div className="text-[8.5px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                    <div className="text-[8.5px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                       Global Head of Credit Surveillance &amp; Solvency
                     </div>
                   </div>
@@ -1583,7 +1583,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                     <div className="text-[9px] text-[#94A3B8] print:text-slate-600">
                       alistair.vance@fintraxis.sovereign
                     </div>
-                    <div className="text-[8.5px] text-[#C5A880] print:text-slate-700 mt-0.5">
+                    <div className="text-[8.5px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                       Senior Partner, Sovereign Fixed Income &amp; Credit
                     </div>
                   </div>
@@ -1599,7 +1599,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Cryptographic Attestation Block */}
             <div className="p-3.5 bg-[#080B10] print:bg-slate-50 border border-[#1E2536] print:border-slate-300 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[10px] text-[#94A3B8] print:text-slate-700">
               <div className="space-y-0.5">
-                <div className="text-[9px] text-[#C5A880] print:text-slate-900 font-bold uppercase">
+                <div className="text-[9px] text-[#38BDF8] print:text-slate-900 font-bold uppercase">
                   IMMUTABLE AUDIT TRAIL &amp; DIGEST
                 </div>
                 <div className="font-mono text-[#F8FAFC] print:text-slate-900 text-[10px]">

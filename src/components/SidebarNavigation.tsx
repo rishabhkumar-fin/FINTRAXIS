@@ -174,7 +174,7 @@ export function SidebarNavigation({
                   key={c.id}
                   onClick={() => handleCompanySelect(c.id)}
                   className={`w-full p-2 text-left text-xs font-mono flex items-center justify-between hover:bg-[#162033] transition-colors border-b border-[#1E2536]/40 last:border-0 ${
-                    selected?.id === c.id ? "bg-[#172033] text-[#C5A880]" : "text-[#94A3B8]"
+                    selected?.id === c.id ? "bg-[#172033] text-[#38BDF8]" : "text-[#94A3B8]"
                   }`}
                 >
                   <div className="truncate mr-2">
@@ -216,13 +216,13 @@ export function SidebarNavigation({
                 title={isCollapsed ? `${mod.number}: ${mod.name}` : undefined}
                 className={`w-full p-2.5 flex items-center gap-3 text-left transition-all rounded ${
                   isCurrent
-                    ? "bg-[#162033] border-l-2 border-[#C5A880] text-[#F8FAFC]"
+                    ? "bg-[#162033] border-l-2 border-[#38BDF8] text-[#F8FAFC]"
                     : "hover:bg-[#111622] text-[#94A3B8] hover:text-[#F8FAFC]"
                 }`}
               >
                 <IconComponent
                   className={`w-4 h-4 shrink-0 ${
-                    isCurrent ? "text-[#C5A880]" : "text-[#64748B]"
+                    isCurrent ? "text-[#38BDF8]" : "text-[#64748B]"
                   }`}
                 />
 
@@ -261,13 +261,13 @@ export function SidebarNavigation({
           <div className="px-3 pt-3">
             <button
               onClick={onOpenAi}
-              className={`w-full p-2 bg-[#172033] hover:bg-[#1E2D4A] border border-[#C5A880]/40 text-[#C5A880] rounded flex items-center transition-all group ${
+              className={`w-full p-2 bg-[#172033] hover:bg-[#1E2D4A] border border-[#38BDF8]/40 text-[#38BDF8] rounded flex items-center transition-all group ${
                 isCollapsed ? "justify-center" : "justify-between"
               }`}
               title="Open Financial AI Copilot (Ctrl + J)"
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#C5A880] group-hover:rotate-12 transition-transform shrink-0" />
+                <Sparkles className="w-4 h-4 text-[#38BDF8] group-hover:rotate-12 transition-transform shrink-0" />
                 {!isCollapsed && <span className="font-bold text-[11px]">AI Risk Copilot</span>}
               </div>
               {!isCollapsed && (
@@ -298,7 +298,7 @@ export function SidebarNavigation({
                   <div className="text-[9px] text-[#94A3B8] truncate">
                     {session?.userEmail || "analyst@fintraxis.terminal"}
                   </div>
-                  <div className="text-[8.5px] text-[#C5A880] tracking-wider mt-0.5 truncate">
+                  <div className="text-[8.5px] text-[#38BDF8] tracking-wider mt-0.5 truncate">
                     {session?.desk || "Global Credit Risk & Surveillance"}
                   </div>
                 </div>

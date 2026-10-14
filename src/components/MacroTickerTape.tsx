@@ -2,17 +2,18 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Landmark,
   Search,
+  Settings,
   Database,
   Clock,
-  Landmark,
-  Settings,
   TrendingUp,
   TrendingDown,
   Pause,
   Play,
   ChevronLeft,
   ChevronRight,
+  Hand,
 } from "lucide-react";
 
 export type MacroRegion = "IND" | "USA" | "JPN" | "GLOBAL";
@@ -76,7 +77,6 @@ export function MacroTickerTape({
   onOpenCommandPalette,
   onOpenSettings,
   selectedTicker,
-  selectedCurrency,
   selectedCountry,
 }: MacroTickerTapeProps) {
   const [utcTime, setUtcTime] = useState<string>("");
@@ -86,6 +86,11 @@ export function MacroTickerTape({
   const [activeRegion, setActiveRegion] = useState<MacroRegion>("GLOBAL");
   const [isManualOverride, setIsManualOverride] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // Manual Drag to Scroll State
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -141,10 +146,34 @@ export function MacroTickerTape({
   }, []);
 
   const handleManualScroll = (direction: "LEFT" | "RIGHT") => {
+    setIsPaused(true); // Stop auto glide so user can freely examine
     if (scrollContainerRef.current) {
       const offset = direction === "LEFT" ? -280 : 280;
       scrollContainerRef.current.scrollBy({ left: offset, behavior: "smooth" });
     }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsPaused(true);
+    setIsDragging(true);
+    setStartX(e.pageX - (scrollContainerRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollContainerRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollContainerRef.current.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
 
   // Filter items based on active region
@@ -167,6 +196,7 @@ export function MacroTickerTape({
       value: r.rate,
       note: r.note,
       isPositive: true,
+      region: r.region,
     })),
     ...filteredBenchmarks.map((b) => ({
       type: "BENCHMARK" as const,
@@ -175,37 +205,35 @@ export function MacroTickerTape({
       value: b.value,
       note: b.delta,
       isPositive: b.isPositive,
+      region: b.region,
     })),
   ];
 
-  // Double list for seamless 100% infinite loop
+  // Infinite duplicate list for seamless looping marquee
   const infiniteTape = [...tickerItems, ...tickerItems];
 
   return (
-    <div className="w-full select-none no-print font-mono text-xs">
-      {/* Tier 1: Top Navigation & Utility Controls */}
-      <header className="w-full bg-[#0D111A] border-b border-[#1E2536] px-3 sm:px-4 py-2 flex items-center justify-between gap-2.5">
-        {/* Left: Active Security Indicator & Quick Omnibar Trigger */}
-        <div className="flex items-center gap-2.5 min-w-0 max-w-md flex-1">
-          {selectedTicker && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#111622] border border-[#C5A880]/30 text-[11px] shrink-0 rounded">
-              <span className="text-[#94A3B8] text-[9.5px] uppercase">Active:</span>
-              <span className="font-bold text-[#C5A880]">{selectedTicker}</span>
-              {selectedCurrency && (
-                <span className="text-[#64748B] text-[9.5px]">[{selectedCurrency}]</span>
-              )}
-            </div>
-          )}
+    <div className="w-full bg-[#05070B] text-[#F8FAFC] border-b border-[#1E293B] font-mono text-xs select-none">
+      {/* Tier 1: Top Navigation, Region Selector & Global Clock */}
+      <header className="px-3 sm:px-4 py-2 flex items-center justify-between gap-3 border-b border-[#1E293B] bg-[#090E17]">
+        {/* Left: Terminal Node & Command Palette */}
+        <div className="flex items-center gap-3 flex-1 max-w-xl">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+            <span className="font-bold text-xs tracking-wider text-[#38BDF8] uppercase hidden sm:inline">
+              FINTRAXIS
+            </span>
+          </div>
 
           <button
             onClick={onOpenCommandPalette}
-            className="flex-1 flex items-center justify-between px-3 py-1.5 bg-[#080B10] hover:bg-[#111622] border border-[#1E2536] hover:border-[#C5A880]/50 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded text-xs truncate"
+            className="flex-1 flex items-center justify-between px-3 py-1.5 bg-[#05070C] hover:bg-[#0E1524] border border-[#1E293B] hover:border-[#38BDF8]/50 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded text-xs truncate"
           >
             <div className="flex items-center gap-2 truncate">
-              <Search className="w-3.5 h-3.5 text-[#C5A880] shrink-0" />
-              <span className="truncate">Search global security (NSE, NASDAQ, BSE)...</span>
+              <Search className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+              <span className="truncate">Search global security (NSE, NASDAQ, BSE, Nikkei)...</span>
             </div>
-            <span className="text-[9.5px] px-1.5 py-0.5 bg-[#172033] border border-[#1E2536] text-[#38BDF8] font-semibold shrink-0 ml-2 rounded hidden sm:inline">
+            <span className="text-[9.5px] px-1.5 py-0.5 bg-[#101A2E] border border-[#1E293B] text-[#38BDF8] font-semibold shrink-0 ml-2 rounded hidden sm:inline">
               CTRL + K
             </span>
           </button>
@@ -214,7 +242,7 @@ export function MacroTickerTape({
         {/* Right: Regional Filter Pills, Marquee Slide Controls, Clock & Calibration */}
         <div className="flex items-center gap-2 shrink-0 text-xs">
           {/* Regional Selector Pills */}
-          <div className="hidden sm:flex items-center gap-0.5 bg-[#080B10] border border-[#1E2536] p-0.5 rounded">
+          <div className="hidden sm:flex items-center gap-0.5 bg-[#05070C] border border-[#1E293B] p-0.5 rounded">
             {[
               { id: "GLOBAL", label: "GLOBAL", flag: "🌐" },
               { id: "IND", label: "INDIA", flag: "🇮🇳" },
@@ -231,7 +259,7 @@ export function MacroTickerTape({
                   }}
                   className={`px-2 py-0.5 text-[10px] font-bold rounded flex items-center gap-1 transition-all ${
                     isActive
-                      ? "bg-[#172033] text-[#C5A880] border border-[#C5A880]/40 shadow-sm"
+                      ? "bg-[#101A2E] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                       : "text-[#64748B] hover:text-[#CBD5E1]"
                   }`}
                 >
@@ -242,12 +270,12 @@ export function MacroTickerTape({
             })}
           </div>
 
-          {/* Marquee Slide Controller (Pause / Play & Step Arrows) */}
-          <div className="flex items-center gap-1 bg-[#080B10] border border-[#1E2536] px-1 py-0.5 rounded">
+          {/* Marquee Slide Controller: Stop / Play & Step Arrows at User's Wish */}
+          <div className="flex items-center gap-1 bg-[#05070C] border border-[#1E293B] px-1 py-0.5 rounded">
             <button
               onClick={() => handleManualScroll("LEFT")}
-              className="p-1 text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#1E2536] rounded transition-colors"
-              title="Slide Left"
+              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#1E293B] rounded transition-colors"
+              title="Slide Left (Stops auto glide)"
             >
               <ChevronLeft className="w-3 h-3" />
             </button>
@@ -256,38 +284,38 @@ export function MacroTickerTape({
               onClick={() => setIsPaused(!isPaused)}
               className={`px-1.5 py-0.5 text-[9.5px] font-bold rounded flex items-center gap-1 transition-all ${
                 isPaused
-                  ? "bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30"
-                  : "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                  ? "bg-[#2563EB]/20 text-[#38BDF8] border border-[#2563EB]/40"
+                  : "bg-[#101A2E] text-[#94A3B8] hover:text-[#F8FAFC]"
               }`}
-              title={isPaused ? "Resume Ticker Glide" : "Pause Ticker Glide"}
+              title={isPaused ? "Click to resume automatic gliding" : "Click to stop sliding ticker"}
             >
-              {isPaused ? <Play className="w-2.5 h-2.5" /> : <Pause className="w-2.5 h-2.5" />}
-              <span className="hidden lg:inline">{isPaused ? "PAUSED" : "GLIDING"}</span>
+              {isPaused ? <Play className="w-2.5 h-2.5 text-[#38BDF8]" /> : <Pause className="w-2.5 h-2.5 text-[#38BDF8]" />}
+              <span>{isPaused ? "RESUME" : "PAUSE"}</span>
             </button>
 
             <button
               onClick={() => handleManualScroll("RIGHT")}
-              className="p-1 text-[#64748B] hover:text-[#F8FAFC] hover:bg-[#1E2536] rounded transition-colors"
-              title="Slide Right"
+              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#1E293B] rounded transition-colors"
+              title="Slide Right (Stops auto glide)"
             >
               <ChevronRight className="w-3 h-3" />
             </button>
           </div>
 
           {/* SQLite Status */}
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-[#111622] border border-[#1E2536] text-[10.5px] rounded">
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-[#0B111E] border border-[#1E293B] text-[10.5px] rounded">
             <Database className="w-3 h-3 text-[#10B981]" />
             <span className="text-[#64748B]">SQLITE:</span>
             <span className="text-[#10B981] font-bold">WAL OK</span>
           </div>
 
-          {/* Interactive Clock */}
+          {/* Interactive Clock with explicit Timezone */}
           <button
             onClick={() => setShowUtcPrimary(!showUtcPrimary)}
-            className="flex items-center gap-1.5 px-2 py-1 bg-[#080B10] hover:bg-[#111622] border border-[#1E2536] hover:border-[#C5A880]/50 text-[10.5px] text-[#F8FAFC] rounded transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2 py-1 bg-[#05070C] hover:bg-[#0B111E] border border-[#1E293B] hover:border-[#38BDF8]/50 text-[10.5px] text-[#F8FAFC] rounded transition-colors cursor-pointer"
             title="Click to toggle Local / UTC Time"
           >
-            <Clock className="w-3 h-3 text-[#C5A880] shrink-0" />
+            <Clock className="w-3 h-3 text-[#38BDF8] shrink-0" />
             <span className="font-mono tabular-nums tracking-wide font-bold">
               {showUtcPrimary ? utcTime : `${localTime || "11:26:41 PM"} (${tzName})`}
             </span>
@@ -297,7 +325,7 @@ export function MacroTickerTape({
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
-              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded"
+              className="p-1.5 bg-[#0B111E] hover:bg-[#1E293B] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded"
               title="Institutional Settings"
             >
               <Settings className="w-3.5 h-3.5" />
@@ -306,18 +334,22 @@ export function MacroTickerTape({
         </div>
       </header>
 
-      {/* Tier 2: Continuous Silky-Smooth Sliding Ticker Tape (Marquee + Hover Pause) */}
-      <div className="w-full bg-[#07090E] border-b border-[#1E2536] py-1 px-2 flex items-center overflow-hidden relative group">
+      {/* Tier 2: Continuous Sliding Ticker Tape with User Slide & Drag Control */}
+      <div className="w-full bg-[#05070B] border-b border-[#1E293B] py-1 px-2 flex items-center overflow-hidden relative group">
         {/* Left Sticky Label */}
-        <div className="shrink-0 flex items-center gap-1.5 bg-[#0D111A] border border-[#C5A880]/30 px-2.5 py-0.5 rounded text-[10px] text-[#C5A880] font-bold z-10 shadow-sm mr-2">
-          <Landmark className="w-3 h-3 text-[#C5A880]" />
+        <div className="shrink-0 flex items-center gap-1.5 bg-[#0B111E] border border-[#2563EB]/40 px-2.5 py-0.5 rounded text-[10px] text-[#38BDF8] font-bold z-10 shadow-sm mr-2">
+          <Landmark className="w-3 h-3 text-[#38BDF8]" />
           <span className="tracking-wider">SOVEREIGN RATES &amp; MARQUEE TAPE:</span>
         </div>
 
-        {/* Continuous Gliding Ticker Container */}
+        {/* Continuous Gliding Ticker Container - User can slide manually or let glide */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-x-auto scrollbar-none flex items-center"
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          className={`flex-1 overflow-x-auto scrollbar-none flex items-center cursor-grab active:cursor-grabbing select-none`}
         >
           <div
             className={`flex items-center gap-3.5 ${
@@ -328,7 +360,7 @@ export function MacroTickerTape({
             {infiniteTape.map((item, idx) => (
               <div
                 key={`${item.id}_${idx}`}
-                className="flex items-center gap-2 bg-[#0C1017] px-2.5 py-0.5 border border-[#1B2333] hover:border-[#C5A880]/50 rounded whitespace-nowrap transition-colors shrink-0"
+                className="flex items-center gap-2 bg-[#0A0E17] px-2.5 py-0.5 border border-[#1E293B] hover:border-[#38BDF8]/60 rounded whitespace-nowrap transition-colors shrink-0"
               >
                 <span className="text-[#64748B] text-[9.5px] uppercase font-semibold">
                   {item.label}
@@ -338,13 +370,13 @@ export function MacroTickerTape({
                 </span>
 
                 {item.type === "RATE" ? (
-                  <span className="text-[8.5px] text-[#C5A880] bg-[#C5A880]/10 px-1 rounded">
+                  <span className="text-[8.5px] text-[#38BDF8] bg-[#2563EB]/15 px-1 rounded font-bold">
                     POLICY
                   </span>
                 ) : (
                   <span
                     className={`text-[9.5px] font-mono tabular-nums flex items-center gap-0.5 font-bold ${
-                      item.isPositive ? "text-[#10B981]" : "text-[#F43F5E]"
+                      item.isPositive ? "text-[#10B981]" : "text-[#EF4444]"
                     }`}
                   >
                     {item.isPositive ? (
@@ -358,6 +390,12 @@ export function MacroTickerTape({
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Drag Hint on hover */}
+        <div className="hidden group-hover:flex items-center gap-1 text-[9px] text-[#64748B] px-1 bg-[#05070B] shrink-0">
+          <Hand className="w-2.5 h-2.5 text-[#38BDF8]" />
+          <span>DRAG TO SCROLL</span>
         </div>
       </div>
     </div>
