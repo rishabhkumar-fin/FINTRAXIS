@@ -59,23 +59,56 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 1-Click Guest Analyst Access
-  const handleGuestLogin = () => {
-    const guestSession: SessionClearance = {
-      id: `usr_guest_${Date.now()}`,
-      userName: "Guest Analyst",
-      userEmail: "guest@fintraxis.terminal",
-      analystId: "Guest Analyst",
-      desk: "Global Market Surveillance",
+  // 1-Click Guest Analyst Access (Isolated Demo Session)
+  const handleGuestLogin = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDemo: true }),
+      });
+      const json = await res.json();
+      if (json.success && json.user) {
+        const demoUser = json.user;
+        const guestSession: SessionClearance = {
+          id: demoUser.id,
+          userName: demoUser.name,
+          userEmail: demoUser.email,
+          analystId: "Demo Analyst",
+          desk: demoUser.desk,
+          avatarId: "crest",
+          netDebtEbitdaHurdle: demoUser.netDebtEbitdaHurdle ?? 3.5,
+          interestCoverageHurdle: demoUser.interestCoverageHurdle ?? 2.5,
+          currentRatioHurdle: demoUser.currentRatioHurdle ?? 1.1,
+          sessionToken: demoUser.sessionToken,
+          authenticatedAt: demoUser.authenticatedAt,
+        };
+        localStorage.setItem("fintraxis_session", JSON.stringify(guestSession));
+        setIsLoading(false);
+        onAuthenticated(guestSession);
+        return;
+      }
+    } catch {
+      // Fallback local demo session if offline
+    }
+
+    const fallbackSession: SessionClearance = {
+      id: "usr_demo_session",
+      userName: "Demo Analyst",
+      userEmail: "demo@fintraxis.terminal",
+      analystId: "Demo Analyst",
+      desk: "Global Surveillance (Demo Mode)",
       avatarId: "crest",
       netDebtEbitdaHurdle: 3.5,
       interestCoverageHurdle: 2.5,
       currentRatioHurdle: 1.1,
-      sessionToken: `tok_guest_${Date.now()}`,
+      sessionToken: `tok_demo_${Date.now()}`,
       authenticatedAt: new Date().toISOString(),
     };
-    localStorage.setItem("fintraxis_session", JSON.stringify(guestSession));
-    onAuthenticated(guestSession);
+    localStorage.setItem("fintraxis_session", JSON.stringify(fallbackSession));
+    setIsLoading(false);
+    onAuthenticated(fallbackSession);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -222,9 +255,29 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       {/* Main Luxury Layout - BlackRock Obsidian Sapphire 10/10 */}
       <div className="relative w-full max-w-5xl bg-[#090D17] border border-[#182337] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.98),0_0_40px_-10px_rgba(37,99,235,0.2)] z-10 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto">
         
-        {/* LEFT COLUMN: Wall Street Institutional Showcase (5 cols on lg) */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-[#0C1220] to-[#070A0F] p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#182337] flex flex-col justify-between space-y-6">
-          <div className="space-y-6">
+        {/* LEFT COLUMN: Wall Street Institutional Brand Showcase (5 cols on lg, below form on mobile) */}
+        <div className="order-2 lg:order-1 lg:col-span-5 bg-gradient-to-br from-[#0C1220] to-[#070A0F] p-6 sm:p-8 border-t lg:border-t-0 lg:border-r border-[#182337] flex flex-col justify-between space-y-6 relative overflow-hidden">
+          
+          {/* Abstract Institutional Network Graphic */}
+          <div className="absolute right-0 bottom-0 pointer-events-none opacity-20 transform translate-x-8 translate-y-8">
+            <svg width="220" height="220" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="100" cy="100" r="80" stroke="#38BDF8" strokeWidth="1" strokeDasharray="4 4" />
+              <circle cx="100" cy="100" r="50" stroke="#2563EB" strokeWidth="1" />
+              <circle cx="100" cy="100" r="20" fill="#2563EB" fillOpacity="0.2" stroke="#38BDF8" strokeWidth="1.5" />
+              <line x1="20" y1="100" x2="180" y2="100" stroke="#1E293B" strokeWidth="1" />
+              <line x1="100" y1="20" x2="100" y2="180" stroke="#1E293B" strokeWidth="1" />
+              <circle cx="40" cy="60" r="3" fill="#38BDF8" />
+              <circle cx="160" cy="60" r="3" fill="#10B981" />
+              <circle cx="150" cy="140" r="3" fill="#2563EB" />
+              <circle cx="50" cy="140" r="3" fill="#EF4444" />
+              <line x1="100" y1="100" x2="40" y2="60" stroke="#38BDF8" strokeWidth="0.8" />
+              <line x1="100" y1="100" x2="160" y2="60" stroke="#10B981" strokeWidth="0.8" />
+              <line x1="100" y1="100" x2="150" y2="140" stroke="#2563EB" strokeWidth="0.8" />
+              <line x1="100" y1="100" x2="50" y2="140" stroke="#EF4444" strokeWidth="0.8" />
+            </svg>
+          </div>
+
+          <div className="space-y-6 relative z-10">
             {/* Royal Crest Lockup */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -245,13 +298,13 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
               </div>
             </div>
 
-            {/* Prestige Pitch */}
+            {/* Prestige Pitch - Section 6.1 Headline */}
             <div className="space-y-2">
               <h1 className="text-lg sm:text-xl font-bold text-[#FFFFFF] tracking-tight leading-snug">
-                Institutional Credit Risk &amp; Solvency Intelligence
+                Understand the numbers behind the risk.
               </h1>
               <p className="text-xs text-[#94A3B8] leading-relaxed">
-                Premier institutional underwriting terminal deployed for corporate debt syndicates, sovereign risk desks, and Investment Committees.
+                Auditable corporate financial intelligence and early-warning terminal engineered for corporate debt syndicates and Investment Committees.
               </p>
             </div>
 
@@ -290,7 +343,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           </div>
 
           {/* Security Node Attestation */}
-          <div className="pt-4 border-t border-[#182337] flex items-center justify-between text-[10px] text-[#64748B]">
+          <div className="pt-4 border-t border-[#182337] flex items-center justify-between text-[10px] text-[#64748B] relative z-10">
             <span className="flex items-center gap-1.5 text-[#10B981]">
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
               <span>NODE: MUM-01 // NY-02</span>
@@ -299,8 +352,8 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Slick Credential Vault (7 cols on lg) */}
-        <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-center space-y-5 bg-[#090D17]">
+        {/* RIGHT COLUMN: Slick Credential Vault (7 cols on lg, top on mobile) */}
+        <div className="order-1 lg:order-2 lg:col-span-7 p-6 sm:p-8 flex flex-col justify-center space-y-5 bg-[#090D17]">
           
           {/* Highlighted VIP 1-Click Guest Analyst Pass */}
           <div className="p-4 bg-gradient-to-r from-[#0E1629] to-[#0A101E] border border-[#2563EB]/60 rounded-xl space-y-2.5 shadow-lg relative overflow-hidden group">

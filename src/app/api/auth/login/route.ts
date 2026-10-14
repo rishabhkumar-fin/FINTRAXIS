@@ -3,10 +3,35 @@ import { db } from "@/db/index";
 import { users } from "@/db/schema";
 import { eq, or, sql } from "drizzle-orm";
 import crypto from "crypto";
+import { checkAuthRateLimit, recordFailedAuthAttempt, resetAuthRateLimit, createDemoSession } from "@/lib/authRateLimit";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const isDemoRequest = Boolean(body.isDemo);
+
+    // If explicit demo access requested, issue isolated demo session
+    if (isDemoRequest) {
+      const demo = createDemoSession();
+      const response = NextResponse.json({
+        success: true,
+        message: "Demo session initiated",
+        user: demo,
+      });
+
+      response.cookies.set({
+        name: "fintraxis_session",
+        value: demo.sessionToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 86400, // 24 hours
+      });
+
+      return response;
+    }
+
     const identifier = (body.email || body.username || "").trim().toLowerCase();
     const { password } = body;
 
@@ -14,6 +39,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "Username/email and password are required" },
         { status: 400 }
+      );
+    }
+
+    // Rate limiting check
+    const rateLimit = checkAuthRateLimit(identifier);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many authentication attempts. Please retry in ${rateLimit.retryAfterSeconds} seconds.`,
+          retryAfter: rateLimit.retryAfterSeconds,
+        },
+        { status: 429 }
       );
     }
 
@@ -54,6 +92,7 @@ export async function POST(request: Request) {
     }
 
     if (!user) {
+      recordFailedAuthAttempt(identifier);
       return NextResponse.json(
         { success: false, error: "User account not found. Please check your credentials or create an account." },
         { status: 401 }
@@ -72,11 +111,18 @@ export async function POST(request: Request) {
       testBuf.length === storedBuf.length && crypto.timingSafeEqual(testBuf, storedBuf);
 
     if (!isMatch) {
+      recordFailedAuthAttempt(identifier);
       return NextResponse.json(
         { success: false, error: "Incorrect password. Please try again." },
         { status: 401 }
       );
     }
+
+    // Reset rate limiter on successful authentication
+    resetAuthRateLimit(identifier);
+
+    const isGuest = user.email.startsWith("guest@") || user.name.toLowerCase().includes("guest");
+    const sessionToken = `SOV-${crypto.randomBytes(12).toString("hex").toUpperCase()}`;
 
     const sessionPayload = {
       id: user.id,
@@ -84,18 +130,33 @@ export async function POST(request: Request) {
       email: user.email,
       desk: user.desk,
       avatar: user.avatar,
+      isDemo: isGuest,
+      role: isGuest ? "DEMO_ANALYST" : "ANALYST",
+      writeRestricted: isGuest,
       netDebtEbitdaHurdle: user.netDebtEbitdaHurdle ?? 3.50,
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
       currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
-      sessionToken: `SOV-${crypto.randomBytes(12).toString("hex").toUpperCase()}`,
+      sessionToken,
       authenticatedAt: new Date().toISOString(),
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Authentication successful",
       user: sessionPayload,
     });
+
+    response.cookies.set({
+      name: "fintraxis_session",
+      value: sessionToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 86400, // 24 hours
+    });
+
+    return response;
   } catch (error: unknown) {
     console.error("POST /api/auth/login failure:", error);
     const msg = error instanceof Error ? error.message : "Authentication failed";

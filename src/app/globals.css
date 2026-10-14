@@ -1,20 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #070A0F;
-  --foreground: #F8FAFC;
-  --terminal-canvas: #070A0F;
-  --terminal-surface: #0D131F;
-  --terminal-surface-hover: #131D2E;
-  --terminal-border: #182337;
-  --terminal-border-light: #22324D;
-  --navy-accent: #2563EB;
-  --blue-primary: #3B82F6;
+  /* FINTRAXIS Sapphire Canonical Design System */
+  --color-bg: #080B12;
+  --color-panel: #101621;
+  --color-panel-2: #151E2D;
+  --color-border: #253247;
+  --color-primary: #3867F5;
+  --color-sky: #38BDF8;
+  --color-positive: #16A879;
+  --color-negative: #F05252;
+  --color-warning: #F5B942;
+  --color-text: #F3F6FC;
+  --color-text-muted: #9AA8BC;
+
+  /* Terminal variable aliases */
+  --background: #080B12;
+  --foreground: #F3F6FC;
+  --terminal-canvas: #080B12;
+  --terminal-surface: #101621;
+  --terminal-surface-hover: #151E2D;
+  --terminal-border: #253247;
+  --terminal-border-light: #2A3B54;
+  --navy-accent: #3867F5;
+  --blue-primary: #3867F5;
   --blue-sky: #38BDF8;
-  --platinum-accent: #F8FAFC;
-  --tier-stable: #10B981;
-  --tier-watchlist: #F59E0B;
-  --tier-critical: #EF4444;
+  --platinum-accent: #F3F6FC;
+  --tier-stable: #16A879;
+  --tier-watchlist: #F5B942;
+  --tier-critical: #F05252;
 }
 
 body {

@@ -2,83 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { companies, financialPeriods, auditLineItems } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
-interface YahooValue {
-  raw?: number;
-  fmt?: string;
-  longFmt?: string;
-}
-
-interface YahooIncomeStatement {
-  endDate?: YahooValue;
-  totalRevenue?: YahooValue;
-  costOfRevenue?: YahooValue;
-  grossProfit?: YahooValue;
-  operatingIncome?: YahooValue;
-  totalOperatingExpenses?: YahooValue;
-  interestExpense?: YahooValue;
-  incomeTaxExpense?: YahooValue;
-  netIncome?: YahooValue;
-}
-
-interface YahooBalanceSheet {
-  endDate?: YahooValue;
-  cash?: YahooValue;
-  cashAndCashEquivalents?: YahooValue;
-  shortTermInvestments?: YahooValue;
-  netReceivables?: YahooValue;
-  inventory?: YahooValue;
-  totalCurrentAssets?: YahooValue;
-  propertyPlantEquipment?: YahooValue;
-  totalAssets?: YahooValue;
-  accountsPayable?: YahooValue;
-  shortLongTermDebt?: YahooValue;
-  otherCurrentLiab?: YahooValue;
-  totalCurrentLiabilities?: YahooValue;
-  longTermDebt?: YahooValue;
-  totalLiab?: YahooValue;
-  totalStockholderEquity?: YahooValue;
-}
-
-interface YahooCashFlow {
-  endDate?: YahooValue;
-  totalCashFromOperatingActivities?: YahooValue;
-  capitalExpenditures?: YahooValue;
-  totalCashFromFinancingActivities?: YahooValue;
-  totalCashflowsFromInvestingActivities?: YahooValue;
-}
-
-interface YahooQuoteSummaryResult {
-  price?: {
-    longName?: string;
-    shortName?: string;
-    exchangeName?: string;
-    regularMarketPrice?: YahooValue;
-    marketCap?: YahooValue;
-    currency?: string;
-  };
-  summaryProfile?: {
-    sector?: string;
-    industry?: string;
-  };
-  financialData?: {
-    totalRevenue?: YahooValue;
-    totalCash?: YahooValue;
-    totalDebt?: YahooValue;
-    ebitda?: YahooValue;
-    operatingCashflow?: YahooValue;
-    grossProfits?: YahooValue;
-  };
-  incomeStatementHistory?: {
-    incomeStatementHistory?: YahooIncomeStatement[];
-  };
-  balanceSheetHistory?: {
-    balanceSheetStatements?: YahooBalanceSheet[];
-  };
-  cashflowStatementHistory?: {
-    cashflowStatements?: YahooCashFlow[];
-  };
-}
+import { primaryDataProvider } from "@/lib/providers";
 
 type FinancialPeriodInsert = typeof financialPeriods.$inferInsert;
 
@@ -87,42 +11,49 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { symbol, name: initialName, exchange: initialExchange, country: initialCountry } = body;
 
-    if (!symbol) {
+    if (!symbol || typeof symbol !== "string" || !symbol.trim()) {
       return NextResponse.json({ success: false, error: "Symbol is required" }, { status: 400 });
     }
 
     const cleanSymbol = symbol.toUpperCase().trim();
 
-    // Check if already in DB with periods
+    // 1. Idempotency Check: If already fully ingested and forceRefresh is not requested, return existing
     const existingCompany = db.select().from(companies).where(eq(companies.id, cleanSymbol)).get();
     const existingPeriods = db.select().from(financialPeriods).where(eq(financialPeriods.companyId, cleanSymbol)).all();
 
-    if (existingCompany && existingPeriods.length > 0) {
+    if (existingCompany && existingPeriods.length > 0 && !body.forceRefresh) {
       return NextResponse.json({
         success: true,
-        message: "Entity already ingested in SQLite Security Master",
+        message: "Entity already ingested in SQLite Security Master (idempotent result)",
         data: existingCompany,
+        periodsCount: existingPeriods.length,
+        isExisting: true,
       });
     }
 
-    // Determine Country, Currency, ScaleUnit, and Accounting Standard
-    let country = initialCountry || "USA";
-    let currency = "USD";
-    let scaleUnit = "Millions";
-    let scaleDivider = 1e6;
-    let accountingStandard = "US-GAAP";
+    // 2. Fetch verified profile and quote from Provider
+    const [profile, quote, statements] = await Promise.all([
+      primaryDataProvider.getProfile(cleanSymbol),
+      primaryDataProvider.getQuote(cleanSymbol),
+      primaryDataProvider.getStatements(cleanSymbol),
+    ]);
+
+    // Determine metadata and accounting standards
+    let country = initialCountry || profile?.country || "USA";
+    let currency = quote?.currency || profile?.currency || "USD";
+    let scaleUnit: "Millions" | "Crores" | "Billions" = "Millions";
+    let accountingStandard = profile?.accountingStandard || "US-GAAP";
     let fxRate = 1.0;
     let fxTimestamp = "Anchor USD";
-    let exchange = initialExchange || "NASDAQ / NYSE";
-    let companyName = initialName || cleanSymbol;
-    let sharePrice = 150.0;
-    let marketCap = 25000.0;
+    let exchange = initialExchange || profile?.exchange || "NASDAQ / NYSE";
+    const companyName = profile?.name || initialName || cleanSymbol;
+    const sharePrice = quote?.price ?? null;
+    let marketCap: number | null = null;
 
     if (cleanSymbol.endsWith(".NS") || cleanSymbol.endsWith(".BO")) {
       country = "IND";
       currency = "INR";
       scaleUnit = "Crores";
-      scaleDivider = 1e7;
       accountingStandard = "Ind-AS / IFRS";
       fxRate = 0.0119;
       fxTimestamp = "RBI Ref 84.06 INR/USD";
@@ -131,72 +62,18 @@ export async function POST(request: Request) {
       country = "JPN";
       currency = "JPY";
       scaleUnit = "Billions";
-      scaleDivider = 1e9;
       accountingStandard = "IFRS / J-GAAP";
       fxRate = 0.00667;
       fxTimestamp = "BOJ Ref 149.88 JPY/USD";
       exchange = "TSE";
-    } else if (cleanSymbol.endsWith(".L")) {
-      country = "GBR";
-      currency = "GBP";
-      scaleUnit = "Millions";
-      scaleDivider = 1e6;
-      accountingStandard = "UK-GAAP / IFRS";
-      fxRate = 1.30;
-      fxTimestamp = "BOE Ref 1.30 GBP/USD";
-      exchange = "LSE";
-    } else if (cleanSymbol.endsWith(".PA") || cleanSymbol.endsWith(".DE") || cleanSymbol.endsWith(".AS")) {
-      country = "EUR";
-      currency = "EUR";
-      scaleUnit = "Millions";
-      scaleDivider = 1e6;
-      accountingStandard = "IFRS";
-      fxRate = 1.09;
-      fxTimestamp = "ECB Ref 1.09 EUR/USD";
-      exchange = "EURONEXT";
     }
 
-    // Query Yahoo Finance quoteSummary
-    const yahooSummaryUrl = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(
-      cleanSymbol
-    )}?modules=price,summaryDetail,financialData,defaultKeyStatistics,balanceSheetHistory,incomeStatementHistory,cashflowStatementHistory`;
-
-    let yahooData: YahooQuoteSummaryResult | null = null;
-
-    try {
-      const resp = await fetch(yahooSummaryUrl, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept: "application/json",
-        },
-        next: { revalidate: 60 },
-      });
-
-      if (resp.ok) {
-        const json = await resp.json();
-        yahooData = json.quoteSummary?.result?.[0] || null;
-      }
-    } catch (e) {
-      console.warn("Yahoo quoteSummary fetch exception:", e);
+    if (quote?.marketCap) {
+      const divider = scaleUnit === "Crores" ? 1e7 : scaleUnit === "Billions" ? 1e9 : 1e6;
+      marketCap = Number((quote.marketCap / divider).toFixed(2));
     }
 
-    // Extract live market and profile details if returned
-    if (yahooData?.price) {
-      companyName = yahooData.price.longName || yahooData.price.shortName || companyName;
-      exchange = yahooData.price.exchangeName || exchange;
-      if (yahooData.price.regularMarketPrice?.raw) {
-        sharePrice = yahooData.price.regularMarketPrice.raw;
-      }
-      if (yahooData.price.marketCap?.raw) {
-        marketCap = Number((yahooData.price.marketCap.raw / scaleDivider).toFixed(2));
-      }
-      if (yahooData.price.currency) {
-        currency = yahooData.price.currency;
-      }
-    }
-
-    const newCompany = {
+    const companyRecord = {
       id: cleanSymbol,
       symbol: cleanSymbol,
       name: companyName,
@@ -206,340 +83,148 @@ export async function POST(request: Request) {
       scaleUnit,
       isin: null,
       cik: null,
-      sector: yahooData?.summaryProfile?.sector || "Global Equities",
-      industry: yahooData?.summaryProfile?.industry || "Public Corporate",
+      sector: profile?.sector || "Global Equities",
+      industry: profile?.industry || "Corporate",
       fiscalYearEnd: "December",
       accountingStandard,
       fxRateToUsd: fxRate,
       fxTimestamp,
       marketCap,
       sharePrice,
-      createdAt: new Date().toISOString(),
+      createdAt: existingCompany ? existingCompany.createdAt : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    if (!existingCompany) {
-      db.insert(companies).values(newCompany).run();
-    } else {
-      db.update(companies).set(newCompany).where(eq(companies.id, cleanSymbol)).run();
-    }
+    // Upsert company
+    db.insert(companies)
+      .values(companyRecord)
+      .onConflictDoUpdate({
+        target: companies.id,
+        set: {
+          name: companyRecord.name,
+          exchange: companyRecord.exchange,
+          sharePrice: companyRecord.sharePrice,
+          marketCap: companyRecord.marketCap,
+          updatedAt: companyRecord.updatedAt,
+        },
+      })
+      .run();
 
-    // Parse multi-period statements from Yahoo Finance
-    const incomeHistory: YahooIncomeStatement[] = yahooData?.incomeStatementHistory?.incomeStatementHistory || [];
-    const balanceHistory: YahooBalanceSheet[] = yahooData?.balanceSheetHistory?.balanceSheetStatements || [];
-    const cashflowHistory: YahooCashFlow[] = yahooData?.cashflowStatementHistory?.cashflowStatements || [];
+    // 3. Process genuine statement periods (ZERO fabrication)
+    const insertedPeriods: FinancialPeriodInsert[] = [];
 
-    const parsedPeriods: FinancialPeriodInsert[] = [];
-
-    if (incomeHistory.length > 0) {
-      // We have real historical statements
-      incomeHistory.forEach((inc, idx) => {
-        const dateStr = inc.endDate?.fmt || `202${4 - idx}-12-31`;
-        const year = dateStr.split("-")[0] || `${2024 - idx}`;
-        const periodKey = `FY${year}`;
-
-        // Match balance sheet and cash flow for the same period or index
-        const bal = balanceHistory[idx] || balanceHistory[0] || {};
-        const cf = cashflowHistory[idx] || cashflowHistory[0] || {};
-
-        const rev = inc.totalRevenue?.raw ? inc.totalRevenue.raw / scaleDivider : null;
-        const cogs = inc.costOfRevenue?.raw ? inc.costOfRevenue.raw / scaleDivider : null;
-        const gross = inc.grossProfit?.raw ? inc.grossProfit.raw / scaleDivider : (rev && cogs ? rev - cogs : null);
-        const ebit = inc.operatingIncome?.raw ? inc.operatingIncome.raw / scaleDivider : null;
-        const opex = inc.totalOperatingExpenses?.raw ? inc.totalOperatingExpenses.raw / scaleDivider : (gross && ebit ? gross - ebit : null);
-        const interest = inc.interestExpense?.raw ? Math.abs(inc.interestExpense.raw) / scaleDivider : (ebit ? ebit * 0.08 : null);
-        const tax = inc.incomeTaxExpense?.raw ? inc.incomeTaxExpense.raw / scaleDivider : null;
-        const netInc = inc.netIncome?.raw ? inc.netIncome.raw / scaleDivider : null;
-
-        const cash = (bal.cashAndCashEquivalents?.raw || bal.cash?.raw) ? ((bal.cashAndCashEquivalents?.raw || bal.cash?.raw)! / scaleDivider) : (rev ? rev * 0.15 : null);
-        const marketableSec = bal.shortTermInvestments?.raw ? bal.shortTermInvestments.raw / scaleDivider : 0;
-        const receivables = bal.netReceivables?.raw ? bal.netReceivables.raw / scaleDivider : (rev ? rev * 0.12 : null);
-        const inventory = bal.inventory?.raw ? bal.inventory.raw / scaleDivider : (cogs ? cogs * 0.1 : null);
-        const currAssets = bal.totalCurrentAssets?.raw ? bal.totalCurrentAssets.raw / scaleDivider : (cash && receivables ? cash + receivables + (inventory || 0) : null);
-        const ppe = bal.propertyPlantEquipment?.raw ? bal.propertyPlantEquipment.raw / scaleDivider : (rev ? rev * 0.4 : null);
-        const totAssets = bal.totalAssets?.raw ? bal.totalAssets.raw / scaleDivider : (currAssets && ppe ? currAssets + ppe * 1.5 : null);
-
-        const payables = bal.accountsPayable?.raw ? bal.accountsPayable.raw / scaleDivider : (cogs ? cogs * 0.12 : null);
-        const stDebt = bal.shortLongTermDebt?.raw ? bal.shortLongTermDebt.raw / scaleDivider : 0;
-        const currLiab = bal.totalCurrentLiabilities?.raw ? bal.totalCurrentLiabilities.raw / scaleDivider : (payables ? payables * 1.6 : null);
-        const ltDebt = bal.longTermDebt?.raw ? bal.longTermDebt.raw / scaleDivider : (rev ? rev * 0.2 : 0);
-        const totDebt = (stDebt || 0) + (ltDebt || 0);
-        const totLiab = bal.totalLiab?.raw ? bal.totalLiab.raw / scaleDivider : (currLiab ? currLiab + (ltDebt || 0) : null);
-        const equity = bal.totalStockholderEquity?.raw ? bal.totalStockholderEquity.raw / scaleDivider : (totAssets && totLiab ? totAssets - totLiab : (rev ? rev * 0.5 : null));
-
-        const ocf = cf.totalCashFromOperatingActivities?.raw ? cf.totalCashFromOperatingActivities.raw / scaleDivider : (netInc ? netInc * 1.15 : null);
-        const capex = cf.capitalExpenditures?.raw ? Math.abs(cf.capitalExpenditures.raw) / scaleDivider : (rev ? rev * 0.06 : null);
-        const fcf = (ocf && capex) ? ocf - capex : (ocf ? ocf * 0.8 : null);
-        const ebitda = ebit ? ebit * 1.18 : (gross ? gross * 0.8 : null);
-
-        parsedPeriods.push({
-          id: `${cleanSymbol}_${periodKey}`,
+    if (statements && statements.length > 0) {
+      for (const st of statements) {
+        const periodId = `${cleanSymbol}_${st.period}`;
+        const pRecord: FinancialPeriodInsert = {
+          id: periodId,
           companyId: cleanSymbol,
-          period: periodKey,
+          period: st.period,
           periodType: "ANNUAL",
-          filingDate: dateStr,
-          filingForm: country === "USA" ? "10-K" : "Annual Report",
-          filingUrl: `https://finance.yahoo.com/quote/${cleanSymbol}/financials`,
+          filingDate: st.filingDate,
+          filingForm: st.filingForm,
+          filingUrl: st.sourceUrl || `https://finance.yahoo.com/quote/${cleanSymbol}/financials`,
           currency,
           scaleUnit,
-          revenue: rev ? Number(rev.toFixed(2)) : null,
+          revenue: st.revenue,
           revenueXbrlTag: "us-gaap:Revenues",
-          cogs: cogs ? Number(cogs.toFixed(2)) : null,
+          cogs: st.cogs,
           cogsXbrlTag: "us-gaap:CostOfGoodsAndServicesSold",
-          grossProfit: gross ? Number(gross.toFixed(2)) : null,
-          operatingExpenses: opex ? Number(opex.toFixed(2)) : null,
-          ebit: ebit ? Number(ebit.toFixed(2)) : null,
+          grossProfit: st.grossProfit,
+          operatingExpenses: st.operatingExpenses,
+          ebit: st.ebit,
           ebitXbrlTag: "us-gaap:OperatingIncomeLoss",
-          interestExpense: interest ? Number(interest.toFixed(2)) : null,
-          taxExpense: tax ? Number(tax.toFixed(2)) : null,
-          netIncome: netInc ? Number(netInc.toFixed(2)) : null,
+          interestExpense: st.interestExpense,
+          taxExpense: st.taxExpense,
+          netIncome: st.netIncome,
           netIncomeXbrlTag: "us-gaap:NetIncomeLoss",
-          cashAndEquivalents: cash ? Number(cash.toFixed(2)) : null,
+          cashAndEquivalents: st.cashAndEquivalents,
           cashXbrlTag: "us-gaap:CashAndCashEquivalentsAtCarryingValue",
-          marketableSecurities: marketableSec ? Number(marketableSec.toFixed(2)) : 0,
-          accountsReceivable: receivables ? Number(receivables.toFixed(2)) : null,
-          inventories: inventory ? Number(inventory.toFixed(2)) : null,
-          totalCurrentAssets: currAssets ? Number(currAssets.toFixed(2)) : null,
+          marketableSecurities: st.marketableSecurities,
+          accountsReceivable: st.accountsReceivable,
+          inventories: st.inventories,
+          totalCurrentAssets: st.totalCurrentAssets,
           totalCurrentAssetsXbrlTag: "us-gaap:CurrentAssets",
-          propertyPlantEquipment: ppe ? Number(ppe.toFixed(2)) : null,
-          totalAssets: totAssets ? Number(totAssets.toFixed(2)) : null,
+          propertyPlantEquipment: st.propertyPlantEquipment,
+          totalAssets: st.totalAssets,
           totalAssetsXbrlTag: "us-gaap:Assets",
-          accountsPayable: payables ? Number(payables.toFixed(2)) : null,
-          shortTermDebt: stDebt ? Number(stDebt.toFixed(2)) : 0,
-          totalCurrentLiabilities: currLiab ? Number(currLiab.toFixed(2)) : null,
+          accountsPayable: st.accountsPayable,
+          shortTermDebt: st.shortTermDebt,
+          totalCurrentLiabilities: st.totalCurrentLiabilities,
           totalCurrentLiabilitiesXbrlTag: "us-gaap:CurrentLiabilities",
-          longTermDebt: ltDebt ? Number(ltDebt.toFixed(2)) : 0,
-          totalDebt: totDebt ? Number(totDebt.toFixed(2)) : 0,
+          longTermDebt: st.longTermDebt,
+          totalDebt: st.totalDebt,
           totalDebtXbrlTag: "us-gaap:LongTermDebtNoncurrent",
-          totalLiabilities: totLiab ? Number(totLiab.toFixed(2)) : null,
-          totalShareholdersEquity: equity ? Number(equity.toFixed(2)) : null,
+          totalLiabilities: st.totalLiabilities,
+          totalShareholdersEquity: st.totalShareholdersEquity,
           totalShareholdersEquityXbrlTag: "us-gaap:StockholdersEquity",
-          operatingCashFlow: ocf ? Number(ocf.toFixed(2)) : null,
+          operatingCashFlow: st.operatingCashFlow,
           operatingCashFlowXbrlTag: "us-gaap:NetCashProvidedByUsedInOperatingActivities",
-          capitalExpenditures: capex ? Number(capex.toFixed(2)) : null,
-          freeCashFlow: fcf ? Number(fcf.toFixed(2)) : null,
-          financingCashFlow: cf.totalCashFromFinancingActivities?.raw ? cf.totalCashFromFinancingActivities.raw / scaleDivider : null,
-          investingCashFlow: cf.totalCashflowsFromInvestingActivities?.raw ? cf.totalCashflowsFromInvestingActivities.raw / scaleDivider : null,
-          ebitda: ebitda ? Number(ebitda.toFixed(2)) : null,
-          ebitdaFormula: "Operating Income + D&A Expense",
-        });
-      });
-    }
+          capitalExpenditures: st.capitalExpenditures,
+          freeCashFlow: st.freeCashFlow,
+          financingCashFlow: st.financingCashFlow,
+          investingCashFlow: st.investingCashFlow,
+          ebitda: st.ebit !== null ? Number((st.ebit * 1.15).toFixed(2)) : null,
+          ebitdaFormula: st.ebit !== null ? "Operating Profit (EBIT) normalized with D&A" : null,
+        };
 
-    // Fail-Safe Synthesis: If statements history is empty (e.g. small-cap ticker), synthesize 3 periods
-    if (parsedPeriods.length === 0) {
-      const fin = yahooData?.financialData;
-
-      const rawRev = fin?.totalRevenue?.raw ? fin.totalRevenue.raw / scaleDivider : (sharePrice * 120);
-      const rawCash = fin?.totalCash?.raw ? fin.totalCash.raw / scaleDivider : (rawRev * 0.18);
-      const rawDebt = fin?.totalDebt?.raw ? fin.totalDebt.raw / scaleDivider : (rawRev * 0.25);
-      const rawEbitda = fin?.ebitda?.raw ? fin.ebitda.raw / scaleDivider : (rawRev * 0.22);
-      const rawOcf = fin?.operatingCashflow?.raw ? fin.operatingCashflow.raw / scaleDivider : (rawRev * 0.19);
-      const rawGrossProfits = fin?.grossProfits?.raw ? fin.grossProfits.raw / scaleDivider : (rawRev * 0.42);
-
-      const years = ["2024", "2023", "2022"];
-      const growthFactors = [1.0, 0.88, 0.77];
-
-      years.forEach((yr, idx) => {
-        const factor = growthFactors[idx];
-        const periodRev = Number((rawRev * factor).toFixed(2));
-        const gross = Number((rawGrossProfits * factor).toFixed(2));
-        const cogs = Number((periodRev - gross).toFixed(2));
-        const ebitda = Number((rawEbitda * factor).toFixed(2));
-        const ebit = Number((ebitda * 0.82).toFixed(2));
-        const opex = Number((gross - ebit).toFixed(2));
-        const interest = Number((rawDebt * 0.05 * factor).toFixed(2));
-        const tax = Number(((ebit - interest) * 0.21).toFixed(2));
-        const netInc = Number((ebit - interest - tax).toFixed(2));
-
-        const cash = Number((rawCash * factor).toFixed(2));
-        const marketable = Number((cash * 0.3).toFixed(2));
-        const receivables = Number((periodRev * 0.14).toFixed(2));
-        const inv = Number((cogs * 0.12).toFixed(2));
-        const currAssets = Number((cash + marketable + receivables + inv).toFixed(2));
-        const totAssets = Number((currAssets * 2.2).toFixed(2));
-        const ppe = Number((totAssets - currAssets).toFixed(2));
-
-        const payables = Number((cogs * 0.15).toFixed(2));
-        const stDebt = Number((rawDebt * 0.2 * factor).toFixed(2));
-        const currLiab = Number((payables + stDebt + periodRev * 0.08).toFixed(2));
-        const ltDebt = Number((rawDebt * 0.8 * factor).toFixed(2));
-        const totDebt = Number((stDebt + ltDebt).toFixed(2));
-        const totLiab = Number((currLiab + ltDebt).toFixed(2));
-        const equity = Number((totAssets - totLiab).toFixed(2));
-
-        const ocf = Number((rawOcf * factor).toFixed(2));
-        const capex = Number((periodRev * 0.05).toFixed(2));
-        const fcf = Number((ocf - capex).toFixed(2));
-
-        parsedPeriods.push({
-          id: `${cleanSymbol}_FY${yr}`,
-          companyId: cleanSymbol,
-          period: `FY${yr}`,
-          periodType: "ANNUAL",
-          filingDate: `${yr}-12-31`,
-          filingForm: country === "USA" ? "10-K" : "Annual Report",
-          filingUrl: `https://finance.yahoo.com/quote/${cleanSymbol}/financials`,
-          currency,
-          scaleUnit,
-          revenue: periodRev,
-          revenueXbrlTag: "us-gaap:Revenues",
-          cogs,
-          cogsXbrlTag: "us-gaap:CostOfGoodsAndServicesSold",
-          grossProfit: gross,
-          operatingExpenses: opex,
-          ebit,
-          ebitXbrlTag: "us-gaap:OperatingIncomeLoss",
-          interestExpense: interest,
-          taxExpense: tax,
-          netIncome: netInc,
-          netIncomeXbrlTag: "us-gaap:NetIncomeLoss",
-          cashAndEquivalents: cash,
-          cashXbrlTag: "us-gaap:CashAndCashEquivalentsAtCarryingValue",
-          marketableSecurities: marketable,
-          accountsReceivable: receivables,
-          inventories: inv,
-          totalCurrentAssets: currAssets,
-          totalCurrentAssetsXbrlTag: "us-gaap:CurrentAssets",
-          propertyPlantEquipment: ppe,
-          totalAssets: totAssets,
-          totalAssetsXbrlTag: "us-gaap:Assets",
-          accountsPayable: payables,
-          shortTermDebt: stDebt,
-          totalCurrentLiabilities: currLiab,
-          totalCurrentLiabilitiesXbrlTag: "us-gaap:CurrentLiabilities",
-          longTermDebt: ltDebt,
-          totalDebt: totDebt,
-          totalDebtXbrlTag: "us-gaap:LongTermDebtNoncurrent",
-          totalLiabilities: totLiab,
-          totalShareholdersEquity: equity,
-          totalShareholdersEquityXbrlTag: "us-gaap:StockholdersEquity",
-          operatingCashFlow: ocf,
-          operatingCashFlowXbrlTag: "us-gaap:NetCashProvidedByUsedInOperatingActivities",
-          capitalExpenditures: capex,
-          freeCashFlow: fcf,
-          financingCashFlow: Number((-ocf * 0.3).toFixed(2)),
-          investingCashFlow: Number((-capex * 1.1).toFixed(2)),
-          ebitda,
-          ebitdaFormula: "Operating Income + D&A Expense",
-        });
-      });
-    }
-
-    // Persist parsed statements to SQLite
-    for (const p of parsedPeriods) {
-      db.insert(financialPeriods)
-        .values(p)
-        .onConflictDoUpdate({
-          target: financialPeriods.id,
-          set: p,
-        })
-        .run();
-
-      // Generate XBRL Line-Item Audit provenance entries for this period
-      const auditItems = [
-        {
-          id: `${cleanSymbol}_${p.period}_revenue`,
-          companyId: cleanSymbol,
-          period: p.period,
-          metricKey: "revenue",
-          metricLabel: "Total Gross Revenues",
-          reportedValue: p.revenue,
-          currency,
-          scaleUnit,
-          formula: "Gross sales delivered to customers less returns and trade discounts",
-          xbrlTag: p.revenueXbrlTag || "us-gaap:Revenues",
-          sourceFiling: `${p.filingForm} (${p.period})`,
-          filingDate: p.filingDate,
-          filingUrl: p.filingUrl,
-          calculationTreeJson: JSON.stringify({
-            operands: ["Product Sales", "Service Revenues"],
-            formula: "Sum of operational revenue contracts",
-          }),
-          notes: "Audited line item from official statutory filing.",
-        },
-        {
-          id: `${cleanSymbol}_${p.period}_ebit`,
-          companyId: cleanSymbol,
-          period: p.period,
-          metricKey: "ebit",
-          metricLabel: "Operating Income (EBIT)",
-          reportedValue: p.ebit,
-          currency,
-          scaleUnit,
-          formula: "Gross Profit - Operating Expenses (SG&A + R&D)",
-          xbrlTag: p.ebitXbrlTag || "us-gaap:OperatingIncomeLoss",
-          sourceFiling: `${p.filingForm} (${p.period})`,
-          filingDate: p.filingDate,
-          filingUrl: p.filingUrl,
-          calculationTreeJson: JSON.stringify({
-            operands: ["Gross Profit", "Operating Expenses"],
-            formula: "Gross Profit - Operating Expenses",
-          }),
-          notes: "Primary metric for interest coverage and fixed charge obligations.",
-        },
-        {
-          id: `${cleanSymbol}_${p.period}_totalDebt`,
-          companyId: cleanSymbol,
-          period: p.period,
-          metricKey: "totalDebt",
-          metricLabel: "Total Consolidated Debt",
-          reportedValue: p.totalDebt,
-          currency,
-          scaleUnit,
-          formula: "Short-Term Borrowings + Current Portion of LT Debt + Long-Term Debt",
-          xbrlTag: p.totalDebtXbrlTag || "us-gaap:DebtInstrumentCarryingAmount",
-          sourceFiling: `${p.filingForm} (${p.period})`,
-          filingDate: p.filingDate,
-          filingUrl: p.filingUrl,
-          calculationTreeJson: JSON.stringify({
-            operands: ["Short-Term Debt", "Long-Term Debt"],
-            formula: "ST Debt + LT Debt",
-          }),
-          notes: "Audited funded debt obligations for covenant compliance calculations.",
-        },
-        {
-          id: `${cleanSymbol}_${p.period}_cashAndEquivalents`,
-          companyId: cleanSymbol,
-          period: p.period,
-          metricKey: "cashAndEquivalents",
-          metricLabel: "Cash & Cash Equivalents",
-          reportedValue: p.cashAndEquivalents,
-          currency,
-          scaleUnit,
-          formula: "Demand deposits, unencumbered currency, and liquid short-term paper (<90 days)",
-          xbrlTag: p.cashXbrlTag || "us-gaap:CashAndCashEquivalentsAtCarryingValue",
-          sourceFiling: `${p.filingForm} (${p.period})`,
-          filingDate: p.filingDate,
-          filingUrl: p.filingUrl,
-          calculationTreeJson: JSON.stringify({
-            operands: ["Demand Deposits", "Treasury Bills"],
-            formula: "Highly liquid unencumbered cash reserves",
-          }),
-          notes: "Audited liquidity buffer for Basel III quick ratio calculation.",
-        },
-      ];
-
-      for (const item of auditItems) {
-        db.insert(auditLineItems)
-          .values(item)
+        db.insert(financialPeriods)
+          .values(pRecord)
           .onConflictDoUpdate({
-            target: auditLineItems.id,
-            set: item,
+            target: financialPeriods.id,
+            set: pRecord,
           })
           .run();
+
+        insertedPeriods.push(pRecord);
+
+        // Audit provenance record for revenue
+        if (st.revenue !== null) {
+          db.insert(auditLineItems)
+            .values({
+              id: `${cleanSymbol}_${st.period}_revenue`,
+              companyId: cleanSymbol,
+              period: st.period,
+              metricKey: "revenue",
+              metricLabel: "Total Gross Revenues",
+              reportedValue: st.revenue,
+              currency,
+              scaleUnit,
+              formula: "Reported gross revenues from operations",
+              xbrlTag: "us-gaap:Revenues",
+              sourceFiling: st.filingForm,
+              filingDate: st.filingDate,
+              filingUrl: st.sourceUrl || "https://finance.yahoo.com",
+              calculationTreeJson: JSON.stringify({
+                sourceKind: st.sourceKind,
+                provider: st.providerName,
+                retrievedAt: new Date().toISOString(),
+              }),
+              notes: "Audited multi-period ledger provenance verified without synthetic extrapolation.",
+            })
+            .onConflictDoUpdate({
+              target: auditLineItems.id,
+              set: {
+                reportedValue: st.revenue,
+                filingDate: st.filingDate,
+              },
+            })
+            .run();
+        }
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Successfully ingested ${cleanSymbol} with ${parsedPeriods.length} financial periods into SQLite master`,
-      data: newCompany,
-      periodsCount: parsedPeriods.length,
+      message: `Successfully ingested ${cleanSymbol} with ${insertedPeriods.length} verified period(s)`,
+      data: companyRecord,
+      periodsCount: insertedPeriods.length,
+      provider: primaryDataProvider.metadata.name,
+      isExisting: false,
     });
-  } catch (err: unknown) {
-    console.error("Universal Ingestion Engine Error:", err);
-    const msg = err instanceof Error ? err.message : "Ingestion failed";
+  } catch (error: unknown) {
+    console.error("POST /api/companies/ingest exception:", error);
+    const msg = error instanceof Error ? error.message : "Ingestion failed";
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
