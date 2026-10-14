@@ -4,6 +4,7 @@ import { users } from "@/db/schema";
 import { eq, or, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { checkAuthRateLimit, recordFailedAuthAttempt, resetAuthRateLimit, createDemoSession } from "@/lib/authRateLimit";
+import { logAuditEvent } from "@/lib/auditLogger";
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
     // If explicit demo access requested, issue isolated demo session
     if (isDemoRequest) {
       const demo = createDemoSession();
+      logAuditEvent("DEMO_SESSION", "Guest", "Guest demo session initiated", "INFO");
       const response = NextResponse.json({
         success: true,
         message: "Demo session initiated",
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
     // Rate limiting check
     const rateLimit = checkAuthRateLimit(identifier);
     if (!rateLimit.allowed) {
+      logAuditEvent("RATE_LIMIT_BLOCK", identifier, `Rate limit breached. Cooldown: ${rateLimit.retryAfterSeconds}s`, "CRITICAL");
       return NextResponse.json(
         {
           success: false,
@@ -73,17 +76,21 @@ export async function POST(request: Request) {
         .pbkdf2Sync(password || "guest", salt, 10000, 64, "sha512")
         .toString("hex");
 
+      const isAdmin = identifier === "admin" || identifier.startsWith("admin@");
+      const isGuestIdent = identifier === "guest" || identifier.startsWith("guest@");
+
       const defaultUser = {
         id: `usr_${crypto.randomBytes(8).toString("hex")}`,
-        name: identifier === "guest" || identifier.startsWith("guest@") ? "Guest Analyst" : "Lead Risk Analyst",
-        email: identifier === "guest" || identifier.startsWith("guest@") ? "guest@fintraxis.terminal" : "analyst@fintraxis.terminal",
+        name: isAdmin ? "Institutional Administrator" : (isGuestIdent ? "Guest Analyst" : "Lead Risk Analyst"),
+        email: isAdmin ? "admin@fintraxis.terminal" : (isGuestIdent ? "guest@fintraxis.terminal" : "analyst@fintraxis.terminal"),
         passwordHash,
         salt,
-        desk: "Global Credit Risk & Surveillance",
-        avatar: "crest",
+        desk: isAdmin ? "Global Systems & Risk Governance" : "Global Credit Risk & Surveillance",
+        avatar: isAdmin ? "security" : "crest",
         netDebtEbitdaHurdle: 3.50,
         interestCoverageHurdle: 2.50,
         currentRatioHurdle: 1.10,
+        role: isAdmin ? "SUPER_ADMIN" : (isGuestIdent ? "DEMO_ANALYST" : "ANALYST"),
         createdAt: new Date().toISOString(),
       };
 
@@ -93,6 +100,7 @@ export async function POST(request: Request) {
 
     if (!user) {
       recordFailedAuthAttempt(identifier);
+      logAuditEvent("AUTH_FAILED", identifier, "Account identifier not found in registry", "WARNING");
       return NextResponse.json(
         { success: false, error: "User account not found. Please check your credentials or create an account." },
         { status: 401 }
@@ -112,6 +120,7 @@ export async function POST(request: Request) {
 
     if (!isMatch) {
       recordFailedAuthAttempt(identifier);
+      logAuditEvent("AUTH_FAILED", identifier, "Cryptographic hash verification failed", "WARNING");
       return NextResponse.json(
         { success: false, error: "Incorrect password. Please try again." },
         { status: 401 }
@@ -122,7 +131,10 @@ export async function POST(request: Request) {
     resetAuthRateLimit(identifier);
 
     const isGuest = user.email.startsWith("guest@") || user.name.toLowerCase().includes("guest");
+    const userRole = user.role || (user.email === "admin@fintraxis.terminal" || user.name.toLowerCase().includes("admin") ? "SUPER_ADMIN" : (isGuest ? "DEMO_ANALYST" : "ANALYST"));
     const sessionToken = `SOV-${crypto.randomBytes(12).toString("hex").toUpperCase()}`;
+
+    logAuditEvent("AUTH_LOGIN", user.email, `Session established: ${user.name} [Role: ${userRole}]`, "INFO");
 
     const sessionPayload = {
       id: user.id,
@@ -131,7 +143,7 @@ export async function POST(request: Request) {
       desk: user.desk,
       avatar: user.avatar,
       isDemo: isGuest,
-      role: isGuest ? "DEMO_ANALYST" : "ANALYST",
+      role: userRole,
       writeRestricted: isGuest,
       netDebtEbitdaHurdle: user.netDebtEbitdaHurdle ?? 3.50,
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,

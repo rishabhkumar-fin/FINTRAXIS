@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { PeacockLogo } from "./PeacockLogo";
-import { ShieldCheck, Database, Clock, Terminal, Lock } from "lucide-react";
+import { ShieldCheck, Database, Clock, Terminal, Lock, Sliders } from "lucide-react";
 import { SessionClearance } from "./AuthGate";
 
 interface TopHeaderProps {
@@ -96,6 +97,16 @@ export function TopHeader({
             {utcTime || "2026-10-13 07:00:00 UTC"}
           </span>
         </div>
+
+        {/* Admin Console Entry */}
+        <Link
+          href="/admin"
+          title="Access System Operational Console & Security Master"
+          className="flex items-center gap-1 px-2.5 py-0.5 bg-[#3867F5]/20 hover:bg-[#3867F5] border border-[#3867F5]/50 hover:border-[#3867F5] text-[#38BDF8] hover:text-white font-bold text-[10px] transition-colors"
+        >
+          <Sliders className="w-3 h-3" />
+          <span className="hidden sm:inline">ADMIN CONSOLE</span>
+        </Link>
 
         {/* Session Termination Button */}
         {onTerminateSession && (

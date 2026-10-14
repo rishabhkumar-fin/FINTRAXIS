@@ -115,10 +115,30 @@ export const users = sqliteTable("users", {
   netDebtEbitdaHurdle: real("net_debt_ebitda_hurdle").default(3.50),
   interestCoverageHurdle: real("interest_coverage_hurdle").default(2.50),
   currentRatioHurdle: real("current_ratio_hurdle").default(1.10),
+  role: text("role").notNull().default("ANALYST"),
   createdAt: text("created_at").notNull(),
+});
+
+export const adminAuditLogs = sqliteTable("admin_audit_logs", {
+  id: text("id").primaryKey(),
+  timestamp: text("timestamp").notNull(),
+  eventType: text("event_type").notNull(),
+  severity: text("severity").notNull(),
+  operator: text("operator").notNull(),
+  details: text("details").notNull(),
+});
+
+export const systemConfig = sqliteTable("system_config", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: text("updated_at").notNull(),
+  updatedBy: text("updated_by").notNull(),
 });
 
 export type Company = typeof companies.$inferSelect;
 export type FinancialPeriod = typeof financialPeriods.$inferSelect;
 export type AuditLineItem = typeof auditLineItems.$inferSelect;
 export type User = typeof users.$inferSelect;
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type SystemConfig = typeof systemConfig.$inferSelect;

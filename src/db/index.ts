@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import * as schema from "./schema";
+import * as schema from "./schema.ts";
 import path from "path";
 import fs from "fs";
 
@@ -46,7 +46,7 @@ try {
   console.warn("SQLite pragma error (non-fatal):", e);
 }
 
-// Ensure users table exists
+// Ensure tables and migrations exist
 try {
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -60,11 +60,50 @@ try {
       net_debt_ebitda_hurdle REAL DEFAULT 3.50,
       interest_coverage_hurdle REAL DEFAULT 2.50,
       current_ratio_hurdle REAL DEFAULT 1.10,
+      role TEXT NOT NULL DEFAULT 'ANALYST',
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS admin_audit_logs (
+      id TEXT PRIMARY KEY,
+      timestamp TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      severity TEXT NOT NULL,
+      operator TEXT NOT NULL,
+      details TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS system_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      description TEXT,
+      updated_at TEXT NOT NULL,
+      updated_by TEXT NOT NULL
+    );
   `);
+
+  try {
+    sqlite.exec(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'ANALYST';`);
+  } catch {
+    // Column already exists
+  }
+
+  // Seed default system_config if missing
+  const countRow = sqlite.prepare("SELECT count(*) as count FROM system_config").get() as { count: number } | undefined;
+  if (!countRow || countRow.count === 0) {
+    const now = new Date().toISOString();
+    const insertConfig = sqlite.prepare(`
+      INSERT INTO system_config (key, value, description, updated_at, updated_by)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    insertConfig.run("GLOBAL_LEVERAGE_HURDLE", "3.5", "Global Net Debt / EBITDA threshold trigger for amber/red flags", now, "SYSTEM");
+    insertConfig.run("GLOBAL_COVERAGE_HURDLE", "2.5", "Global EBIT / Interest Expense coverage floor", now, "SYSTEM");
+    insertConfig.run("GLOBAL_LIQUIDITY_HURDLE", "1.1", "Global Current Ratio liquidity floor", now, "SYSTEM");
+    insertConfig.run("MAINTENANCE_MODE", "false", "Operational lockdown flag for schema re-indexing", now, "SYSTEM");
+    insertConfig.run("RATE_LIMIT_ANALYST_RPM", "60", "Requests per minute allowed per terminal session", now, "SYSTEM");
+  }
 } catch (e) {
-  console.warn("Users table DDL error (non-fatal):", e);
+  console.warn("DB setup / migration error (non-fatal):", e);
 }
 
 if (process.env.NODE_ENV !== "production") {

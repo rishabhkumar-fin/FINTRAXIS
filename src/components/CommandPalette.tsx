@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Terminal, CornerDownLeft, Lock, Cpu, FileText } from "lucide-react";
+import { Terminal, CornerDownLeft, Lock, Cpu, FileText, Sliders } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
 
 interface CommandPaletteProps {
@@ -90,6 +90,12 @@ export function CommandPalette({
 
     if (raw === "LOCK" || raw === "LOGOUT" || raw === "TERMINATE") {
       onLockSession();
+      onClose();
+      return;
+    }
+
+    if (raw === "ADMIN" || raw === "ADMIN CONSOLE" || raw === "GO ADMIN") {
+      window.location.href = "/admin";
       onClose();
       return;
     }
@@ -186,6 +192,17 @@ export function CommandPalette({
             >
               <span className="text-[#E1E7EC] font-bold">[2] STATEMENTS</span>
               <span className="text-[10px] text-[#5A687D]">XBRL LEDGER</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("ADMIN")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#3867F5]/40 text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#38BDF8] font-bold flex items-center gap-1">
+                <Sliders className="w-3 h-3" />
+                <span>ADMIN CONSOLE</span>
+              </span>
+              <span className="text-[10px] text-[#5A687D]">SYSTEM GOVERNANCE</span>
             </button>
 
             <button

@@ -3,6 +3,7 @@ import { db } from "@/db/index";
 import { companies, financialPeriods, auditLineItems } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { primaryDataProvider } from "@/lib/providers";
+import { logAuditEvent } from "@/lib/auditLogger";
 
 type FinancialPeriodInsert = typeof financialPeriods.$inferInsert;
 
@@ -213,6 +214,13 @@ export async function POST(request: Request) {
         }
       }
     }
+
+    logAuditEvent(
+      "COMPANY_INGEST",
+      "TERMINAL_OPERATOR",
+      `Ingested security ${cleanSymbol} (${companyName}) with ${insertedPeriods.length} period(s) via ${primaryDataProvider.metadata.name}`,
+      "INFO"
+    );
 
     return NextResponse.json({
       success: true,

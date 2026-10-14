@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { PeacockLogo } from "./PeacockLogo";
 import {
   Building2,
@@ -16,6 +17,7 @@ import {
   Lock,
   Settings,
   Sparkles,
+  Sliders,
   X,
 } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
@@ -305,6 +307,14 @@ export function SidebarNavigation({
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
+                <Link
+                  href="/admin"
+                  className="p-1.5 bg-[#0F1626] hover:bg-[#3867F5]/20 border border-[#182337] hover:border-[#3867F5] text-[#38BDF8] rounded transition-colors"
+                  title="Administrative Console"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                </Link>
+
                 {onOpenSettings && (
                   <button
                     onClick={onOpenSettings}
