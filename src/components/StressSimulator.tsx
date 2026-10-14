@@ -95,37 +95,63 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
           </div>
         </div>
 
-        {/* Quick Scenario Presets */}
+        {/* Wall Street Institutional Scenario Presets */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] text-[#64748B] uppercase font-bold">PRESETS:</span>
+          <span className="text-[10px] text-[#C5A880] uppercase font-bold tracking-wider">WALL ST PRESETS:</span>
           <button
             onClick={() => handlePreset(0, 0, 0)}
-            className="px-2.5 py-1 bg-[#111622] hover:bg-[#1A2234] border border-[#1E2536] text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+            className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border ${
+              inputs.revenueShockPct === 0 && inputs.cogsInflationPct === 0 && inputs.rateShockBps === 0
+                ? "bg-[#C5A880] text-[#080B10] border-[#C5A880]"
+                : "bg-[#111622] hover:bg-[#1A2234] border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC]"
+            }`}
           >
-            Base Zero
+            Base Zero (Reported)
           </button>
           <button
-            onClick={() => handlePreset(0, 3, 150)}
-            className="px-2.5 py-1 bg-[#111622] hover:bg-[#1A2234] border border-[#1E2536] text-[10px] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+            onClick={() => handlePreset(-10, 5, 200)}
+            className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border ${
+              inputs.revenueShockPct === -10 && inputs.cogsInflationPct === 5 && inputs.rateShockBps === 200
+                ? "bg-[#C5A880] text-[#080B10] border-[#C5A880]"
+                : "bg-[#111622] hover:bg-[#1A2234] border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC]"
+            }`}
           >
-            Rate Hike (+150bps)
+            Basel III Adverse (-10% / +200bps)
           </button>
           <button
-            onClick={() => handlePreset(-15, 8, 250)}
-            className="px-2.5 py-1 bg-[#1A1215] hover:bg-[#2A161B] border border-[#F43F5E]/40 text-[10px] text-[#F43F5E] font-bold rounded transition-colors"
+            onClick={() => handlePreset(-25, 10, 350)}
+            className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border ${
+              inputs.revenueShockPct === -25 && inputs.cogsInflationPct === 10 && inputs.rateShockBps === 350
+                ? "bg-[#F43F5E] text-white border-[#F43F5E]"
+                : "bg-[#1A1215] hover:bg-[#2A161B] border-[#F43F5E]/40 text-[#F43F5E]"
+            }`}
           >
-            Stagflation (-15% / +250bps)
+            2008 GFC Freeze (-25% / +350bps)
           </button>
           <button
-            onClick={() => handlePreset(-25, -5, 200)}
-            className="px-2.5 py-1 bg-[#1A1215] hover:bg-[#2A161B] border border-[#F43F5E]/40 text-[10px] text-[#F43F5E] font-bold rounded transition-colors"
+            onClick={() => handlePreset(-15, 12, 250)}
+            className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border ${
+              inputs.revenueShockPct === -15 && inputs.cogsInflationPct === 12 && inputs.rateShockBps === 250
+                ? "bg-[#F59E0B] text-[#080B10] border-[#F59E0B]"
+                : "bg-[#1C160C] hover:bg-[#2A1F10] border-[#F59E0B]/40 text-[#F59E0B]"
+            }`}
           >
-            Severe Recession (-25%)
+            Stagflation Squeeze (-15% / +250bps)
+          </button>
+          <button
+            onClick={() => handlePreset(10, 0, -50)}
+            className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border ${
+              inputs.revenueShockPct === 10 && inputs.cogsInflationPct === 0 && inputs.rateShockBps === -50
+                ? "bg-[#10B981] text-white border-[#10B981]"
+                : "bg-[#0E1B15] hover:bg-[#132A1F] border-[#10B981]/40 text-[#10B981]"
+            }`}
+          >
+            Expansionary Soft Landing (+10% / -50bps)
           </button>
           <button
             onClick={() => handlePreset(-10, 5, 200)}
             className="p-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#C5A880]/40 text-[#C5A880] rounded transition-colors"
-            title="Reset to default stress scenario"
+            title="Reset to default Basel III stress scenario"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>

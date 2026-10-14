@@ -77,6 +77,46 @@ body {
   outline: 1px solid #C5A880;
 }
 
+/* Continuous Smooth Ticker Marquee */
+@keyframes ticker-slide {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker-slide {
+  display: flex;
+  width: max-content;
+  animation: ticker-slide 32s linear infinite;
+}
+
+.animate-ticker-slide-slow {
+  display: flex;
+  width: max-content;
+  animation: ticker-slide 48s linear infinite;
+}
+
+.animate-ticker-slide:hover,
+.animate-ticker-slide-slow:hover {
+  animation-play-state: paused;
+}
+
+/* Royal Wall Street Glass & Border Styling */
+.royal-glass {
+  background: rgba(13, 17, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(197, 168, 128, 0.12);
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(197, 168, 128, 0.2);
+}
+
 /* Boardroom A4 Print Engine */
 @media print {
   @page {
