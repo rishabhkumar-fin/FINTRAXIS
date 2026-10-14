@@ -78,6 +78,27 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleExportCsv = () => {
+    const headers = ["Period", "Revenue", "EBIT", "Net Income", "Total Debt", "Cash", "Operating Cash Flow"];
+    const rows = periods.map((p) => [
+      p.period,
+      p.revenue ?? "",
+      p.ebit ?? "",
+      p.netIncome ?? "",
+      p.totalDebt ?? "",
+      p.cashAndEquivalents ?? "",
+      p.operatingCashFlow ?? "",
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${company.symbol}_financial_ledger.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -100,15 +121,21 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
 
         <div className="flex items-center gap-2">
           <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#232B3A] hover:border-[#38BDF8] text-[#38BDF8] text-xs transition-colors cursor-pointer"
+          >
+            <span>EXPORT CSV</span>
+          </button>
+          <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#232B3A] hover:border-[#2563EB] text-[#E1E7EC] text-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12161F] hover:bg-[#181F2B] border border-[#232B3A] hover:border-[#2563EB] text-[#E1E7EC] text-xs transition-colors cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#2563EB]" />}
             <span>{copied ? "COPIED" : "COPY MARKDOWN"}</span>
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-[#60A5FA] text-[#07090E] font-bold text-xs transition-colors shadow-[0_0_10px_rgba(212,175,55,0.25)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs transition-colors cursor-pointer shadow-md"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>EXPORT / PRINT TEARSHEET</span>

@@ -1,5 +1,5 @@
-import { CompanyEntity, CompanyRiskProfile } from "./types";
-import { formatFinancialValue, formatRatio } from "./formatters";
+import type { CompanyEntity, CompanyRiskProfile } from "./types.ts";
+import { formatFinancialValue, formatRatio } from "./formatters.ts";
 
 export interface KnowledgeTopic {
   keys: string[];

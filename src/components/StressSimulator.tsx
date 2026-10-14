@@ -459,7 +459,7 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
               </td>
               <td className="py-2.5 px-3 text-right">
                 <span className={`px-2 py-0.5 text-[9px] font-bold border rounded ${isCovenantBreached ? "bg-[#EF4444]/15 text-[#EF4444] border-[#EF4444]" : "bg-[#10B981]/15 text-[#10B981] border-[#10B981]"}`}>
-                  {isCovenantBreached ? "BREACH RISK (< 2.0x)" : "COVENANT MET"}
+                  {isCovenantBreached ? "Reference threshold breached in this scenario (< 2.50x)" : "Complies with analytical benchmark"}
                 </span>
               </td>
             </tr>
