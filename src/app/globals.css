@@ -1,24 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05070B;
+  --background: #070A0F;
   --foreground: #F8FAFC;
-  --terminal-canvas: #05070B;
-  --terminal-surface: #0B111E;
-  --terminal-surface-hover: #131D31;
-  --terminal-border: #1E293B;
-  --terminal-border-light: #2A3B57;
+  --terminal-canvas: #070A0F;
+  --terminal-surface: #0D131F;
+  --terminal-surface-hover: #131D2E;
+  --terminal-border: #182337;
+  --terminal-border-light: #22324D;
   --navy-accent: #2563EB;
   --blue-primary: #3B82F6;
   --blue-sky: #38BDF8;
-  --platinum-accent: #F1F5F9;
+  --platinum-accent: #F8FAFC;
   --tier-stable: #10B981;
   --tier-watchlist: #F59E0B;
   --tier-critical: #EF4444;
 }
 
 body {
-  background-color: var(--terminal-canvas);
+  background-color: #070A0F;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 85% 10%, rgba(56, 189, 248, 0.05), transparent 60%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
@@ -33,13 +37,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Hairline borders */
+/* Hairline borders - 10/10 Obsidian Sapphire */
 .border-hairline {
-  border-color: #1F293D;
+  border-color: #182337;
 }
 
 .border-hairline-light {
-  border-color: #2A364F;
+  border-color: #22324D;
 }
 
 /* Custom terminal scrollbars */
@@ -49,11 +53,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #05070B;
+  background: #070A0F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #182337;
   border-radius: 2px;
 }
 
@@ -68,15 +72,15 @@ body {
 }
 
 .audit-cell:hover {
-  background-color: rgba(37, 99, 235, 0.08);
+  background-color: rgba(37, 99, 235, 0.12);
   color: #FFFFFF;
-  outline: 1px solid rgba(59, 130, 246, 0.5);
+  outline: 1px solid rgba(56, 189, 248, 0.5);
 }
 
 .audit-cell.active-audit {
-  background-color: rgba(37, 99, 235, 0.18);
+  background-color: rgba(37, 99, 235, 0.22);
   color: #38BDF8;
-  outline: 1px solid #3B82F6;
+  outline: 1px solid #38BDF8;
 }
 
 /* Continuous Smooth Ticker Marquee */
@@ -106,17 +110,29 @@ body {
   animation-play-state: paused;
 }
 
-/* Royal Wall Street Glass & Border Styling - Classy Black & Navy Blue */
+/* BlackRock Obsidian Sapphire 10/10 Glass & Precision Panels */
 .royal-glass {
-  background: rgba(11, 17, 30, 0.90);
+  background: rgba(13, 19, 31, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.95), 0 0 30px -10px rgba(37, 99, 235, 0.22);
+}
+
+.obsidian-card {
+  background: rgba(13, 19, 31, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(37, 99, 235, 0.2);
+  border: 1px solid #182337;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.obsidian-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .blue-glow {
-  box-shadow: 0 0 24px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 0 28px rgba(37, 99, 235, 0.32);
 }
 
 /* Boardroom A4 Print Engine */

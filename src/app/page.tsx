@@ -221,7 +221,7 @@ export default function FintraxisTerminalPage() {
 
   // Prevent flash of content during hydration
   if (!mounted) {
-    return <div className="min-h-screen bg-[#080B10]" />;
+    return <div className="min-h-screen bg-[#070A0F]" />;
   }
 
   // Enforce Real Authentication & Onboarding Gate
@@ -230,7 +230,7 @@ export default function FintraxisTerminalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F8FAFC] flex font-mono selection:bg-[#38BDF8]/30 selection:text-[#F8FAFC]">
+    <div className="min-h-screen bg-[#070A0F] text-[#F8FAFC] flex font-mono selection:bg-[#38BDF8]/30 selection:text-[#FFFFFF]">
       {/* Column 1: Vertical Institutional Left Sidebar */}
       <SidebarNavigation
         activeTab={activeTab}
@@ -250,11 +250,11 @@ export default function FintraxisTerminalPage() {
       {/* Column 2: Flexible Main Workspace Area (responsive offset: pl-0 on mobile, lg:pl-64 on desktop) */}
       <div className="flex-1 flex flex-col min-w-0 pl-0 lg:pl-64 transition-all duration-200">
         {/* Mobile Header Bar (< lg screens) */}
-        <header className="lg:hidden w-full bg-[#0A0E17] border-b border-[#1E2536] px-3.5 py-2.5 flex items-center justify-between sticky top-0 z-30 select-none">
+        <header className="lg:hidden w-full bg-[#090D17] border-b border-[#182337] px-3.5 py-2.5 flex items-center justify-between sticky top-0 z-30 select-none">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMobileNavOpen(true)}
-              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#38BDF8] rounded transition-colors"
+              className="p-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] text-[#38BDF8] rounded transition-colors"
               aria-label="Open Navigation Menu"
             >
               <Menu className="w-4 h-4" />
@@ -266,7 +266,7 @@ export default function FintraxisTerminalPage() {
               </span>
             </div>
             {profile?.company.symbol && (
-              <span className="ml-1 px-1.5 py-0.5 bg-[#111622] border border-[#38BDF8]/30 text-[#38BDF8] text-[10px] font-bold rounded">
+              <span className="ml-1 px-1.5 py-0.5 bg-[#0F1626] border border-[#38BDF8]/30 text-[#38BDF8] text-[10px] font-bold rounded">
                 {profile.company.symbol}
               </span>
             )}
@@ -275,14 +275,14 @@ export default function FintraxisTerminalPage() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
-              className="p-1.5 bg-[#111622] hover:bg-[#1E2536] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+              className="p-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] rounded transition-colors"
               title="Quick Search (Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setIsAiOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] font-bold text-[11px] rounded transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-[11px] rounded transition-colors shadow-[0_0_12px_rgba(37,99,235,0.4)] cursor-pointer"
             >
               <Sparkles className="w-3 h-3" />
               <span>AI</span>

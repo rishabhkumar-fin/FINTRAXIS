@@ -194,7 +194,7 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
           </div>
 
           {/* Question 2: Cash Runway */}
-          <div className="p-3 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1.5">
+          <div className="p-3 bg-[#070A0F] border border-[#182337] rounded-lg space-y-1.5">
             <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
               <span>2. WILL IT RUN OUT OF CASH?</span>
               <span className={simulation.runwayStatus === "CRITICAL_BURN" ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
@@ -209,7 +209,7 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
           </div>
 
           {/* Question 3: Debt Covenants */}
-          <div className="p-3 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1.5">
+          <div className="p-3 bg-[#070A0F] border border-[#182337] rounded-lg space-y-1.5">
             <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
               <span>3. DO BANK COVENANTS BREAK?</span>
               <span className={isCovenantBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
@@ -226,9 +226,9 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
       </div>
 
       {/* Interactive Parameter Sliders with Exact Client Explanations */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-[#090E17] border border-[#1E293B] rounded-xl shadow-lg">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-[#090D17] border border-[#182337] rounded-xl shadow-lg">
         {/* Slider 1: Revenue Shock */}
-        <div className="space-y-2 p-3 bg-[#05070B] border border-[#1E293B] rounded-lg">
+        <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#64748B] uppercase font-bold">REVENUE CONTRACTION</span>
             <span
@@ -258,13 +258,13 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
             <span>0%</span>
             <span>+15% (Growth)</span>
           </div>
-          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#1E293B]">
+          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
             <strong className="text-[#38BDF8]">Client Impact:</strong> {inputs.revenueShockPct < 0 ? `Company loses ${formatCurr(revenueLoss)} in gross sales.` : `Company gains ${formatCurr(revenueLoss)} in extra sales.`}
           </div>
         </div>
 
         {/* Slider 2: Input Cost Inflation */}
-        <div className="space-y-2 p-3 bg-[#05070B] border border-[#1E293B] rounded-lg">
+        <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#64748B] uppercase font-bold">COGS COST INFLATION</span>
             <span
@@ -294,13 +294,13 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
             <span>0%</span>
             <span>+20% (Spike)</span>
           </div>
-          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#1E293B]">
+          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
             <strong className="text-[#F59E0B]">Client Impact:</strong> Adds {formatCurr(cogsExtraCost)} in direct factory &amp; material expenses.
           </div>
         </div>
 
         {/* Slider 3: Benchmark Rate Shock */}
-        <div className="space-y-2 p-3 bg-[#05070B] border border-[#1E293B] rounded-lg">
+        <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-[#64748B] uppercase font-bold">INTEREST RATE TIGHTENING</span>
             <span className="font-bold font-mono text-xs text-[#38BDF8]">
@@ -326,7 +326,7 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
             <span>+200 bps (Repo Shift)</span>
             <span>+500 bps (Severe)</span>
           </div>
-          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#1E293B]">
+          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
             <strong className="text-[#38BDF8]">Client Impact:</strong> {(latest?.totalDebt ?? 0) === 0 ? "Immune (zero funded debt)." : `Extra bank interest cost of ${formatCurr(extraInterestPaid)}.`}
           </div>
         </div>

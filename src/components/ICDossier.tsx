@@ -275,17 +275,17 @@ Synchronized live on FINTRAXIS Terminal.`;
       {/* =========================================================================
           TOP ACTION & PRESENTATION CONTROLS (Hidden on Print)
          ========================================================================= */}
-      <div className="p-3.5 bg-[#0F141F] border border-[#1E2536] rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-lg no-print">
+      <div className="p-3.5 bg-[#090D17] border border-[#182337] rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-lg no-print">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#38BDF8]/15 border border-[#38BDF8]/40 rounded-lg text-[#38BDF8]">
+          <div className="p-2 bg-[#2563EB]/15 border border-[#38BDF8]/40 rounded-lg text-[#38BDF8]">
             <Presentation className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-[#F8FAFC] tracking-wider uppercase text-xs">
+              <span className="font-bold text-[#FFFFFF] tracking-wider uppercase text-xs">
                 INVESTMENT COMMITTEE // BOARDROOM CREDIT RISK DOSSIER &amp; DECK
               </span>
-              <span className="px-2 py-0.5 bg-[#162033] border border-[#38BDF8]/40 text-[#38BDF8] text-[10px] font-bold rounded">
+              <span className="px-2 py-0.5 bg-[#0F1626] border border-[#38BDF8]/40 text-[#38BDF8] text-[10px] font-bold rounded">
                 CLASSY PRESENTATION DECK
               </span>
             </div>
@@ -298,13 +298,13 @@ Synchronized live on FINTRAXIS Terminal.`;
         {/* View Mode & Export Actions */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Deck vs Scroll Slicer */}
-          <div className="flex items-center bg-[#080B10] border border-[#1E2536] p-0.5 rounded-lg">
+          <div className="flex items-center bg-[#070A0F] border border-[#182337] p-0.5 rounded-lg">
             <button
               onClick={() => setViewMode("DECK")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "DECK"
-                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
               title="Slide-by-slide presentation deck view"
             >
@@ -315,8 +315,8 @@ Synchronized live on FINTRAXIS Terminal.`;
               onClick={() => setViewMode("SCROLL")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "SCROLL"
-                  ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
               title="Full continuous boardroom dossier document"
             >
@@ -327,7 +327,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           <button
             onClick={handleDownloadMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#38BDF8]/40 text-[#FFFFFF] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
             title="Download full Markdown Tearsheet file"
           >
             <Download className="w-3.5 h-3.5 text-[#38BDF8]" />
@@ -336,7 +336,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           <button
             onClick={handleShareSummary}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#38BDF8]/40 text-[#FFFFFF] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
             title="Copy shareable executive summary to clipboard"
           >
             {shareCopied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Share2 className="w-3.5 h-3.5 text-[#38BDF8]" />}
@@ -345,7 +345,7 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           <button
             onClick={handleCopyMemo}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#162033] hover:bg-[#1E2B45] border border-[#1E2536] hover:border-[#38BDF8]/40 text-[#F8FAFC] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#38BDF8]/40 text-[#FFFFFF] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#38BDF8]" />}
             <span>{copied ? "COPIED" : "COPY MD"}</span>

@@ -207,30 +207,30 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#05070B] text-[#F8FAFC] flex items-center justify-center p-3 sm:p-6 select-none font-mono overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#070A0F] text-[#F8FAFC] flex items-center justify-center p-3 sm:p-6 select-none font-mono overflow-y-auto">
       {/* Background Radial Navy Accents */}
       <div
-        className="fixed inset-0 pointer-events-none opacity-20"
+        className="fixed inset-0 pointer-events-none opacity-25"
         style={{
           backgroundImage: `radial-gradient(rgba(37, 99, 235, 0.25) 1px, transparent 1px)`,
           backgroundSize: "32px 32px",
         }}
       />
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-[#1D4ED8]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-[#0284C7]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-[#2563EB]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-[#38BDF8]/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Luxury Layout - Classy Black & Navy Blue */}
-      <div className="relative w-full max-w-5xl bg-[#090E17] border border-[#1E293B] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.95)] z-10 rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto">
+      {/* Main Luxury Layout - BlackRock Obsidian Sapphire 10/10 */}
+      <div className="relative w-full max-w-5xl bg-[#090D17] border border-[#182337] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.98),0_0_40px_-10px_rgba(37,99,235,0.2)] z-10 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto">
         
         {/* LEFT COLUMN: Wall Street Institutional Showcase (5 cols on lg) */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-[#0B111E] to-[#06090F] p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#1E293B] flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-5 bg-gradient-to-br from-[#0C1220] to-[#070A0F] p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-[#182337] flex flex-col justify-between space-y-6">
           <div className="space-y-6">
             {/* Royal Crest Lockup */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <PeacockLogo size="lg" showLockup={false} />
                 <div>
-                  <div className="text-sm font-bold tracking-[0.25em] text-[#F8FAFC] uppercase">
+                  <div className="text-sm font-bold tracking-[0.25em] text-[#FFFFFF] uppercase">
                     FINTRAXIS
                   </div>
                   <div className="text-[9.5px] text-[#38BDF8] tracking-widest uppercase font-semibold">
@@ -239,7 +239,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#101A2E] border border-[#2563EB]/40 rounded text-[10px] text-[#38BDF8] font-bold">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#0F1626] border border-[#2563EB]/40 rounded text-[10px] text-[#38BDF8] font-bold">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
                 <span>LEVEL 3 CLEARANCE // WALL STREET DESK</span>
               </div>
@@ -247,7 +247,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
 
             {/* Prestige Pitch */}
             <div className="space-y-2">
-              <h1 className="text-lg sm:text-xl font-bold text-[#F8FAFC] tracking-tight leading-snug">
+              <h1 className="text-lg sm:text-xl font-bold text-[#FFFFFF] tracking-tight leading-snug">
                 Institutional Credit Risk &amp; Solvency Intelligence
               </h1>
               <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -256,33 +256,33 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
             </div>
 
             {/* 4 Pillars of Wall Street Clearance */}
-            <div className="space-y-2.5 pt-2 border-t border-[#1E293B]">
+            <div className="space-y-2.5 pt-2 border-t border-[#182337]">
               <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#131F37] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
                   <TrendingUp className="w-3 h-3" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#F8FAFC]">Multi-Period Audited Financials</div>
+                  <div className="text-[11px] font-bold text-[#FFFFFF]">Multi-Period Audited Financials</div>
                   <div className="text-[10px] text-[#64748B]">Regulatory XBRL disclosures across NSE, BSE, NASDAQ &amp; NYSE.</div>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#131F37] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
                   <Landmark className="w-3 h-3" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#F8FAFC]">Monetary Transmission Shock Lab</div>
+                  <div className="text-[11px] font-bold text-[#FFFFFF]">Monetary Transmission Shock Lab</div>
                   <div className="text-[10px] text-[#64748B]">Real-time RBI Repo Rate (5.50%) &amp; US Fed Funds stress testing.</div>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#131F37] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
                   <FileText className="w-3 h-3" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#F8FAFC]">Boardroom Presentation PDF Deck</div>
+                  <div className="text-[11px] font-bold text-[#FFFFFF]">Boardroom Presentation PDF Deck</div>
                   <div className="text-[10px] text-[#64748B]">1-Click PowerPoint-style underwriting memos with cryptographic seal.</div>
                 </div>
               </div>
@@ -290,7 +290,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           </div>
 
           {/* Security Node Attestation */}
-          <div className="pt-4 border-t border-[#1E293B] flex items-center justify-between text-[10px] text-[#64748B]">
+          <div className="pt-4 border-t border-[#182337] flex items-center justify-between text-[10px] text-[#64748B]">
             <span className="flex items-center gap-1.5 text-[#10B981]">
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
               <span>NODE: MUM-01 // NY-02</span>
@@ -300,16 +300,16 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         </div>
 
         {/* RIGHT COLUMN: Slick Credential Vault (7 cols on lg) */}
-        <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-center space-y-5 bg-[#090E17]">
+        <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-center space-y-5 bg-[#090D17]">
           
           {/* Highlighted VIP 1-Click Guest Analyst Pass */}
-          <div className="p-4 bg-gradient-to-r from-[#0F1B33] to-[#0A1224] border border-[#2563EB]/60 rounded-xl space-y-2.5 shadow-lg relative overflow-hidden group">
+          <div className="p-4 bg-gradient-to-r from-[#0E1629] to-[#0A101E] border border-[#2563EB]/60 rounded-xl space-y-2.5 shadow-lg relative overflow-hidden group">
             <div className="absolute top-0 right-0 px-3 py-0.5 bg-[#2563EB] text-white text-[9px] font-bold uppercase tracking-wider rounded-bl">
               1-CLICK GUEST PASS
             </div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#38BDF8] animate-pulse" />
-              <div className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+              <div className="text-xs font-bold text-[#FFFFFF] uppercase tracking-wider">
                 EXPLORE TERMINAL AS GUEST ANALYST
               </div>
             </div>
@@ -327,15 +327,15 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           </div>
 
           <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-[#1E293B]"></div>
+            <div className="flex-grow border-t border-[#182337]"></div>
             <span className="flex-shrink mx-3 text-[#64748B] text-[10px] uppercase font-mono tracking-widest">
               OR USE ACCOUNT CREDENTIALS
             </span>
-            <div className="flex-grow border-t border-[#1E293B]"></div>
+            <div className="flex-grow border-t border-[#182337]"></div>
           </div>
 
           {/* Segmented Sign In / Create Account Toggle */}
-          <div className="w-full grid grid-cols-2 gap-1 p-1 bg-[#05070C] border border-[#1E293B] rounded-lg">
+          <div className="w-full grid grid-cols-2 gap-1 p-1 bg-[#070A0F] border border-[#182337] rounded-lg">
             <button
               type="button"
               onClick={() => {
@@ -345,8 +345,8 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
               }}
               className={`py-2 text-xs font-medium transition-all flex items-center justify-center gap-2 rounded ${
                 mode === "SIGN_IN"
-                  ? "bg-[#1E293B] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
@@ -361,8 +361,8 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
               }}
               className={`py-2 text-xs font-medium transition-all flex items-center justify-center gap-2 rounded ${
                 mode === "REGISTER"
-                  ? "bg-[#1E293B] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -399,7 +399,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                     onChange={(e) => setSignInIdentifier(e.target.value)}
                     required
                     placeholder="e.g. user@gmail.com or username"
-                    className="w-full pl-9 pr-3 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-[#070A0F] border border-[#182337] text-[#FFFFFF] placeholder-[#475569] focus:border-[#38BDF8] focus:outline-none text-xs font-mono rounded transition-colors"
                   />
                   <User className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
                 </div>
@@ -416,7 +416,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                     onChange={(e) => setSignInPassword(e.target.value)}
                     required
                     placeholder="Enter security password"
-                    className="w-full pl-9 pr-10 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
+                    className="w-full pl-9 pr-10 py-2 bg-[#070A0F] border border-[#182337] text-[#FFFFFF] placeholder-[#475569] focus:border-[#38BDF8] focus:outline-none text-xs font-mono rounded transition-colors"
                   />
                   <Lock className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
                   <button
@@ -435,7 +435,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-[#1E293B] bg-[#05070C] text-[#2563EB] focus:ring-0 cursor-pointer w-3.5 h-3.5"
+                    className="rounded border-[#182337] bg-[#070A0F] text-[#2563EB] focus:ring-0 cursor-pointer w-3.5 h-3.5"
                   />
                   <span>Remember clearance on this device</span>
                 </label>
@@ -444,7 +444,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-[#1E293B] hover:bg-[#2563EB] border border-[#3B82F6]/50 text-[#38BDF8] hover:text-white font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-2.5 bg-[#182337] hover:bg-[#2563EB] border border-[#38BDF8]/50 text-[#38BDF8] hover:text-white font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">

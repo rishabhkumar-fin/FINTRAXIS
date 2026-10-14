@@ -213,9 +213,9 @@ export function MacroTickerTape({
   const infiniteTape = [...tickerItems, ...tickerItems];
 
   return (
-    <div className="w-full bg-[#05070B] text-[#F8FAFC] border-b border-[#1E293B] font-mono text-xs select-none">
+    <div className="w-full bg-[#070A0F] text-[#F8FAFC] border-b border-[#182337] font-mono text-xs select-none">
       {/* Tier 1: Top Navigation, Region Selector & Global Clock */}
-      <header className="px-3 sm:px-4 py-2 flex items-center justify-between gap-3 border-b border-[#1E293B] bg-[#090E17]">
+      <header className="px-3 sm:px-4 py-2 flex items-center justify-between gap-3 border-b border-[#182337] bg-[#0A0E18]">
         {/* Left: Terminal Node & Command Palette */}
         <div className="flex items-center gap-3 flex-1 max-w-xl">
           <div className="flex items-center gap-2">
@@ -227,13 +227,13 @@ export function MacroTickerTape({
 
           <button
             onClick={onOpenCommandPalette}
-            className="flex-1 flex items-center justify-between px-3 py-1.5 bg-[#05070C] hover:bg-[#0E1524] border border-[#1E293B] hover:border-[#38BDF8]/50 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded text-xs truncate"
+            className="flex-1 flex items-center justify-between px-3 py-1.5 bg-[#070A10] hover:bg-[#0F1626] border border-[#182337] hover:border-[#38BDF8]/50 text-[#94A3B8] hover:text-[#FFFFFF] transition-colors rounded text-xs truncate"
           >
             <div className="flex items-center gap-2 truncate">
               <Search className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
               <span className="truncate">Search global security (NSE, NASDAQ, BSE, Nikkei)...</span>
             </div>
-            <span className="text-[9.5px] px-1.5 py-0.5 bg-[#101A2E] border border-[#1E293B] text-[#38BDF8] font-semibold shrink-0 ml-2 rounded hidden sm:inline">
+            <span className="text-[9.5px] px-1.5 py-0.5 bg-[#101A2E] border border-[#182337] text-[#38BDF8] font-semibold shrink-0 ml-2 rounded hidden sm:inline">
               CTRL + K
             </span>
           </button>
@@ -242,7 +242,7 @@ export function MacroTickerTape({
         {/* Right: Regional Filter Pills, Marquee Slide Controls, Clock & Calibration */}
         <div className="flex items-center gap-2 shrink-0 text-xs">
           {/* Regional Selector Pills */}
-          <div className="hidden sm:flex items-center gap-0.5 bg-[#05070C] border border-[#1E293B] p-0.5 rounded">
+          <div className="hidden sm:flex items-center gap-0.5 bg-[#070A10] border border-[#182337] p-0.5 rounded">
             {[
               { id: "GLOBAL", label: "GLOBAL", flag: "🌐" },
               { id: "IND", label: "INDIA", flag: "🇮🇳" },
@@ -259,7 +259,7 @@ export function MacroTickerTape({
                   }}
                   className={`px-2 py-0.5 text-[10px] font-bold rounded flex items-center gap-1 transition-all ${
                     isActive
-                      ? "bg-[#101A2E] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                      ? "bg-[#131D30] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
                       : "text-[#64748B] hover:text-[#CBD5E1]"
                   }`}
                 >
@@ -271,10 +271,10 @@ export function MacroTickerTape({
           </div>
 
           {/* Marquee Slide Controller: Stop / Play & Step Arrows at User's Wish */}
-          <div className="flex items-center gap-1 bg-[#05070C] border border-[#1E293B] px-1 py-0.5 rounded">
+          <div className="flex items-center gap-1 bg-[#070A10] border border-[#182337] px-1 py-0.5 rounded">
             <button
               onClick={() => handleManualScroll("LEFT")}
-              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#1E293B] rounded transition-colors"
+              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#182337] rounded transition-colors"
               title="Slide Left (Stops auto glide)"
             >
               <ChevronLeft className="w-3 h-3" />
@@ -285,7 +285,7 @@ export function MacroTickerTape({
               className={`px-1.5 py-0.5 text-[9.5px] font-bold rounded flex items-center gap-1 transition-all ${
                 isPaused
                   ? "bg-[#2563EB]/20 text-[#38BDF8] border border-[#2563EB]/40"
-                  : "bg-[#101A2E] text-[#94A3B8] hover:text-[#F8FAFC]"
+                  : "bg-[#131D30] text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
               title={isPaused ? "Click to resume automatic gliding" : "Click to stop sliding ticker"}
             >
@@ -295,7 +295,7 @@ export function MacroTickerTape({
 
             <button
               onClick={() => handleManualScroll("RIGHT")}
-              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#1E293B] rounded transition-colors"
+              className="p-1 text-[#64748B] hover:text-[#38BDF8] hover:bg-[#182337] rounded transition-colors"
               title="Slide Right (Stops auto glide)"
             >
               <ChevronRight className="w-3 h-3" />
@@ -303,7 +303,7 @@ export function MacroTickerTape({
           </div>
 
           {/* SQLite Status */}
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-[#0B111E] border border-[#1E293B] text-[10.5px] rounded">
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-[#0C1220] border border-[#182337] text-[10.5px] rounded">
             <Database className="w-3 h-3 text-[#10B981]" />
             <span className="text-[#64748B]">SQLITE:</span>
             <span className="text-[#10B981] font-bold">WAL OK</span>
@@ -312,7 +312,7 @@ export function MacroTickerTape({
           {/* Interactive Clock with explicit Timezone */}
           <button
             onClick={() => setShowUtcPrimary(!showUtcPrimary)}
-            className="flex items-center gap-1.5 px-2 py-1 bg-[#05070C] hover:bg-[#0B111E] border border-[#1E293B] hover:border-[#38BDF8]/50 text-[10.5px] text-[#F8FAFC] rounded transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2 py-1 bg-[#070A10] hover:bg-[#0F1626] border border-[#182337] hover:border-[#38BDF8]/50 text-[10.5px] text-[#FFFFFF] rounded transition-colors cursor-pointer"
             title="Click to toggle Local / UTC Time"
           >
             <Clock className="w-3 h-3 text-[#38BDF8] shrink-0" />
@@ -325,7 +325,7 @@ export function MacroTickerTape({
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
-              className="p-1.5 bg-[#0B111E] hover:bg-[#1E293B] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors rounded"
+              className="p-1.5 bg-[#0C1220] hover:bg-[#182337] border border-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] transition-colors rounded"
               title="Institutional Settings"
             >
               <Settings className="w-3.5 h-3.5" />
@@ -335,9 +335,9 @@ export function MacroTickerTape({
       </header>
 
       {/* Tier 2: Continuous Sliding Ticker Tape with User Slide & Drag Control */}
-      <div className="w-full bg-[#05070B] border-b border-[#1E293B] py-1 px-2 flex items-center overflow-hidden relative group">
+      <div className="w-full bg-[#070A0F] border-b border-[#182337] py-1 px-2 flex items-center overflow-hidden relative group">
         {/* Left Sticky Label */}
-        <div className="shrink-0 flex items-center gap-1.5 bg-[#0B111E] border border-[#2563EB]/40 px-2.5 py-0.5 rounded text-[10px] text-[#38BDF8] font-bold z-10 shadow-sm mr-2">
+        <div className="shrink-0 flex items-center gap-1.5 bg-[#0D1424] border border-[#2563EB]/40 px-2.5 py-0.5 rounded text-[10px] text-[#38BDF8] font-bold z-10 shadow-sm mr-2">
           <Landmark className="w-3 h-3 text-[#38BDF8]" />
           <span className="tracking-wider">SOVEREIGN RATES &amp; MARQUEE TAPE:</span>
         </div>
@@ -360,12 +360,12 @@ export function MacroTickerTape({
             {infiniteTape.map((item, idx) => (
               <div
                 key={`${item.id}_${idx}`}
-                className="flex items-center gap-2 bg-[#0A0E17] px-2.5 py-0.5 border border-[#1E293B] hover:border-[#38BDF8]/60 rounded whitespace-nowrap transition-colors shrink-0"
+                className="flex items-center gap-2 bg-[#0A0E18] px-2.5 py-0.5 border border-[#182337] hover:border-[#38BDF8]/60 rounded whitespace-nowrap transition-colors shrink-0"
               >
                 <span className="text-[#64748B] text-[9.5px] uppercase font-semibold">
                   {item.label}
                 </span>
-                <span className="font-bold font-mono tabular-nums text-[#F8FAFC] text-[10.5px]">
+                <span className="font-bold font-mono tabular-nums text-[#FFFFFF] text-[10.5px]">
                   {item.value}
                 </span>
 

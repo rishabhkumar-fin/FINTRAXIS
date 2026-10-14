@@ -245,17 +245,17 @@ export function StatementsLedger({
       </div>
 
       {/* Ledger Header, Sub-Navigation & Actions */}
-      <div className="p-3 bg-[#090E17] border border-[#1E293B] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
+      <div className="p-3 bg-[#090D17] border border-[#182337] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#101A2E] border border-[#2563EB]/40 rounded-lg text-[#38BDF8]">
+          <div className="p-2 bg-[#0F1626] border border-[#2563EB]/40 rounded-lg text-[#38BDF8]">
             <FileSpreadsheet className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#F8FAFC] tracking-wider uppercase">
+              <span className="text-xs font-bold text-[#FFFFFF] tracking-wider uppercase">
                 XBRL AUDITABLE FINANCIAL LEDGER // {company.symbol}
               </span>
-              <span className="text-[10px] px-2 py-0.5 border border-[#2563EB]/40 text-[#38BDF8] bg-[#0E1524] rounded font-bold">
+              <span className="text-[10px] px-2 py-0.5 border border-[#2563EB]/40 text-[#38BDF8] bg-[#0D131F] rounded font-bold">
                 AS-REPORTED: {company.currency} ({company.scaleUnit})
               </span>
             </div>
@@ -269,7 +269,7 @@ export function StatementsLedger({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setIsOfficialReportModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#101A2E] hover:bg-[#1E293B] border border-[#2563EB]/50 text-[#38BDF8] hover:text-white text-xs font-bold rounded transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#2563EB]/50 text-[#38BDF8] hover:text-white text-xs font-bold rounded transition-colors cursor-pointer"
             title="Inspect Official Regulatory Filing & Auditor Report"
           >
             <FileText className="w-3.5 h-3.5" />
@@ -277,13 +277,13 @@ export function StatementsLedger({
           </button>
 
           {/* Statement Switcher Tabs */}
-          <div className="flex items-center p-0.5 bg-[#05070B] border border-[#1E293B] rounded-lg text-xs">
+          <div className="flex items-center p-0.5 bg-[#070A0F] border border-[#182337] rounded-lg text-xs">
             <button
               onClick={() => setActiveStatement("INCOME")}
               className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
                 activeStatement === "INCOME"
-                  ? "bg-[#2563EB] text-white shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#2563EB] text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
             >
               INCOME
@@ -292,8 +292,8 @@ export function StatementsLedger({
               onClick={() => setActiveStatement("BALANCE_SHEET")}
               className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
                 activeStatement === "BALANCE_SHEET"
-                  ? "bg-[#2563EB] text-white shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#2563EB] text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
             >
               BALANCE SHEET
@@ -302,8 +302,8 @@ export function StatementsLedger({
               onClick={() => setActiveStatement("CASH_FLOW")}
               className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
                 activeStatement === "CASH_FLOW"
-                  ? "bg-[#2563EB] text-white shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                  ? "bg-[#2563EB] text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
               }`}
             >
               CASH FLOW
@@ -313,11 +313,11 @@ export function StatementsLedger({
       </div>
 
       {/* Main Multi-Period Ledger Grid */}
-      <div className="border border-[#1E293B] bg-[#05070B] rounded-xl overflow-hidden shadow-lg">
+      <div className="border border-[#182337] bg-[#070A0F] rounded-xl overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-xs font-mono">
             <thead>
-              <tr className="border-b border-[#1E293B] bg-[#090E17] text-[#64748B] text-[11px]">
+              <tr className="border-b border-[#182337] bg-[#0A0E18] text-[#64748B] text-[11px]">
                 <th className="py-2.5 px-3 text-left w-2/5">STANDARDIZED GAAP / IFRS LINE ITEM</th>
                 {sortedPeriods.map((p) => (
                   <th key={p.id} className="py-2.5 px-3 text-right">

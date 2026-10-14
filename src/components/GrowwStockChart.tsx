@@ -169,22 +169,22 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
   const TIMEFRAMES: TimeframePeriod[] = ["1D", "1W", "1M", "3M", "1Y", "3Y", "5Y", "ALL"];
 
   return (
-    <div className="p-4 bg-[#070B12] border border-[#1E293B] rounded-xl space-y-3 font-mono select-none">
+    <div className="p-4 bg-[#090D17] border border-[#182337] rounded-xl space-y-3 font-mono select-none shadow-md">
       {/* Groww Header Lockup: Interactive Price Display & Timeframe Slicers */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-[#1E293B] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-[#182337] pb-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-[#64748B] uppercase font-bold tracking-wider">
               {companyName} &bull; GROWW-STYLE LIVE CHART
             </span>
-            <span className="px-1.5 py-0.2 bg-[#0E1524] border border-[#2563EB]/40 text-[#38BDF8] text-[9.5px] rounded">
+            <span className="px-1.5 py-0.2 bg-[#0F1626] border border-[#2563EB]/40 text-[#38BDF8] text-[9.5px] rounded">
               SCRUB TO INSPECT ANY MONTH
             </span>
           </div>
 
           {/* Large dynamic price tracking cursor */}
           <div className="flex items-baseline gap-3 mt-1">
-            <span className="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] tracking-tight">
+            <span className="text-2xl sm:text-3xl font-extrabold text-[#FFFFFF] tracking-tight">
               {quote.currencySymbol}{currentDisplayPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <span
@@ -213,7 +213,7 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
         </div>
 
         {/* Groww Timeframe Pill Selector */}
-        <div className="flex items-center gap-1 bg-[#0A0F1A] border border-[#1E293B] p-1 rounded-lg">
+        <div className="flex items-center gap-1 bg-[#070A0F] border border-[#182337] p-1 rounded-lg">
           {TIMEFRAMES.map((tf) => (
             <button
               key={tf}
@@ -223,8 +223,8 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
               }}
               className={`px-2.5 py-1 text-[11px] font-bold rounded transition-all cursor-pointer ${
                 activeTimeframe === tf
-                  ? "bg-[#2563EB] text-white shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#101A2E]"
+                  ? "bg-[#2563EB] text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                  : "text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-[#0F1626]"
               }`}
             >
               {tf}
@@ -253,13 +253,13 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
           </defs>
 
           {/* Horizontal Reference Grid Lines */}
-          <line x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#1E293B" strokeDasharray="3 3" />
+          <line x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#182337" strokeDasharray="3 3" />
           <line
             x1={padX}
             y1={padTop + chartHeight / 2}
             x2={width - padX}
             y2={padTop + chartHeight / 2}
-            stroke="#1E293B"
+            stroke="#182337"
             strokeDasharray="3 3"
           />
           <line
@@ -267,7 +267,7 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
             y1={padTop + chartHeight}
             x2={width - padX}
             y2={padTop + chartHeight}
-            stroke="#1E293B"
+            stroke="#182337"
           />
 
           {/* Groww-style Volume Bars at bottom */}

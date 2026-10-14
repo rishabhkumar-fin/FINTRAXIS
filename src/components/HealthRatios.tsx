@@ -239,10 +239,10 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-base font-bold text-[#F8FAFC] tracking-wider uppercase">
+              <span className="text-base font-bold text-[#FFFFFF] tracking-wider uppercase">
                 {company.name} ({company.symbol})
               </span>
-              <span className={`text-[10px] px-2.5 py-0.5 border font-bold rounded ${isTier1 ? "border-[#10B981] text-[#10B981] bg-[#10B981]/10" : isTier2 ? "border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10" : "border-[#F43F5E] text-[#F43F5E] bg-[#F43F5E]/10"}`}>
+              <span className={`text-[10px] px-2.5 py-0.5 border font-bold rounded ${isTier1 ? "border-[#10B981] text-[#10B981] bg-[#10B981]/10" : isTier2 ? "border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10" : "border-[#EF4444] text-[#EF4444] bg-[#EF4444]/10"}`}>
                 {riskTier.replace("_", " ")} &bull; {riskScore}/100
               </span>
             </div>
@@ -257,13 +257,13 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
         </div>
 
         {/* View Switcher: Power BI vs Detailed Tiles */}
-        <div className="flex items-center gap-1 bg-[#080B10] border border-[#1E2536] p-1 rounded-lg self-end md:self-auto">
+        <div className="flex items-center gap-1 bg-[#070A0F] border border-[#182337] p-1 rounded-lg self-end md:self-auto">
           <button
             onClick={() => setActiveView("POWER_BI")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
               activeView === "POWER_BI"
-                ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                : "text-[#94A3B8] hover:text-[#FFFFFF]"
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -273,8 +273,8 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
             onClick={() => setActiveView("TILES")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
               activeView === "TILES"
-                ? "bg-[#1E2B45] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                : "text-[#94A3B8] hover:text-[#FFFFFF]"
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
@@ -284,8 +284,8 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
       </div>
 
       {/* EXECUTIVE SYNTHESIS: WHAT THIS DESK TELLS YOU (Direct Plain-English Takeaways) */}
-      <div className="p-4 bg-[#0A0E17] border border-[#1E2536] rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-[#1E2536] pb-2">
+      <div className="p-4 bg-[#090D17] border border-[#182337] rounded-xl space-y-3 shadow-lg">
+        <div className="flex items-center justify-between border-b border-[#182337] pb-2">
           <div className="flex items-center gap-2 text-xs font-bold text-[#38BDF8] uppercase tracking-wider">
             <Info className="w-4 h-4 text-[#38BDF8]" />
             <span>EXECUTIVE SYNTHESIS: WHAT THESE RATIOS MEAN IN BUSINESS REALITY</span>
@@ -294,7 +294,7 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1">
+          <div className="p-3 bg-[#0D131F] border border-[#182337] rounded-lg space-y-1">
             <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
               <span>1. CAN THE FIRM PAY ITS DEBT?</span>
               <span className={(latestRatios.netDebtToEbitda ?? 0) <= 2.5 ? "text-[#10B981]" : "text-[#F59E0B]"}>

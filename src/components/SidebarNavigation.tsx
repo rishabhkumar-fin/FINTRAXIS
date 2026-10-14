@@ -98,7 +98,7 @@ export function SidebarNavigation({
       )}
 
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 bg-[#0A0E17] border-r border-[#1E2536] flex flex-col justify-between transition-all duration-200 select-none no-print ${
+        className={`fixed top-0 left-0 bottom-0 z-50 bg-[#090D17] border-r border-[#182337] flex flex-col justify-between transition-all duration-200 select-none no-print ${
           isCollapsed ? "w-20" : "w-64"
         } ${
           isMobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"
@@ -106,7 +106,7 @@ export function SidebarNavigation({
       >
         {/* Top Header Lockup & Collapse Trigger */}
         <div className="flex flex-col">
-          <div className="p-3.5 border-b border-[#1E2536] flex items-center justify-between">
+          <div className="p-3.5 border-b border-[#182337] flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
               <PeacockLogo size="sm" showLockup={false} />
               {!isCollapsed && (
@@ -119,14 +119,14 @@ export function SidebarNavigation({
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:block p-1 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111622] rounded transition-colors"
+                className="hidden lg:block p-1 text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-[#0F1626] rounded transition-colors"
                 title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               >
                 {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={onCloseMobile}
-                className="lg:hidden p-1 text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111622] rounded transition-colors"
+                className="lg:hidden p-1 text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-[#0F1626] rounded transition-colors"
                 title="Close Navigation Drawer"
               >
                 <X className="w-4 h-4" />
@@ -135,21 +135,21 @@ export function SidebarNavigation({
           </div>
 
         {/* Active Entity Quick Switcher Card */}
-        <div className="p-2 border-b border-[#1E2536] relative">
+        <div className="p-2 border-b border-[#182337] relative">
           <button
             onClick={() => setIsSwitcherOpen(!isSwitcherOpen)}
-            className="w-full p-2 bg-[#111622] hover:bg-[#162033] border border-[#1E2536] text-left transition-colors flex items-center justify-between rounded"
+            className="w-full p-2 bg-[#0F1626] hover:bg-[#141E33] border border-[#182337] text-left transition-colors flex items-center justify-between rounded"
           >
             <div className="truncate mr-1 min-w-0">
               <div className="text-[10px] text-[#64748B] uppercase tracking-wider flex items-center gap-1">
                 <span>ACTIVE ENTITY</span>
                 {selected?.country && (
-                  <span className="text-[9px] px-1 bg-[#080B10] text-[#94A3B8] border border-[#1E2536]">
+                  <span className="text-[9px] px-1 bg-[#070A0F] text-[#94A3B8] border border-[#182337]">
                     {selected.country}
                   </span>
                 )}
               </div>
-              <div className="text-xs font-bold font-mono text-[#F8FAFC] truncate">
+              <div className="text-xs font-bold font-mono text-[#FFFFFF] truncate">
                 {selected ? selected.symbol : "SELECT ENTITY"}
               </div>
               {!isCollapsed && selected && (
@@ -164,8 +164,8 @@ export function SidebarNavigation({
 
           {/* Quick Entity Dropdown Menu */}
           {isSwitcherOpen && (
-            <div className="absolute top-full left-2 right-2 mt-1 z-50 bg-[#0D111A] border border-[#1E2536] shadow-2xl rounded max-h-56 overflow-y-auto">
-              <div className="p-1.5 text-[9px] text-[#64748B] uppercase border-b border-[#1E2536] flex justify-between">
+            <div className="absolute top-full left-2 right-2 mt-1 z-50 bg-[#0B101D] border border-[#182337] shadow-2xl rounded max-h-56 overflow-y-auto">
+              <div className="p-1.5 text-[9px] text-[#64748B] uppercase border-b border-[#182337] flex justify-between">
                 <span>SECURITY REGISTER</span>
                 <span>{companies.length} ISSUERS</span>
               </div>
@@ -173,15 +173,15 @@ export function SidebarNavigation({
                 <button
                   key={c.id}
                   onClick={() => handleCompanySelect(c.id)}
-                  className={`w-full p-2 text-left text-xs font-mono flex items-center justify-between hover:bg-[#162033] transition-colors border-b border-[#1E2536]/40 last:border-0 ${
-                    selected?.id === c.id ? "bg-[#172033] text-[#38BDF8]" : "text-[#94A3B8]"
+                  className={`w-full p-2 text-left text-xs font-mono flex items-center justify-between hover:bg-[#131D30] transition-colors border-b border-[#182337]/40 last:border-0 ${
+                    selected?.id === c.id ? "bg-[#131D30] text-[#38BDF8]" : "text-[#94A3B8]"
                   }`}
                 >
                   <div className="truncate mr-2">
-                    <div className="font-bold text-[#F8FAFC]">{c.symbol}</div>
+                    <div className="font-bold text-[#FFFFFF]">{c.symbol}</div>
                     <div className="text-[10px] text-[#64748B] truncate">{c.name}</div>
                   </div>
-                  <div className="text-[10px] px-1 bg-[#080B10] border border-[#1E2536] text-[#94A3B8]">
+                  <div className="text-[10px] px-1 bg-[#070A0F] border border-[#182337] text-[#94A3B8]">
                     {c.currency}
                   </div>
                 </button>
@@ -206,7 +206,7 @@ export function SidebarNavigation({
             if (mod.id === "ic") badge = "PDF";
             if (mod.id === "vulnerability") {
               badge = earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "0 FLAGS";
-              badgeColor = earlyWarningCount > 0 ? "text-[#F43F5E] border-[#F43F5E]/40" : "text-[#10B981] border-[#10B981]/40";
+              badgeColor = earlyWarningCount > 0 ? "text-[#EF4444] border-[#EF4444]/40" : "text-[#10B981] border-[#10B981]/40";
             }
 
             return (
@@ -216,8 +216,8 @@ export function SidebarNavigation({
                 title={isCollapsed ? `${mod.number}: ${mod.name}` : undefined}
                 className={`w-full p-2.5 flex items-center gap-3 text-left transition-all rounded ${
                   isCurrent
-                    ? "bg-[#162033] border-l-2 border-[#38BDF8] text-[#F8FAFC]"
-                    : "hover:bg-[#111622] text-[#94A3B8] hover:text-[#F8FAFC]"
+                    ? "bg-[#131D30] border-l-2 border-[#38BDF8] text-[#FFFFFF] shadow-[inset_0_0_12px_rgba(37,99,235,0.15)]"
+                    : "hover:bg-[#0F1626] text-[#94A3B8] hover:text-[#FFFFFF]"
                 }`}
               >
                 <IconComponent
@@ -229,7 +229,7 @@ export function SidebarNavigation({
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0 flex items-center justify-between">
                     <div className="truncate mr-1">
-                      <div className="text-xs font-semibold truncate leading-tight text-[#F8FAFC]">
+                      <div className="text-xs font-semibold truncate leading-tight text-[#FFFFFF]">
                         {mod.name}
                       </div>
                       <div className="text-[9.5px] text-[#64748B] truncate">
@@ -241,7 +241,7 @@ export function SidebarNavigation({
                       {badge && (
                         <span
                           className={`text-[8.5px] px-1 py-0.2 border rounded ${
-                            badgeColor || "text-[#94A3B8] border-[#1E2536]"
+                            badgeColor || "text-[#94A3B8] border-[#182337]"
                           }`}
                         >
                           {badge}
@@ -261,7 +261,7 @@ export function SidebarNavigation({
           <div className="px-3 pt-3">
             <button
               onClick={onOpenAi}
-              className={`w-full p-2 bg-[#172033] hover:bg-[#1E2D4A] border border-[#38BDF8]/40 text-[#38BDF8] rounded flex items-center transition-all group ${
+              className={`w-full p-2 bg-[#131D30] hover:bg-[#1A2640] border border-[#38BDF8]/40 text-[#38BDF8] rounded flex items-center transition-all group ${
                 isCollapsed ? "justify-center" : "justify-between"
               }`}
               title="Open Financial AI Copilot (Ctrl + J)"
@@ -271,7 +271,7 @@ export function SidebarNavigation({
                 {!isCollapsed && <span className="font-bold text-[11px]">AI Risk Copilot</span>}
               </div>
               {!isCollapsed && (
-                <span className="text-[8.5px] px-1 py-0.2 bg-[#080B10] text-[#94A3B8] rounded border border-[#1E2536]">
+                <span className="text-[8.5px] px-1 py-0.2 bg-[#070A0F] text-[#94A3B8] rounded border border-[#182337]">
                   CTRL+J
                 </span>
               )}
@@ -281,7 +281,7 @@ export function SidebarNavigation({
       </div>
 
       {/* Sidebar Footer with Operator Identity & Settings CTA */}
-      <div className="p-3 border-t border-[#1E2536] bg-[#0D111A] font-mono text-xs">
+      <div className="p-3 border-t border-[#182337] bg-[#0A0E18] font-mono text-xs">
         {!isCollapsed ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -308,7 +308,7 @@ export function SidebarNavigation({
                 {onOpenSettings && (
                   <button
                     onClick={onOpenSettings}
-                    className="p-1.5 bg-[#111622] hover:bg-[#172033] border border-[#1E2536] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+                    className="p-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] rounded transition-colors"
                     title="Operator Calibration Settings"
                   >
                     <Settings className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export function SidebarNavigation({
 
                 <button
                   onClick={onLogout}
-                  className="p-1.5 bg-[#111622] hover:bg-[#F43F5E]/20 border border-[#1E2536] hover:border-[#F43F5E] text-[#94A3B8] hover:text-[#F43F5E] rounded transition-colors"
+                  className="p-1.5 bg-[#0F1626] hover:bg-[#EF4444]/20 border border-[#182337] hover:border-[#EF4444] text-[#94A3B8] hover:text-[#EF4444] rounded transition-colors"
                   title="Lock Terminal Session (Ctrl+Shift+L)"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -325,7 +325,7 @@ export function SidebarNavigation({
               </div>
             </div>
 
-            <div className="text-[8.5px] text-[#64748B] flex items-center justify-between pt-1 border-t border-[#1E2536]/60">
+            <div className="text-[8.5px] text-[#64748B] flex items-center justify-between pt-1 border-t border-[#182337]/60">
               <span>NODE: MUM-01 (LIVE)</span>
               <span>LOCK: CTRL+SHIFT+L</span>
             </div>
@@ -340,7 +340,7 @@ export function SidebarNavigation({
             {onOpenSettings && (
               <button
                 onClick={onOpenSettings}
-                className="p-1.5 bg-[#111622] hover:bg-[#172033] text-[#94A3B8] hover:text-[#F8FAFC] rounded transition-colors"
+                className="p-1.5 bg-[#0F1626] hover:bg-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] rounded transition-colors"
                 title="Settings"
               >
                 <Settings className="w-3.5 h-3.5" />
@@ -348,7 +348,7 @@ export function SidebarNavigation({
             )}
             <button
               onClick={onLogout}
-              className="p-1.5 bg-[#111622] hover:bg-[#F43F5E]/20 text-[#94A3B8] hover:text-[#F43F5E] rounded transition-colors"
+              className="p-1.5 bg-[#0F1626] hover:bg-[#EF4444]/20 text-[#94A3B8] hover:text-[#EF4444] rounded transition-colors"
               title="Lock Terminal (Ctrl+Shift+L)"
             >
               <Lock className="w-3.5 h-3.5" />

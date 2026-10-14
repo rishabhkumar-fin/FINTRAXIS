@@ -126,7 +126,7 @@ export function CompanyHub({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search & resolve any global equity or ticker (e.g. NVDA, AAPL, RELIANCE.NS, TCS.NS, 7203.T, MSFT)..."
-            className="w-full pl-10 pr-28 py-2.5 bg-[#05070B] border border-[#1E293B] text-xs font-mono text-[#F8FAFC] placeholder-[#5A687D] focus:outline-none focus:border-[#38BDF8] focus:ring-1 focus:ring-[#38BDF8] rounded-sm transition-all"
+            className="w-full pl-10 pr-28 py-2.5 bg-[#070A0F] border border-[#182337] text-xs font-mono text-[#FFFFFF] placeholder-[#5A687D] focus:outline-none focus:border-[#38BDF8] focus:ring-1 focus:ring-[#38BDF8] rounded-sm transition-all"
           />
           {searchQuery && (
             <button
@@ -137,7 +137,7 @@ export function CompanyHub({
             </button>
           )}
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <span className="text-[10px] px-2 py-0.5 bg-[#101A2E] border border-[#1E293B] text-[#38BDF8] font-semibold rounded">
+            <span className="text-[10px] px-2 py-0.5 bg-[#0F1626] border border-[#182337] text-[#38BDF8] font-semibold rounded">
               GLOBAL SEARCH
             </span>
           </div>
@@ -145,7 +145,7 @@ export function CompanyHub({
       </div>
 
       {/* Featured Institutional Coverage Quick Selection */}
-      <div className="p-3 bg-[#0B111E] border border-[#1E293B] rounded-sm space-y-2">
+      <div className="p-3 bg-[#090D17] border border-[#182337] rounded-sm space-y-2">
         <div className="flex items-center justify-between text-[10px] text-[#5A687D]">
           <span className="font-bold text-[#38BDF8] uppercase tracking-wider flex items-center gap-1.5">
             <Database className="w-3.5 h-3.5 text-[#38BDF8]" />
@@ -177,7 +177,7 @@ export function CompanyHub({
                 className={`px-2 py-1 border text-[11px] font-mono transition-all flex items-center gap-1.5 rounded-sm ${
                   isCurrent
                     ? "bg-[#2563EB] text-white border-[#38BDF8] font-bold shadow-[0_0_12px_rgba(37,99,235,0.4)]"
-                    : "bg-[#0A0E17] hover:bg-[#101A2E] text-[#F8FAFC] border-[#1E293B] hover:border-[#38BDF8]"
+                    : "bg-[#070A0F] hover:bg-[#0F1626] text-[#FFFFFF] border-[#182337] hover:border-[#38BDF8]"
                 }`}
               >
                 <span>{item.flag}</span>
@@ -195,8 +195,8 @@ export function CompanyHub({
 
       {/* Global Live Omnichannel Search Dropdown Results */}
       {liveSearchResults.length > 0 && searchQuery.trim().length >= 2 && (
-        <div className="border border-[#2563EB]/50 bg-[#090E17] p-3 space-y-2 shadow-2xl animate-in fade-in duration-150">
-          <div className="flex items-center justify-between text-[10px] text-[#38BDF8] uppercase font-bold border-b border-[#1E293B] pb-1">
+        <div className="border border-[#2563EB]/50 bg-[#090D17] p-3 space-y-2 shadow-2xl animate-in fade-in duration-150 rounded-xl">
+          <div className="flex items-center justify-between text-[10px] text-[#38BDF8] uppercase font-bold border-b border-[#182337] pb-1">
             <span>LIVE GLOBAL RESOLUTIONS FOR &quot;{searchQuery}&quot;</span>
             <span>CLICK TO INGEST DIRECTLY INTO SQLITE MASTER</span>
           </div>
@@ -206,16 +206,16 @@ export function CompanyHub({
                 <div
                   key={item.symbol}
                   onClick={() => onSelectCompany(item.symbol)}
-                  className="p-2.5 bg-[#0B111E] border border-[#1E293B] hover:border-[#38BDF8] flex items-center justify-between transition-colors cursor-pointer group"
+                  className="p-2.5 bg-[#0D131F] border border-[#182337] hover:border-[#38BDF8] flex items-center justify-between transition-colors cursor-pointer group rounded"
                 >
                   <div className="truncate mr-2">
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-[#38BDF8] group-hover:text-white">{item.symbol}</span>
-                      <span className="text-[9px] px-1 bg-[#05070B] border border-[#1E293B] text-[#94A3B8]">
+                      <span className="text-[9px] px-1 bg-[#070A0F] border border-[#182337] text-[#94A3B8]">
                         {item.country}
                       </span>
                     </div>
-                    <div className="text-[10.5px] text-[#F8FAFC] truncate">{item.name}</div>
+                    <div className="text-[10.5px] text-[#FFFFFF] truncate">{item.name}</div>
                     <div className="text-[9.5px] text-[#64748B]">{item.exchange}</div>
                   </div>
 
@@ -237,24 +237,24 @@ export function CompanyHub({
 
       {/* Selected Entity Institutional Banner & Real-Time Market HUD */}
       {selected && (
-        <div className="bg-[#0B111E] border border-[#1E293B] p-4 relative overflow-hidden space-y-4">
+        <div className="bg-[#090D17] border border-[#182337] p-4 relative overflow-hidden space-y-4 rounded-xl shadow-lg">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB]/10 blur-3xl pointer-events-none"></div>
 
           {/* Top Identity Row */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="text-xl font-bold font-mono tracking-wider text-[#F8FAFC] flex items-center gap-2">
+                <span className="text-xl font-bold font-mono tracking-wider text-[#FFFFFF] flex items-center gap-2">
                   {selected.name}
                   {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#38BDF8]" />}
                 </span>
-                <span className="px-2 py-0.5 bg-[#05070B] border border-[#38BDF8] text-[#38BDF8] text-xs font-mono font-bold">
+                <span className="px-2 py-0.5 bg-[#070A0F] border border-[#38BDF8] text-[#38BDF8] text-xs font-mono font-bold">
                   {selected.symbol}
                 </span>
-                <span className="px-2 py-0.5 bg-[#05070B] border border-[#1E293B] text-[#94A3B8] text-[11px] font-mono">
+                <span className="px-2 py-0.5 bg-[#070A0F] border border-[#182337] text-[#94A3B8] text-[11px] font-mono">
                   {selected.exchange}
                 </span>
-                <span className="px-2 py-0.5 bg-[#05070B] border border-[#1E293B] text-[#94A3B8] text-[11px] font-mono">
+                <span className="px-2 py-0.5 bg-[#070A0F] border border-[#182337] text-[#94A3B8] text-[11px] font-mono">
                   {selected.accountingStandard}
                 </span>
               </div>
@@ -272,7 +272,7 @@ export function CompanyHub({
 
             {/* As-Reported Currency & Actions */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="p-2.5 bg-[#05070B] border border-[#1E293B] font-mono text-xs">
+              <div className="p-2.5 bg-[#070A0F] border border-[#182337] font-mono text-xs rounded">
                 <div className="text-[10px] text-[#64748B] uppercase">NATIVE REPORTING CURRENCY</div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="font-bold text-base text-[#38BDF8]">
@@ -290,7 +290,7 @@ export function CompanyHub({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsChartModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-3 bg-[#101A2E] hover:bg-[#1E293B] border border-[#38BDF8]/50 text-[#38BDF8] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-3 bg-[#0F1626] hover:bg-[#182337] border border-[#38BDF8]/50 text-[#38BDF8] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
                   title="Open Power BI Deep Interactive Chart Explorer"
                 >
                   <BarChart3 className="w-4 h-4" />
