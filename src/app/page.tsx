@@ -8,9 +8,10 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { AdminConsoleView } from "@/components/AdminConsoleView";
 import { OverviewWorkstation } from "@/components/OverviewWorkstation";
 import { CompanyHub } from "@/components/CompanyHub";
-import { StatementsLedger } from "@/components/StatementsLedger";
-import { HealthRatios } from "@/components/HealthRatios";
+import { FinancialHealthWorkspace } from "@/components/FinancialHealthWorkspace";
 import { VulnerabilityMonitor } from "@/components/VulnerabilityMonitor";
+import { BusinessDependencies } from "@/components/BusinessDependencies";
+import { ConcentrationExposure } from "@/components/ConcentrationExposure";
 import { StressSimulator } from "@/components/StressSimulator";
 import { ICDossier } from "@/components/ICDossier";
 import { AuditSidecar } from "@/components/AuditSidecar";
@@ -54,14 +55,17 @@ export default function FintraxisTerminalPage() {
     const stored = localStorage.getItem("fintraxis_session");
     if (stored) {
       try {
-        setSession(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setSession(parsed);
+        const isAdmin = parsed.role === "SUPER_ADMIN" || parsed.role === "ADMIN";
+        setActiveTab(isAdmin ? "00_ADMIN" : "overview");
       } catch (e) {
         console.warn("Corrupt session in storage, resetting:", e);
       }
     }
   }, []);
 
-  // Global Keyboard Shortcuts (Ctrl+K, Ctrl+Shift+L, 1-6)
+  // Global Keyboard Shortcuts (Ctrl+K, Ctrl+Shift+L, 1-6 Modules)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // 1. Drop Credentials / Lock Terminal (Ctrl + Shift + L or Cmd + Shift + L)
@@ -85,7 +89,7 @@ export default function FintraxisTerminalPage() {
         return;
       }
 
-      // 4. Tab Jump (1-6) when not in an input/textarea
+      // 4. Tab Jump (1-6 for Modules 1-6) when not in an input/textarea
       const target = e.target as HTMLElement;
       const isInput =
         target.tagName === "INPUT" ||
@@ -93,16 +97,16 @@ export default function FintraxisTerminalPage() {
         target.isContentEditable;
 
       if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "1") setActiveTab("00_ADMIN");
-        else if (e.key === "2") setActiveTab("overview");
-        else if (e.key === "3") setActiveTab("01_HUB");
-        else if (e.key === "4") setActiveTab("02_STATEMENTS");
-        else if (e.key === "5") setActiveTab("03_HEALTH");
-        else if (e.key === "6") setActiveTab("04_VULNERABILITY");
-        else if (e.key === "7") setActiveTab("05_SIMULATOR");
-        else if (e.key === "8") setActiveTab("06_MEMO");
+        if (e.key === "1") setActiveTab("01_HUB");
+        else if (e.key === "2") setActiveTab("02_HEALTH");
+        else if (e.key === "3") setActiveTab("03_VULNERABILITY");
+        else if (e.key === "4") setActiveTab("04_DEPENDENCIES");
+        else if (e.key === "5") setActiveTab("05_CONCENTRATION");
+        else if (e.key === "6") setActiveTab("06_SIMULATOR");
+        else if (e.key === "7") setActiveTab("07_REPORTS");
+        else if (e.key === "8") setActiveTab("overview");
         else if (e.key === "9") setIsAiOpen((prev) => !prev);
-        else if (e.key === "0") setIsSettingsOpen((prev) => !prev);
+        else if (e.key === "0") setActiveTab("00_ADMIN");
       }
     };
 
@@ -364,35 +368,51 @@ export default function FintraxisTerminalPage() {
             />
           )}
 
-          {/* Desk 02: Multi-Period Financial Statements & XBRL Line-Item Audit */}
-          {activeTab === "02_STATEMENTS" && profile && (
-            <StatementsLedger
+          {/* Module 02: Financial Health Analysis (Unifying 3-Statement XBRL Ledger + Credit Solvency Ratios) */}
+          {(activeTab === "02_HEALTH" || activeTab === "02_STATEMENTS" || activeTab === "03_HEALTH") && profile && (
+            <FinancialHealthWorkspace
               profile={profile}
               onAuditMetric={handleAuditMetric}
               activeAuditKey={activeAuditKey}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
             />
           )}
 
-          {/* Desk 03: Credit Risk & Solvency Assessment */}
-          {activeTab === "03_HEALTH" && profile && (
-            <HealthRatios
+          {/* Module 03: Financial Vulnerability Monitor */}
+          {(activeTab === "03_VULNERABILITY" || activeTab === "04_VULNERABILITY") && profile && (
+            <VulnerabilityMonitor
               profile={profile}
-              onAuditMetric={handleAuditMetric}
+              session={session}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
             />
           )}
 
-          {/* Desk 04: Early Warning Surveillance & Basel III Accord */}
-          {activeTab === "04_VULNERABILITY" && profile && (
-            <VulnerabilityMonitor profile={profile} session={session} />
+          {/* Module 04: Business Dependency Intelligence */}
+          {activeTab === "04_DEPENDENCIES" && profile && (
+            <BusinessDependencies
+              profile={profile}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+            />
           )}
 
-          {/* Desk 05: Macro Stress Testing & Capital Lab */}
-          {activeTab === "05_SIMULATOR" && profile && (
-            <StressSimulator profile={profile} />
+          {/* Module 05: Concentration & Exposure Analysis */}
+          {activeTab === "05_CONCENTRATION" && profile && (
+            <ConcentrationExposure
+              profile={profile}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+            />
           )}
 
-          {/* Desk 06: Investment Committee Credit Memorandum & Boardroom Deck */}
-          {activeTab === "06_MEMO" && profile && (
+          {/* Module 06: Scenario & Resilience Simulator */}
+          {(activeTab === "06_SIMULATOR" || activeTab === "05_SIMULATOR") && profile && (
+            <StressSimulator
+              profile={profile}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
+          {/* Supporting Capability: Investment Committee Research Reports & Export */}
+          {(activeTab === "07_REPORTS" || activeTab === "06_MEMO") && profile && (
             <ICDossier profile={profile} session={session} />
           )}
 

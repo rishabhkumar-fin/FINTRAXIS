@@ -7,11 +7,17 @@ export type ModuleTab =
   | "00_ADMIN"
   | "overview"
   | "01_HUB"
+  | "02_HEALTH"
   | "02_STATEMENTS"
   | "03_HEALTH"
+  | "03_VULNERABILITY"
   | "04_VULNERABILITY"
+  | "04_DEPENDENCIES"
+  | "05_CONCENTRATION"
   | "05_SIMULATOR"
-  | "06_MEMO";
+  | "06_SIMULATOR"
+  | "06_MEMO"
+  | "07_REPORTS";
 
 interface NavigationTabsProps {
   activeTab: ModuleTab;

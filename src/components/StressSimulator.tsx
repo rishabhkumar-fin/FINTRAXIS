@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, RotateCcw, BarChart3, Info } from "lucide-react";
+import { Cpu, RotateCcw, BarChart3, Info, ArrowRight } from "lucide-react";
 import { CompanyRiskProfile, StressSimulationInputs } from "@/lib/types";
 import { runStressSimulation } from "@/lib/financialEngine";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
+import { ModuleTab } from "./NavigationTabs";
 
 interface StressSimulatorProps {
   profile: CompanyRiskProfile;
+  onNavigateToTab?: (tab: ModuleTab) => void;
 }
 
-export function StressSimulator({ profile }: StressSimulatorProps) {
+export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorProps) {
   const { company, periods } = profile;
   const latest = periods[0];
 
@@ -479,6 +481,28 @@ export function StressSimulator({ profile }: StressSimulatorProps) {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* Sequential Next Step Recommendation Card */}
+      <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border border-[#38BDF8]/30 rounded-lg p-5 flex flex-col md:flex-row items-center justify-between gap-4 font-mono mt-6">
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-[#38BDF8] font-bold">
+            RESEARCH WORKFLOW CONCLUSION
+          </div>
+          <div className="text-sm font-bold text-white mt-1">
+            Next: Generate Evidence-Backed Research Report & Boardroom Deck
+          </div>
+          <div className="text-xs text-[#94A3B8] mt-0.5">
+            Assemble analytical conclusions from all 6 core modules into an Investment Committee Credit Memo with cryptographic SHA-256 verification and PDF/CSV export.
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigateToTab?.("07_REPORTS")}
+          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0"
+        >
+          <span>Generate Research Report</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

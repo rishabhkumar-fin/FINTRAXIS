@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   LayoutDashboard,
   Building2,
-  FileSpreadsheet,
   Activity,
   ShieldAlert,
   SlidersHorizontal,
@@ -19,6 +18,8 @@ import {
   Settings,
   Sparkles,
   X,
+  Network,
+  PieChart,
 } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
@@ -70,16 +71,23 @@ export function SidebarNavigation({
     onCloseMobile?.();
   };
 
-  // Canonical 8 Workspace Navigation Items (Admin Console first)
+  const userRole = session?.role || (session?.isDemo ? "DEMO_ANALYST" : "ANALYST");
+  const isAdmin = userRole === "SUPER_ADMIN" || userRole === "ADMIN";
+
+  // Canonical Navigation: Admin (role-gated) + Overview + 6 Core Modules + Research Reports
   const navItems = [
-    {
-      id: "00_ADMIN" as ModuleTab,
-      name: "Admin Console",
-      shortDesc: "Operational Governance & Health",
-      icon: ShieldCheck,
-      badge: "MGMT",
-      badgeColor: "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10",
-    },
+    ...(isAdmin
+      ? [
+          {
+            id: "00_ADMIN" as ModuleTab,
+            name: "Admin Console",
+            shortDesc: "Operational Governance & Supervision",
+            icon: ShieldCheck,
+            badge: "ADMIN",
+            badgeColor: "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10",
+          },
+        ]
+      : []),
     {
       id: "overview" as ModuleTab,
       name: "Overview",
@@ -90,55 +98,61 @@ export function SidebarNavigation({
     },
     {
       id: "01_HUB" as ModuleTab,
-      name: "Company Hub",
+      name: "Company Intelligence",
       shortDesc: "Securities Search & Chart",
       icon: Building2,
-      badge: "MARKET",
-      badgeColor: "text-[#9AA8BC] border-[#253247]",
+      badge: "MODULE 1",
+      badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
-      id: "02_STATEMENTS" as ModuleTab,
-      name: "Financial Statements",
-      shortDesc: "3-Statement Ledger & XBRL",
-      icon: FileSpreadsheet,
-      badge: "XBRL",
-      badgeColor: "text-[#38BDF8] border-[#38BDF8]/40",
-    },
-    {
-      id: "03_HEALTH" as ModuleTab,
+      id: "02_HEALTH" as ModuleTab,
       name: "Financial Health",
-      shortDesc: "Credit Solvency & Ratios",
+      shortDesc: "3-Statements & Credit Solvency",
       icon: Activity,
-      badge: "HEALTH",
-      badgeColor: "text-[#16A879] border-[#16A879]/40",
+      badge: "MODULE 2",
+      badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
-      id: "04_VULNERABILITY" as ModuleTab,
-      name: "Risk Monitor",
+      id: "03_VULNERABILITY" as ModuleTab,
+      name: "Vulnerability Monitor",
       shortDesc: "Early Warning & Debt Maturity",
       icon: ShieldAlert,
-      badge: earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "0 FLAGS",
+      badge: earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "MODULE 3",
       badgeColor: earlyWarningCount > 0 ? "text-[#F05252] border-[#F05252]/40" : "text-[#16A879] border-[#16A879]/40",
     },
     {
-      id: "05_SIMULATOR" as ModuleTab,
-      name: "Stress Simulator",
+      id: "04_DEPENDENCIES" as ModuleTab,
+      name: "Business Dependencies",
+      shortDesc: "Disclosed Sourcing & Bottlenecks",
+      icon: Network,
+      badge: "MODULE 4",
+      badgeColor: "text-[#38BDF8] border-[#253247]",
+    },
+    {
+      id: "05_CONCENTRATION" as ModuleTab,
+      name: "Concentration & Exposure",
+      shortDesc: "Segment & Geographic HHI Risk",
+      icon: PieChart,
+      badge: "MODULE 5",
+      badgeColor: "text-[#38BDF8] border-[#253247]",
+    },
+    {
+      id: "06_SIMULATOR" as ModuleTab,
+      name: "Scenario Simulator",
       shortDesc: "Macro Shocks & Rate Testing",
       icon: SlidersHorizontal,
-      badge: "SHOCK",
+      badge: "MODULE 6",
       badgeColor: "text-[#F5B942] border-[#F5B942]/40",
     },
     {
-      id: "06_MEMO" as ModuleTab,
+      id: "07_REPORTS" as ModuleTab,
       name: "Research Reports",
       shortDesc: "Boardroom Tearsheet & PDF",
       icon: FileText,
-      badge: "MEMO",
+      badge: "REPORTS",
       badgeColor: "text-[#9AA8BC] border-[#253247]",
     },
   ];
-
-  const userRole = session?.role || (session?.isDemo ? "DEMO_ANALYST" : "ANALYST");
 
   return (
     <>
@@ -247,7 +261,12 @@ export function SidebarNavigation({
           <nav className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-270px)]">
             {/* Items 1 to 8: Workspace Views */}
             {navItems.map((item, index) => {
-              const isCurrent = activeTab === item.id;
+              const isCurrent =
+                activeTab === item.id ||
+                (item.id === "02_HEALTH" && (activeTab === "02_STATEMENTS" || activeTab === "03_HEALTH")) ||
+                (item.id === "03_VULNERABILITY" && activeTab === "04_VULNERABILITY") ||
+                (item.id === "06_SIMULATOR" && activeTab === "05_SIMULATOR") ||
+                (item.id === "07_REPORTS" && activeTab === "06_MEMO");
               const IconComponent = item.icon;
               const itemNumber = index + 1;
 

@@ -40,82 +40,154 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 0.2: Market valuation and reported accounting fundamentals must remain visually and conceptually separated to prevent mixing intraday market moves with fiscal accounting records.",
   },
   "01_HUB": {
-    title: "SECURITIES DIRECTORY: GLOBAL SECURITY MASTER & ENTITY RESOLUTION",
-    badge: "OMNICHANNEL RESOLUTION",
+    title: "MODULE 1: COMPANY INTELLIGENCE WORKSPACE & SECURITIES MASTER",
+    badge: "COMPANY INTELLIGENCE",
     purpose:
-      "Universal entity resolution across USA (SEC EDGAR), India (NSE/BSE), Japan (TSE), and European exchanges. Ingests raw reported financials, maintains native currency preservation, and maps securities to local SQLite master database.",
+      "Universal entity resolution across USA (SEC EDGAR), India (NSE/BSE), Japan (TSE), and global exchanges. Ingests raw reported financials, maintains native currency preservation, and maps securities to local SQLite master database.",
     actions: [
-      "Omnibar Global Search: Type 2+ characters to query live global ticker database and preview exchange metadata.",
-      "1-Click SQLite Ingestion: Click 'INGEST' to pull multi-period 10-K/Annual Report financial statements directly into local database.",
-      "Institutional HUD Inspection: Review live market cap, 52-week trading corridor, P/E multiples, and reporting scale (Millions, Crores, Billions).",
+      "Omnibar Global Search: Search companies by ticker, CIK, ISIN, or name to verify reporting currency and exchange.",
+      "Multi-Period Statement Audit: Inspect available reporting periods, filing URLs, and scale units (Millions, Crores, Billions).",
+      "Interactive Chart Inspection: Examine trading corridors and price action alongside accounting fundamentals.",
     ],
     decisionRule:
-      "RULE 1.1: Financial figures must strictly maintain native as-reported reporting currency (ISO 4217). Cross-border comparisons require auditable, timestamped reference FX rates.",
+      "RULE 1.1: Financial figures must strictly maintain native as-reported reporting currency (ISO 4217). Cross-border comparisons require auditable reference FX rates.",
+  },
+  "02_HEALTH": {
+    title: "MODULE 2: FINANCIAL HEALTH ANALYSIS & 3-STATEMENT ACCOUNTING",
+    badge: "FINANCIAL HEALTH",
+    purpose:
+      "Explains the company's financial condition using genuine multi-period 3-statement financial ledgers (Income Statement, Balance Sheet, Cash Flow) and reproducible credit solvency ratios.",
+    actions: [
+      "3-Statement XBRL Audit: Click any gold-marked statement cell to inspect its underlying SEC XBRL tag, filing URL, and formula calculation tree.",
+      "Solvency & Liquidity Multiples: Audit Current Ratio, Quick Ratio, Debt-to-Equity, Net Debt / EBITDA, and Interest Coverage.",
+      "Cash Flow Quality: Review Operating Cash Flow vs Net Income and Free Cash Flow (CFO - CapEx) generation.",
+    ],
+    decisionRule:
+      "RULE 2.1: All financial metrics are calculated via pure backend functions. Zero silent arithmetic substitutions are permitted.",
   },
   "02_STATEMENTS": {
-    title: "FINANCIAL STATEMENTS: MULTI-PERIOD LEDGER & XBRL AUDIT TRAIL",
+    title: "MODULE 2: FINANCIAL STATEMENTS (XBRL AUDIT TRAIL)",
     badge: "LINE-ITEM PROVENANCE",
     purpose:
       "Full 3-statement provenance engine (Income Statement, Balance Sheet, Cash Flow) across multi-period annual filings with cell-level XBRL audit lineage.",
     actions: [
-      "Click-to-Audit Cells: Click any financial cell with gold marker to open the right-hand Audit Sidecar showing XBRL tag, source filing URL, and formula DAG.",
-      "Period Horizon Toggle: Audit sequential FY historical reporting periods to identify balance sheet trends and revenue momentum.",
-      "Missing Item Protocol: Any unpopulated field renders strictly as 'N/D' (Not Disclosed), preventing false arithmetic zeros.",
+      "Click-to-Audit Cells: Click any financial cell with gold marker to open the right-hand Audit Sidecar showing XBRL tag and source filing URL.",
+      "Period Horizon: Audit sequential FY historical reporting periods to identify balance sheet trends.",
     ],
     decisionRule:
-      "RULE 2.1: An unaudited line item is inadmissible for institutional underwriting. Every statement cell must tie back to a verified SEC EDGAR or statutory filing tag.",
+      "RULE 2.2: Every statement cell must tie back to a verified SEC EDGAR or statutory filing tag.",
   },
   "03_HEALTH": {
-    title: "CREDIT RISK & SOLVENCY: DEFAULT HEALTH & CAPITAL MULTIPLES",
+    title: "MODULE 2: CREDIT RISK & SOLVENCY ASSESSMENT",
     badge: "SOLVENCY HEALTH",
     purpose:
-      "Evaluates capital structure robustness, cash flow quality, debt service capacity, and DuPont ROE breakdown through a directed acyclic graph (DAG) of non-coerced accounting formulas.",
+      "Evaluates capital structure robustness, cash flow quality, debt service capacity, and DuPont ROE breakdown.",
     actions: [
-      "Inspect Ratio Categories: Review Liquidity (Current, Quick, Cash), Solvency (Debt/Equity, Debt/EBITDA), and Coverage (EBIT/Interest, OCF/Debt).",
-      "DuPont 3-Factor Deconstruction: Deconstruct Return on Equity into Net Margin × Asset Turnover × Financial Leverage.",
-      "Altman Z-Score Diagnostic: Audit the 5-factor multivariate credit distress formula determining bankruptcy probability.",
+      "Inspect Ratio Categories: Review Liquidity, Solvency, and Coverage multiples.",
+      "Altman Z-Score Diagnostic: Audit the 5-factor multivariate credit distress formula.",
     ],
     decisionRule:
-      "RULE 3.1: Altman Z-Score < 1.81 signifies imminent distress (Red Zone). Interest Coverage < 2.50x triggers automatic credit facility covenant review.",
+      "RULE 2.3: Altman Z-Score < 1.81 signifies distress. Interest Coverage < 2.50x triggers automatic credit facility covenant review.",
   },
-  "04_VULNERABILITY": {
-    title: "SURVEILLANCE DESK: BASEL III EARLY WARNING SYSTEM & COVENANTS",
-    badge: "BREACH SURVEILLANCE",
+  "03_VULNERABILITY": {
+    title: "MODULE 3: FINANCIAL VULNERABILITY MONITOR & SURVEILLANCE",
+    badge: "EARLY WARNING",
     purpose:
-      "Continuous algorithmic surveillance monitoring capital erosion, aggressive accounting red-flags, liquidity contraction, and covenant proximity.",
+      "Identifies early potential financial deterioration, working capital stress, refinancing walls, and debt covenant proximity.",
     actions: [
       "Vulnerability Matrix Review: Inspect categorized severity flags (CRITICAL, ELEVATED, WATCH) with calculated breach distances.",
-      "Working Capital Stress Detection: Track receivables growth vs revenue growth and inventory buildup pace.",
-      "Refinancing Wall Audit: Identify imminent short-term debt maturities exceeding liquid cash & marketable securities.",
+      "Working Capital Stress: Track receivables growth vs revenue growth and inventory buildup pace.",
+      "Refinancing Wall Audit: Identify short-term debt maturities exceeding liquid cash & marketable securities.",
     ],
     decisionRule:
-      "RULE 4.1: Two or more CRITICAL flags require mandatory Investment Committee Escalation and temporary freeze on credit facility expansions.",
+      "RULE 3.1: Two or more CRITICAL flags require mandatory Investment Committee Escalation and temporary freeze on credit facility expansions.",
+  },
+  "04_VULNERABILITY": {
+    title: "MODULE 3: FINANCIAL VULNERABILITY MONITOR",
+    badge: "EARLY WARNING",
+    purpose:
+      "Algorithmic surveillance monitoring capital erosion, aggressive accounting red-flags, liquidity contraction, and covenant proximity.",
+    actions: [
+      "Inspect early warning triggers with affected reporting periods.",
+    ],
+    decisionRule:
+      "RULE 3.2: Configurable hurdles calibrate against operator underwriting guidelines.",
+  },
+  "04_DEPENDENCIES": {
+    title: "MODULE 4: BUSINESS DEPENDENCY INTELLIGENCE",
+    badge: "BUSINESS DEPENDENCIES",
+    purpose:
+      "Uncovers disclosed operational dependencies, single-source suppliers, sovereign infrastructure licensors, and major customer distribution channels from statutory notes.",
+    actions: [
+      "Sourcing Architecture: Identify critical sole-source manufacturing bottlenecks (e.g., TSMC custom silicon, Foxconn assembly).",
+      "Customer Concentration: Verify whether any commercial off-taker exceeds the 10% statutory disclosure threshold under ASC 280 / Ind-AS 108.",
+      "Analyst Sourcing Notes: Record proprietary supply chain findings labeled with explicit data-provenance tags.",
+    ],
+    decisionRule:
+      "RULE 4.1: If supplier or customer individual identities are withheld as confidential trade secrets under regulatory exemptions, the platform explicitly notes the limitation without fabricating counterparties.",
+  },
+  "05_CONCENTRATION": {
+    title: "MODULE 5: CONCENTRATION & EXPOSURE ANALYSIS",
+    badge: "CONCENTRATION & EXPOSURE",
+    purpose:
+      "Quantifies revenue diversification across operating product divisions and geographic jurisdictions using the Herfindahl-Hirschman Index (HHI).",
+    actions: [
+      "Product Line Contribution: Review revenue percentage generated by flagship vs secondary business segments.",
+      "Geographic Jurisdiction Exposure: Measure exposure to international regions, tariffs, and cross-border currency regimes.",
+      "Herfindahl-Hirschman Index: Assess market concentration regime (<1,500 Diversified, 1,500-2,500 Moderate, >2,500 Concentrated).",
+    ],
+    decisionRule:
+      "RULE 5.1: High product or geographic concentration (HHI > 2,500) mandates stress testing for regional macro downturns in Module 6.",
   },
   "05_SIMULATOR": {
-    title: "CAPITAL STRESS LAB: MACROECONOMIC SENSITIVITY & SHOCK SIMULATION",
-    badge: "PRO-FORMA SENSITIVITY",
+    title: "MODULE 6: SCENARIO & RESILIENCE SIMULATOR",
+    badge: "STRESS SIMULATION",
     purpose:
-      "Simulates enterprise resilience under severe macroeconomic shocks (+/- revenue haircut, operating margin contraction, and benchmark monetary rate hikes).",
+      "Simulates enterprise resilience under severe macroeconomic shocks (revenue contraction, input inflation, and monetary benchmark rate hikes).",
     actions: [
-      "Shock Sliders: Adjust top-line Revenue Haircut (-30% to 0%), Operating Margin Squeeze, and Benchmark Interest Rate Hikes (+0 to +500 bps).",
+      "Shock Sliders: Adjust top-line Revenue Haircut (-30% to +30%), COGS inflation, and Rate Hikes (+0 to +500 bps).",
       "Liquidity Runway Gauge: Observe remaining cash burn runway in months under pro-forma stressed operating cash draw.",
-      "Pro-Forma Ratio Impact: Compare baseline interest coverage, debt/EBITDA, and net margins against post-shock pro-forma numbers.",
     ],
     decisionRule:
-      "RULE 5.1: If stressed liquidity runway drops below 6.0 months under a 20% revenue shock and +200 bps rate hike, mandatory cash collateral is required.",
+      "RULE 6.1: Modeled estimates represent synthetic stress transmissions, not predictive guarantees of future performance.",
+  },
+  "06_SIMULATOR": {
+    title: "MODULE 6: SCENARIO & RESILIENCE SIMULATOR",
+    badge: "STRESS SIMULATION",
+    purpose:
+      "Simulates enterprise resilience under severe macroeconomic shocks (revenue contraction, input inflation, and monetary benchmark rate hikes).",
+    actions: [
+      "Shock Sliders: Adjust top-line Revenue Haircut (-30% to +30%), COGS inflation, and Rate Hikes (+0 to +500 bps).",
+      "Liquidity Runway Gauge: Observe remaining cash burn runway in months under pro-forma stressed operating cash draw.",
+      "Pro-Forma Covenant Review: Check whether stressed interest coverage breaches debt covenant floors (< 2.50x).",
+    ],
+    decisionRule:
+      "RULE 6.2: Modeled estimates represent synthetic stress transmissions, not predictive guarantees of future performance.",
   },
   "06_MEMO": {
-    title: "INVESTMENT COMMITTEE: CREDIT UNDERWRITING MEMO & BOARDROOM DECK",
+    title: "RESEARCH REPORTS & INVESTMENT COMMITTEE DOSSIER",
     badge: "BOARDROOM DELIVERABLE",
     purpose:
-      "Credit committee investment memorandum synthesizing executive risk tier (BlackRock Aladdin rating scale), covenant compliance matrix, stress results, and underwriter attestations.",
+      "Consolidates findings across all core modules into an evidence-backed Investment Committee Tearsheet with SHA-256 cryptographic verification.",
     actions: [
-      "Managing Director Risk Thesis: Input custom underwriter commentary (auto-saved securely to local browser storage).",
-      "Covenant Compliance Grid: Verify test compliance for Net Debt/EBITDA, Interest Coverage, and Working Capital minimums.",
-      "1-Click Boardroom PDF Tearsheet: Click 'EXPORT BOARDROOM MEMO' to generate a clean, vector print-optimized PDF with navigation stripped.",
+      "Verify Module Consistency: Ensure displayed figures match underlying statement ledgers and calculations.",
+      "Export PDF / CSV: Generate print-optimized PDF tearsheets and CSV data records.",
     ],
     decisionRule:
-      "RULE 6.1: Investment Committee approval requires Aladdin Composite Score >= 70/100, zero critical covenant defaults, and formal digital attestation sign-off.",
+      "RULE 7.1: File hashes verify data transit integrity, not factual accounting veracity.",
+  },
+  "07_REPORTS": {
+    title: "RESEARCH REPORTS & INVESTMENT COMMITTEE DOSSIER",
+    badge: "BOARDROOM DELIVERABLE",
+    purpose:
+      "Consolidates findings across all 6 core modules into an evidence-backed Investment Committee Tearsheet with SHA-256 cryptographic verification.",
+    actions: [
+      "Verify Module Consistency: Ensure displayed figures match underlying statement ledgers and calculations.",
+      "Export PDF / CSV: Generate print-optimized PDF tearsheets and CSV data records with audit stamps.",
+      "Executive Summary: Synthesize credit tier, early warnings, business dependencies, and stressed liquidity runway.",
+    ],
+    decisionRule:
+      "RULE 7.2: File hashes verify data transit integrity, not factual accounting veracity.",
   },
 };
 

@@ -49,50 +49,55 @@ export function CommandPalette({
     }
 
     // Syntax 2: Numbers 1 - 8 & Module Keywords
-    if (raw === "1" || raw === "ADMIN" || raw.includes("ADMIN") || raw === "GO ADMIN") {
+    if (raw === "0" || raw === "ADMIN" || raw.includes("ADMIN") || raw === "GO ADMIN") {
       onSelectTab("00_ADMIN");
       onClose();
       return;
     }
-    if (raw === "2" || raw === "OVERVIEW" || raw.includes("OVERVIEW")) {
-      onSelectTab("overview");
-      onClose();
-      return;
-    }
-    if (raw === "3" || raw.includes("HUB")) {
+    if (raw === "1" || raw.includes("HUB") || raw.includes("COMPANY") || raw.includes("SECURITY")) {
       onSelectTab("01_HUB");
       onClose();
       return;
     }
-    if (raw === "4" || raw.includes("STATEMENT") || raw.includes("XBRL")) {
-      onSelectTab("02_STATEMENTS");
+    if (raw === "2" || raw.includes("STATEMENT") || raw.includes("HEALTH") || raw.includes("XBRL") || raw.includes("RATIO")) {
+      onSelectTab("02_HEALTH");
       onClose();
       return;
     }
-    if (raw === "5" || raw.includes("HEALTH") || raw.includes("RATIO")) {
-      onSelectTab("03_HEALTH");
+    if (raw === "3" || raw.includes("VULNERABILITY") || raw.includes("EWS") || raw.includes("EARLY WARNING")) {
+      onSelectTab("03_VULNERABILITY");
       onClose();
       return;
     }
-    if (raw === "6" || raw.includes("VULNERABILITY") || raw.includes("EWS")) {
-      onSelectTab("04_VULNERABILITY");
+    if (raw === "4" || raw.includes("DEPENDENC") || raw.includes("SUPPLIER") || raw.includes("SOURCING")) {
+      onSelectTab("04_DEPENDENCIES");
       onClose();
       return;
     }
-    if (raw === "7" || raw === "STRESS" || raw.includes("SIMULATOR")) {
-      onSelectTab("05_SIMULATOR");
+    if (raw === "5" || raw.includes("CONCENTRATION") || raw.includes("EXPOSURE") || raw.includes("HHI") || raw.includes("SEGMENT")) {
+      onSelectTab("05_CONCENTRATION");
       onClose();
       return;
     }
-    if (raw === "8" || raw.includes("MEMO") || raw.includes("DOSSIER")) {
-      onSelectTab("06_MEMO");
+    if (raw === "6" || raw === "STRESS" || raw.includes("SIMULAT") || raw.includes("SHOCK")) {
+      onSelectTab("06_SIMULATOR");
+      onClose();
+      return;
+    }
+    if (raw === "7" || raw.includes("MEMO") || raw.includes("DOSSIER") || raw.includes("REPORT")) {
+      onSelectTab("07_REPORTS");
+      onClose();
+      return;
+    }
+    if (raw === "8" || raw === "OVERVIEW" || raw.includes("OVERVIEW") || raw.includes("DASHBOARD")) {
+      onSelectTab("overview");
       onClose();
       return;
     }
 
     // Syntax 3: Actions
     if (raw === "EXPORT MEMO" || raw === "EXPORT" || raw === "PRINT") {
-      onSelectTab("06_MEMO");
+      onSelectTab("07_REPORTS");
       setTimeout(onExportMemo, 150);
       onClose();
       return;
@@ -191,11 +196,51 @@ export function CommandPalette({
             </button>
 
             <button
+              onClick={() => handleExecute("1")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#E1E7EC] font-bold">[1] COMPANY HUB</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 1</span>
+            </button>
+
+            <button
               onClick={() => handleExecute("2")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[2] STATEMENTS</span>
-              <span className="text-[10px] text-[#5A687D]">XBRL LEDGER</span>
+              <span className="text-[#E1E7EC] font-bold">[2] FINANCIAL HEALTH</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 2</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("3")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#E1E7EC] font-bold">[3] VULNERABILITY</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 3</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("4")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#E1E7EC] font-bold">[4] DEPENDENCIES</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 4</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("5")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#E1E7EC] font-bold">[5] CONCENTRATION</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 5</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("6")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
+            >
+              <span className="text-[#E1E7EC] font-bold">[6] SIMULATOR</span>
+              <span className="text-[10px] text-[#5A687D]">MODULE 6</span>
             </button>
 
             <button
@@ -206,7 +251,7 @@ export function CommandPalette({
                 <Sliders className="w-3 h-3" />
                 <span>ADMIN CONSOLE</span>
               </span>
-              <span className="text-[10px] text-[#5A687D]">SYSTEM GOVERNANCE</span>
+              <span className="text-[10px] text-[#5A687D]">GOVERNANCE</span>
             </button>
 
             <button

@@ -163,3 +163,52 @@ export interface CompanyRiskProfile {
   earlyWarningFlags: EarlyWarningFlag[];
   simulation: StressSimulationResult;
 }
+
+// ==========================================
+// MODULE 4 & 5 TYPES: DISCLOSURES & CONCENTRATION
+// ==========================================
+
+export type DisclosureType = "CONFIRMED_FILING" | "QUALITATIVE_NOTE" | "ANALYST_ESTIMATE";
+
+export interface BusinessDependency {
+  id: string;
+  companyId: string;
+  counterpartyName: string;
+  relationshipType: "SUPPLIER" | "CUSTOMER" | "TECHNOLOGY_PARTNER" | "REGULATORY_INFRASTRUCTURE";
+  disclosureType: DisclosureType;
+  dependencyLevel: "CRITICAL_SINGLE_SOURCE" | "STRATEGIC_HIGH" | "MODERATE" | "DISTRIBUTED";
+  disclosedConcentrationPct: number | null; // null if not explicitly disclosed in %
+  description: string;
+  filingCitation: string;
+  filingPeriod: string;
+  sourceUrl?: string;
+}
+
+export interface ExposureSegment {
+  id: string;
+  name: string;
+  category: "PRODUCT_BUSINESS" | "GEOGRAPHIC";
+  revenueAmount: number;
+  percentageOfTotal: number;
+  currency: CurrencyCode;
+  reportingPeriod: string;
+  filingCitation: string;
+}
+
+export interface ConcentrationAnalysis {
+  companyId: string;
+  period: string;
+  businessSegments: ExposureSegment[];
+  geographicSegments: ExposureSegment[];
+  topSegmentName: string;
+  topSegmentConcentrationPct: number;
+  topGeographicName: string;
+  topGeographicConcentrationPct: number;
+  herfindahlIndexBusiness: number; // HHI (0 - 10,000)
+  herfindahlIndexGeographic: number; // HHI (0 - 10,000)
+  diversificationStatus: "WELL_DIVERSIFIED" | "MODERATELY_CONCENTRATED" | "HIGHLY_CONCENTRATED";
+  dataStatus: "AUDITED_DISCLOSURE" | "PARTIAL_DISCLOSURE" | "UNAVAILABLE";
+  regulatoryStandard: string; // e.g., ASC 280 (US-GAAP), IFRS 8, Ind-AS 108
+  disclosureNotes: string[];
+}
+

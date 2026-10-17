@@ -29,4 +29,17 @@ describe("Phase 7: AI Copilot Grounding & Knowledge Resolution", () => {
     assert.ok(res);
     assert.ok(res.response.includes("REPO RATE") || res.response.includes("POLICY"));
   });
+
+  it("handles conversational simulation prompts with grounded mathematical formulas", () => {
+    const res = resolveFinanceIntelligence("simulate -15% revenue drop", undefined, undefined, false);
+    assert.ok(res);
+    assert.ok(res.response.length > 0);
+  });
+
+  it("provides reliable financial education answers without fabricated citations", () => {
+    const res = resolveFinanceIntelligence("explain current ratio", undefined, undefined, false);
+    assert.ok(res);
+    assert.ok(res.response.includes("Current Ratio") || res.response.includes("Liquidity"));
+    assert.ok(res.followUps.length >= 2);
+  });
 });

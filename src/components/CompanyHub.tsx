@@ -608,6 +608,28 @@ export function CompanyHub({
         </div>
       </div>
 
+      {/* Sequential Next Step Recommendation Card */}
+      <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border border-[#38BDF8]/30 rounded-lg p-5 flex flex-col md:flex-row items-center justify-between gap-4 font-mono">
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-[#38BDF8] font-bold">
+            RECOMMENDED WORKFLOW STEP 2 OF 6
+          </div>
+          <div className="text-sm font-bold text-white mt-1">
+            Next: Assess Financial Health, Statements & Solvency
+          </div>
+          <div className="text-xs text-[#94A3B8] mt-0.5">
+            Review the 3-statement accounting ledger, XBRL line items, working capital, and credit solvency ratios for {selected?.name || "the selected issuer"}.
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigateToTab("02_HEALTH")}
+          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0"
+        >
+          <span>Assess Financial Health (Module 2)</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Power BI Deep Interactive Chart Inspector Modal */}
       <CompanyChartModal
         isOpen={isChartModalOpen}
