@@ -231,7 +231,18 @@ export default function FintraxisTerminalPage() {
 
   // Enforce Real Authentication & Onboarding Gate
   if (!session) {
-    return <AuthGate onAuthenticated={(s) => setSession(s)} />;
+    return (
+      <AuthGate
+        onAuthenticated={(s) => {
+          setSession(s);
+          if (s.role === "SUPER_ADMIN" || s.role === "ADMIN") {
+            setActiveTab("00_ADMIN");
+          } else {
+            setActiveTab("overview");
+          }
+        }}
+      />
+    );
   }
 
   return (

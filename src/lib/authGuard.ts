@@ -1,12 +1,29 @@
-import { sqlite } from "@/db/index";
+import { sqlite } from "../db/index.ts";
 
-export type OperatorRole = "SUPER_ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+export type OperatorRole = "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+
+export const ROLE_PERMISSIONS = {
+  VIEW_FINANCIAL_DATA: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST", "DEMO_ANALYST"] as OperatorRole[],
+  INGEST_COMPANY: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST"] as OperatorRole[],
+  REFRESH_DATA: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST"] as OperatorRole[],
+  RUN_SIMULATIONS: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST", "DEMO_ANALYST"] as OperatorRole[],
+  EXPORT_REPORTS: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST"] as OperatorRole[],
+  MANAGE_USERS: ["SUPER_ADMIN", "ADMIN"] as OperatorRole[],
+  CHANGE_RISK_SETTINGS: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST"] as OperatorRole[],
+  CONFIGURE_PROVIDERS: ["SUPER_ADMIN"] as OperatorRole[],
+  VIEW_AUDIT_LOGS: ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST"] as OperatorRole[],
+  EXECUTE_SYSTEM_JOBS: ["SUPER_ADMIN", "ADMIN"] as OperatorRole[],
+} as const;
+
+export type SystemPermission = keyof typeof ROLE_PERMISSIONS;
 
 export interface ClearanceCheckResult {
   allowed: boolean;
   operator: string;
   role: OperatorRole;
   isDemo: boolean;
+  userId?: string;
+  userEmail?: string;
   error?: string;
 }
 
@@ -15,7 +32,7 @@ export interface ClearanceCheckResult {
  */
 export function verifyOperatorClearance(
   request: Request,
-  requiredRoles: OperatorRole[] = ["SUPER_ADMIN", "LEAD_ANALYST", "ANALYST", "DEMO_ANALYST"]
+  requiredRoles: OperatorRole[] = ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST", "DEMO_ANALYST"]
 ): ClearanceCheckResult {
   try {
     const cookieHeader = request.headers.get("cookie") || "";
@@ -36,18 +53,32 @@ export function verifyOperatorClearance(
     }
 
     // Lookup user in SQLite
-    let userRow: { id: string; name: string; email: string; role: string } | undefined;
+    let userRow: { id: string; name: string; email: string; role: string; status?: string } | undefined;
 
     if (operatorParam) {
       userRow = sqlite
-        .prepare("SELECT id, name, email, COALESCE(role, 'ANALYST') as role FROM users WHERE email = ? OR id = ?")
+        .prepare("SELECT id, name, email, COALESCE(role, 'ANALYST') as role, COALESCE(status, 'ACTIVE') as status FROM users WHERE email = ? OR id = ?")
         .get(operatorParam, operatorParam) as typeof userRow;
+    }
+
+    // Account status check
+    if (userRow && userRow.status === "DEACTIVATED") {
+      return {
+        allowed: false,
+        operator: userRow.name,
+        role: (userRow.role as OperatorRole) || "ANALYST",
+        isDemo: false,
+        userId: userRow.id,
+        userEmail: userRow.email,
+        error: "Access Denied: This operator account has been deactivated by a System Administrator.",
+      };
     }
 
     // Default to Super Admin for default seeded admin or resolve user role
     const effectiveRole: OperatorRole = (userRow?.role as OperatorRole) || 
-      (operatorParam?.toLowerCase().includes("admin") ? "SUPER_ADMIN" : "ANALYST");
-    const effectiveName = userRow?.name || (effectiveRole === "SUPER_ADMIN" ? "Institutional Administrator" : "Active Analyst");
+      (operatorParam?.toLowerCase().includes("superadmin") ? "SUPER_ADMIN" : 
+       operatorParam?.toLowerCase().includes("admin") ? "ADMIN" : "ANALYST");
+    const effectiveName = userRow?.name || (effectiveRole === "SUPER_ADMIN" ? "Super Administrator" : effectiveRole === "ADMIN" ? "Administrator" : "Active Analyst");
 
     const isAllowed = requiredRoles.includes(effectiveRole);
 
@@ -57,6 +88,8 @@ export function verifyOperatorClearance(
         operator: effectiveName,
         role: effectiveRole,
         isDemo: false,
+        userId: userRow?.id,
+        userEmail: userRow?.email,
         error: `Access Denied: Your assigned role (${effectiveRole}) does not have permission to execute this administrative operation.`,
       };
     }
@@ -66,6 +99,8 @@ export function verifyOperatorClearance(
       operator: effectiveName,
       role: effectiveRole,
       isDemo: false,
+      userId: userRow?.id,
+      userEmail: userRow?.email,
     };
   } catch (err) {
     console.warn("Authorization verification error (failing safe):", err);
@@ -77,4 +112,15 @@ export function verifyOperatorClearance(
       error: "Access Denied: Could not verify authorization credentials with security register.",
     };
   }
+}
+
+/**
+ * Checks a granular institutional permission against the request's caller.
+ */
+export function verifyOperatorPermission(
+  request: Request,
+  permission: SystemPermission
+): ClearanceCheckResult {
+  const allowedRoles = ROLE_PERMISSIONS[permission] || ["SUPER_ADMIN"];
+  return verifyOperatorClearance(request, allowedRoles as OperatorRole[]);
 }

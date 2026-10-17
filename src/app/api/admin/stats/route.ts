@@ -4,13 +4,25 @@ import { primaryDataProvider } from "@/lib/providers";
 
 export async function GET() {
   try {
-    // 1. Database table counts
+    // 1. Database table counts and user breakdowns
+    const userBreakdown = {
+      total: (sqlite.prepare("SELECT count(*) as count FROM users").get() as { count: number })?.count ?? 0,
+      active: (sqlite.prepare("SELECT count(*) as count FROM users WHERE COALESCE(status, 'ACTIVE') = 'ACTIVE'").get() as { count: number })?.count ?? 0,
+      deactivated: (sqlite.prepare("SELECT count(*) as count FROM users WHERE status = 'DEACTIVATED'").get() as { count: number })?.count ?? 0,
+      superAdmins: (sqlite.prepare("SELECT count(*) as count FROM users WHERE role = 'SUPER_ADMIN'").get() as { count: number })?.count ?? 0,
+      admins: (sqlite.prepare("SELECT count(*) as count FROM users WHERE role = 'ADMIN'").get() as { count: number })?.count ?? 0,
+      analysts: (sqlite.prepare("SELECT count(*) as count FROM users WHERE role IN ('ANALYST', 'LEAD_ANALYST')").get() as { count: number })?.count ?? 0,
+    };
+
     const counts = {
       companies: (sqlite.prepare("SELECT count(*) as count FROM companies").get() as { count: number })?.count ?? 0,
       financialPeriods: (sqlite.prepare("SELECT count(*) as count FROM financial_periods").get() as { count: number })?.count ?? 0,
       auditLineItems: (sqlite.prepare("SELECT count(*) as count FROM audit_line_items").get() as { count: number })?.count ?? 0,
-      users: (sqlite.prepare("SELECT count(*) as count FROM users").get() as { count: number })?.count ?? 0,
+      users: userBreakdown.total,
+      usersActive: userBreakdown.active,
+      usersDeactivated: userBreakdown.deactivated,
       auditLogs: (sqlite.prepare("SELECT count(*) as count FROM admin_audit_logs").get() as { count: number })?.count ?? 0,
+      systemJobs: (sqlite.prepare("SELECT count(*) as count FROM system_jobs").get() as { count: number })?.count ?? 0,
     };
 
     // 2. Pragmas and DB health
@@ -44,6 +56,7 @@ export async function GET() {
       success: true,
       timestamp: new Date().toISOString(),
       counts,
+      userBreakdown,
       database: {
         engine: "better-sqlite3 / Drizzle ORM",
         journalMode,
@@ -70,6 +83,14 @@ export async function GET() {
         globalLeverage: Number(configMap.GLOBAL_LEVERAGE_HURDLE ?? "3.5"),
         globalCoverage: Number(configMap.GLOBAL_COVERAGE_HURDLE ?? "2.5"),
         globalLiquidity: Number(configMap.GLOBAL_LIQUIDITY_HURDLE ?? "1.1"),
+        alertMarginDeterioration: Number(configMap.ALERT_MARGIN_DETERIORATION_PCT ?? "-5.0"),
+        alertRevenueContraction: Number(configMap.ALERT_REVENUE_CONTRACTION_PCT ?? "-10.0"),
+        maxRateShockBps: Number(configMap.MAX_RATE_SHOCK_BPS ?? "500"),
+        defaultCurrency: configMap.DEFAULT_CURRENCY ?? "USD",
+        defaultPeriodType: configMap.DEFAULT_PERIOD_TYPE ?? "ANNUAL",
+        sessionTimeoutMinutes: Number(configMap.SESSION_TIMEOUT_MINUTES ?? "60"),
+        loginLockoutAttempts: Number(configMap.LOGIN_LOCKOUT_ATTEMPTS ?? "5"),
+        organizationName: configMap.ORGANIZATION_NAME ?? "FINTRAXIS Institutional Risk Services",
         maintenanceMode: configMap.MAINTENANCE_MODE === "true",
         rateLimitRpm: Number(configMap.RATE_LIMIT_ANALYST_RPM ?? "60"),
       },

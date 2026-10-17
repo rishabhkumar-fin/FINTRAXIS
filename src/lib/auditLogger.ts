@@ -4,7 +4,18 @@ import crypto from "crypto";
 export interface SystemAuditEvent {
   id: string;
   timestamp: string;
-  eventType: "AUTH_LOGIN" | "AUTH_FAILED" | "RATE_LIMIT_BLOCK" | "DEMO_SESSION" | "COMPANY_INGEST" | "POLICY_UPDATE" | "USER_MANAGEMENT" | "SYSTEM_DIAGNOSTIC";
+  eventType:
+    | "AUTH_LOGIN"
+    | "AUTH_FAILED"
+    | "RATE_LIMIT_BLOCK"
+    | "DEMO_SESSION"
+    | "COMPANY_INGEST"
+    | "POLICY_UPDATE"
+    | "USER_MANAGEMENT"
+    | "SYSTEM_DIAGNOSTIC"
+    | "SYSTEM_JOB"
+    | "PROVIDER_HEALTH"
+    | "SECURITY_REVOKE";
   severity: "INFO" | "WARNING" | "CRITICAL";
   operator: string;
   details: string;

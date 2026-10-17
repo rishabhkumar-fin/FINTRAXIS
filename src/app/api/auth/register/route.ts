@@ -63,6 +63,9 @@ export async function POST(request: Request) {
       netDebtEbitdaHurdle: 3.50,
       interestCoverageHurdle: 2.50,
       currentRatioHurdle: 1.10,
+      role: "ANALYST",
+      status: "ACTIVE",
+      lastLoginAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
 

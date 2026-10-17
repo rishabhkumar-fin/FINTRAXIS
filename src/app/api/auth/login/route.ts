@@ -91,6 +91,8 @@ export async function POST(request: Request) {
         interestCoverageHurdle: 2.50,
         currentRatioHurdle: 1.10,
         role: isAdmin ? "SUPER_ADMIN" : (isGuestIdent ? "DEMO_ANALYST" : "ANALYST"),
+        status: "ACTIVE",
+        lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
 
@@ -104,6 +106,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "User account not found. Please check your credentials or create an account." },
         { status: 401 }
+      );
+    }
+
+    // Account status check
+    if (user.status === "DEACTIVATED") {
+      logAuditEvent("AUTH_FAILED", identifier, "Attempted sign-in to deactivated account", "WARNING");
+      return NextResponse.json(
+        { success: false, error: "Access Denied: This operator account has been deactivated by a System Administrator." },
+        { status: 403 }
       );
     }
 

@@ -80,6 +80,19 @@ try {
       updated_at TEXT NOT NULL,
       updated_by TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS system_jobs (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      category TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'IDLE',
+      last_run_at TEXT,
+      last_duration_ms REAL,
+      records_processed REAL DEFAULT 0,
+      last_error TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
 
   try {
@@ -88,20 +101,96 @@ try {
     // Column already exists
   }
 
-  // Seed default system_config if missing
-  const countRow = sqlite.prepare("SELECT count(*) as count FROM system_config").get() as { count: number } | undefined;
-  if (!countRow || countRow.count === 0) {
-    const now = new Date().toISOString();
-    const insertConfig = sqlite.prepare(`
-      INSERT INTO system_config (key, value, description, updated_at, updated_by)
-      VALUES (?, ?, ?, ?, ?)
-    `);
-    insertConfig.run("GLOBAL_LEVERAGE_HURDLE", "3.5", "Global Net Debt / EBITDA threshold trigger for amber/red flags", now, "SYSTEM");
-    insertConfig.run("GLOBAL_COVERAGE_HURDLE", "2.5", "Global EBIT / Interest Expense coverage floor", now, "SYSTEM");
-    insertConfig.run("GLOBAL_LIQUIDITY_HURDLE", "1.1", "Global Current Ratio liquidity floor", now, "SYSTEM");
-    insertConfig.run("MAINTENANCE_MODE", "false", "Operational lockdown flag for schema re-indexing", now, "SYSTEM");
-    insertConfig.run("RATE_LIMIT_ANALYST_RPM", "60", "Requests per minute allowed per terminal session", now, "SYSTEM");
+  try {
+    sqlite.exec(`ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'ACTIVE';`);
+  } catch {
+    // Column already exists
   }
+
+  try {
+    sqlite.exec(`ALTER TABLE users ADD COLUMN last_login_at TEXT;`);
+  } catch {
+    // Column already exists
+  }
+
+  // Seed default system_config if missing or insert new enterprise parameters
+  const now = new Date().toISOString();
+  const insertConfigOrIgnore = sqlite.prepare(`
+    INSERT OR IGNORE INTO system_config (key, value, description, updated_at, updated_by)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  insertConfigOrIgnore.run("GLOBAL_LEVERAGE_HURDLE", "3.5", "Global Net Debt / EBITDA threshold trigger for amber/red flags", now, "SYSTEM");
+  insertConfigOrIgnore.run("GLOBAL_COVERAGE_HURDLE", "2.5", "Global EBIT / Interest Expense coverage floor", now, "SYSTEM");
+  insertConfigOrIgnore.run("GLOBAL_LIQUIDITY_HURDLE", "1.1", "Global Current Ratio liquidity floor", now, "SYSTEM");
+  insertConfigOrIgnore.run("ALERT_MARGIN_DETERIORATION_PCT", "-5.0", "Operating margin period-over-period percentage drop alert threshold", now, "SYSTEM");
+  insertConfigOrIgnore.run("ALERT_REVENUE_CONTRACTION_PCT", "-10.0", "Year-over-year revenue contraction trigger for distress surveillance", now, "SYSTEM");
+  insertConfigOrIgnore.run("MAX_RATE_SHOCK_BPS", "500", "Maximum permissible interest rate shock in stress simulations (bps)", now, "SYSTEM");
+  insertConfigOrIgnore.run("DEFAULT_CURRENCY", "USD", "Default institutional presentation currency", now, "SYSTEM");
+  insertConfigOrIgnore.run("DEFAULT_PERIOD_TYPE", "ANNUAL", "Default filing cadence across financial statements", now, "SYSTEM");
+  insertConfigOrIgnore.run("SESSION_TIMEOUT_MINUTES", "60", "Automatic inactivity logout timer", now, "SYSTEM");
+  insertConfigOrIgnore.run("LOGIN_LOCKOUT_ATTEMPTS", "5", "Brute-force security lockout threshold", now, "SYSTEM");
+  insertConfigOrIgnore.run("ORGANIZATION_NAME", "FINTRAXIS Institutional Risk Services", "Entity identifier for regulatory research exports", now, "SYSTEM");
+  insertConfigOrIgnore.run("MAINTENANCE_MODE", "false", "Operational lockdown flag for schema re-indexing", now, "SYSTEM");
+  insertConfigOrIgnore.run("RATE_LIMIT_ANALYST_RPM", "60", "Requests per minute allowed per terminal session", now, "SYSTEM");
+
+  // Seed default system_jobs if missing
+  const insertJobOrIgnore = sqlite.prepare(`
+    INSERT OR IGNORE INTO system_jobs (id, name, description, category, status, last_run_at, last_duration_ms, records_processed, last_error, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  insertJobOrIgnore.run(
+    "audit_balance_sheets",
+    "Balance Sheet Identity Audit",
+    "Pure arithmetic audit of Assets = Liabilities + Equity across all registered issuer balance sheets",
+    "AUDIT",
+    "IDLE",
+    now,
+    14,
+    3,
+    null,
+    now
+  );
+
+  insertJobOrIgnore.run(
+    "db_integrity",
+    "Database Integrity Check & WAL Checkpoint",
+    "Executes SQLite PRAGMA integrity_check and WAL log checkpoint truncation",
+    "MAINTENANCE",
+    "IDLE",
+    now,
+    8,
+    1,
+    null,
+    now
+  );
+
+  insertJobOrIgnore.run(
+    "refresh_market_quotes",
+    "Security Master Pricing Synchronizer",
+    "Polls verified market providers for latest trading prices and market valuations",
+    "DATA_SYNC",
+    "IDLE",
+    now,
+    42,
+    3,
+    null,
+    now
+  );
+
+  insertJobOrIgnore.run(
+    "audit_journal_verification",
+    "Audit Journal Cryptographic Verification",
+    "Scans security audit events to verify timestamp linearity and operator provenance",
+    "SECURITY",
+    "IDLE",
+    now,
+    5,
+    10,
+    null,
+    now
+  );
 } catch (e) {
   console.warn("DB setup / migration error (non-fatal):", e);
 }

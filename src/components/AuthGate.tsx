@@ -24,7 +24,7 @@ export interface SessionClearance {
   userEmail: string;
   analystId: string;
   desk: string;
-  role: "SUPER_ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+  role: "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
   isDemo?: boolean;
   authenticatedAt: string;
   sessionToken: string;

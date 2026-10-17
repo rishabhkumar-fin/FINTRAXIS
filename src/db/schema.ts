@@ -116,6 +116,8 @@ export const users = sqliteTable("users", {
   interestCoverageHurdle: real("interest_coverage_hurdle").default(2.50),
   currentRatioHurdle: real("current_ratio_hurdle").default(1.10),
   role: text("role").notNull().default("ANALYST"),
+  status: text("status").notNull().default("ACTIVE"),
+  lastLoginAt: text("last_login_at"),
   createdAt: text("created_at").notNull(),
 });
 
@@ -136,9 +138,23 @@ export const systemConfig = sqliteTable("system_config", {
   updatedBy: text("updated_by").notNull(),
 });
 
+export const systemJobs = sqliteTable("system_jobs", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  status: text("status").notNull().default("IDLE"),
+  lastRunAt: text("last_run_at"),
+  lastDurationMs: real("last_duration_ms"),
+  recordsProcessed: real("records_processed").default(0),
+  lastError: text("last_error"),
+  createdAt: text("created_at").notNull(),
+});
+
 export type Company = typeof companies.$inferSelect;
 export type FinancialPeriod = typeof financialPeriods.$inferSelect;
 export type AuditLineItem = typeof auditLineItems.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
 export type SystemConfig = typeof systemConfig.$inferSelect;
+export type SystemJob = typeof systemJobs.$inferSelect;
