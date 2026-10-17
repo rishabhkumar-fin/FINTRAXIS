@@ -48,33 +48,43 @@ export function CommandPalette({
       }
     }
 
-    // Syntax 2: Numbers 1 - 6
-    if (raw === "1" || raw.includes("HUB")) {
+    // Syntax 2: Numbers 1 - 8 & Module Keywords
+    if (raw === "1" || raw === "ADMIN" || raw.includes("ADMIN") || raw === "GO ADMIN") {
+      onSelectTab("00_ADMIN");
+      onClose();
+      return;
+    }
+    if (raw === "2" || raw === "OVERVIEW" || raw.includes("OVERVIEW")) {
+      onSelectTab("overview");
+      onClose();
+      return;
+    }
+    if (raw === "3" || raw.includes("HUB")) {
       onSelectTab("01_HUB");
       onClose();
       return;
     }
-    if (raw === "2" || raw.includes("STATEMENT") || raw.includes("XBRL")) {
+    if (raw === "4" || raw.includes("STATEMENT") || raw.includes("XBRL")) {
       onSelectTab("02_STATEMENTS");
       onClose();
       return;
     }
-    if (raw === "3" || raw.includes("HEALTH") || raw.includes("RATIO")) {
+    if (raw === "5" || raw.includes("HEALTH") || raw.includes("RATIO")) {
       onSelectTab("03_HEALTH");
       onClose();
       return;
     }
-    if (raw === "4" || raw.includes("VULNERABILITY") || raw.includes("EWS")) {
+    if (raw === "6" || raw.includes("VULNERABILITY") || raw.includes("EWS")) {
       onSelectTab("04_VULNERABILITY");
       onClose();
       return;
     }
-    if (raw === "5" || raw === "STRESS" || raw.includes("SIMULATOR")) {
+    if (raw === "7" || raw === "STRESS" || raw.includes("SIMULATOR")) {
       onSelectTab("05_SIMULATOR");
       onClose();
       return;
     }
-    if (raw === "6" || raw.includes("MEMO") || raw.includes("DOSSIER")) {
+    if (raw === "8" || raw.includes("MEMO") || raw.includes("DOSSIER")) {
       onSelectTab("06_MEMO");
       onClose();
       return;
@@ -90,12 +100,6 @@ export function CommandPalette({
 
     if (raw === "LOCK" || raw === "LOGOUT" || raw === "TERMINATE") {
       onLockSession();
-      onClose();
-      return;
-    }
-
-    if (raw === "ADMIN" || raw === "ADMIN CONSOLE" || raw === "GO ADMIN") {
-      window.location.href = "/admin";
       onClose();
       return;
     }

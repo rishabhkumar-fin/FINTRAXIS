@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sqlite } from "@/db/index";
 import { logAuditEvent } from "@/lib/auditLogger";
+import { verifyOperatorClearance } from "@/lib/authGuard";
 
 interface CompanyAdminRow {
   id: string;
@@ -49,9 +50,14 @@ export async function GET() {
 
 export async function DELETE(request: Request) {
   try {
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "LEAD_ANALYST"]);
+    if (!clearance.allowed) {
+      return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const operator = searchParams.get("operator") || "SUPER_ADMIN";
+    const operator = clearance.operator;
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Company ID is required" }, { status: 400 });

@@ -4,6 +4,7 @@ import { companies, financialPeriods, auditLineItems } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { primaryDataProvider } from "@/lib/providers";
 import { logAuditEvent } from "@/lib/auditLogger";
+import { verifyOperatorClearance } from "@/lib/authGuard";
 
 type FinancialPeriodInsert = typeof financialPeriods.$inferInsert;
 
@@ -18,6 +19,9 @@ export async function POST(request: Request) {
 
     const cleanSymbol = symbol.toUpperCase().trim();
 
+    // Check clearance: Demo sessions cannot mutate production security master
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "LEAD_ANALYST", "ANALYST"]);
+
     // 1. Idempotency Check: If already fully ingested and forceRefresh is not requested, return existing
     const existingCompany = db.select().from(companies).where(eq(companies.id, cleanSymbol)).get();
     const existingPeriods = db.select().from(financialPeriods).where(eq(financialPeriods.companyId, cleanSymbol)).all();
@@ -30,6 +34,13 @@ export async function POST(request: Request) {
         periodsCount: existingPeriods.length,
         isExisting: true,
       });
+    }
+
+    if (!clearance.allowed) {
+      return NextResponse.json({
+        success: false,
+        error: "Access Denied: Guest demo sessions operate in sandbox mode and cannot ingest new securities into production master.",
+      }, { status: 403 });
     }
 
     // 2. Fetch verified profile and quote from Provider

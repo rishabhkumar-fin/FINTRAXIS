@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { AuthGate, SessionClearance } from "@/components/AuthGate";
 import { SidebarNavigation } from "@/components/SidebarNavigation";
 import { MacroTickerTape } from "@/components/MacroTickerTape";
-import { WorkflowBanner } from "@/components/WorkflowBanner";
 import { CommandPalette } from "@/components/CommandPalette";
+import { AdminConsoleView } from "@/components/AdminConsoleView";
+import { OverviewWorkstation } from "@/components/OverviewWorkstation";
 import { CompanyHub } from "@/components/CompanyHub";
 import { StatementsLedger } from "@/components/StatementsLedger";
 import { HealthRatios } from "@/components/HealthRatios";
@@ -29,7 +30,7 @@ import { Loader2, AlertCircle, Sparkles, Menu, Search } from "lucide-react";
 export default function FintraxisTerminalPage() {
   const [mounted, setMounted] = useState<boolean>(false);
   const [session, setSession] = useState<SessionClearance | null>(null);
-  const [activeTab, setActiveTab] = useState<ModuleTab>("01_HUB");
+  const [activeTab, setActiveTab] = useState<ModuleTab>("00_ADMIN");
   const [companies, setCompanies] = useState<CompanyEntity[]>(SEED_COMPANIES);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("AAPL");
   const [profile, setProfile] = useState<CompanyRiskProfile | null>(null);
@@ -92,12 +93,16 @@ export default function FintraxisTerminalPage() {
         target.isContentEditable;
 
       if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "1") setActiveTab("01_HUB");
-        else if (e.key === "2") setActiveTab("02_STATEMENTS");
-        else if (e.key === "3") setActiveTab("03_HEALTH");
-        else if (e.key === "4") setActiveTab("04_VULNERABILITY");
-        else if (e.key === "5") setActiveTab("05_SIMULATOR");
-        else if (e.key === "6") setActiveTab("06_MEMO");
+        if (e.key === "1") setActiveTab("00_ADMIN");
+        else if (e.key === "2") setActiveTab("overview");
+        else if (e.key === "3") setActiveTab("01_HUB");
+        else if (e.key === "4") setActiveTab("02_STATEMENTS");
+        else if (e.key === "5") setActiveTab("03_HEALTH");
+        else if (e.key === "6") setActiveTab("04_VULNERABILITY");
+        else if (e.key === "7") setActiveTab("05_SIMULATOR");
+        else if (e.key === "8") setActiveTab("06_MEMO");
+        else if (e.key === "9") setIsAiOpen((prev) => !prev);
+        else if (e.key === "0") setIsSettingsOpen((prev) => !prev);
       }
     };
 
@@ -317,15 +322,24 @@ export default function FintraxisTerminalPage() {
             </div>
           )}
 
-          {/* Collapsible Institutional Underwriting Workflow Discovery Banner */}
-          <WorkflowBanner
-            activeTab={activeTab}
-            onSelectTab={setActiveTab}
-            selectedTicker={profile?.company.symbol}
-          />
-
           {/* Contextual Institutional Field Guide for Active Module */}
           <ModuleGuide moduleKey={activeTab} />
+
+          {/* Module 01: Administrative Governance & Supervisory Console */}
+          {activeTab === "00_ADMIN" && (
+            <AdminConsoleView
+              session={session}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
+          {/* Module 02: Executive Corporate Overview */}
+          {activeTab === "overview" && profile && (
+            <OverviewWorkstation
+              profile={profile}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+            />
+          )}
 
           {/* Desk 01: Global Securities Directory & Master */}
           {activeTab === "01_HUB" && (

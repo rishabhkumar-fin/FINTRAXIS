@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { PeacockLogo } from "./PeacockLogo";
 import {
-  Lock,
   ArrowRight,
   UserPlus,
   LogIn,
@@ -13,11 +12,10 @@ import {
   EyeOff,
   AlertCircle,
   CheckCircle2,
-  Sparkles,
   ShieldCheck,
-  TrendingUp,
-  Landmark,
-  FileText,
+  Activity,
+  Sliders,
+  Sparkles,
 } from "lucide-react";
 
 export interface SessionClearance {
@@ -26,6 +24,8 @@ export interface SessionClearance {
   userEmail: string;
   analystId: string;
   desk: string;
+  role: "SUPER_ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+  isDemo?: boolean;
   authenticatedAt: string;
   sessionToken: string;
   avatarId?: string;
@@ -46,7 +46,6 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   const [signInIdentifier, setSignInIdentifier] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
 
   // Registration State
   const [regName, setRegName] = useState("");
@@ -62,6 +61,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   // 1-Click Guest Analyst Access (Isolated Demo Session)
   const handleGuestLogin = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -77,6 +77,8 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           userEmail: demoUser.email,
           analystId: "Demo Analyst",
           desk: demoUser.desk,
+          role: "DEMO_ANALYST",
+          isDemo: true,
           avatarId: "crest",
           netDebtEbitdaHurdle: demoUser.netDebtEbitdaHurdle ?? 3.5,
           interestCoverageHurdle: demoUser.interestCoverageHurdle ?? 2.5,
@@ -90,7 +92,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         return;
       }
     } catch {
-      // Fallback local demo session if offline
+      // Offline fallback
     }
 
     const fallbackSession: SessionClearance = {
@@ -99,6 +101,8 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       userEmail: "demo@fintraxis.terminal",
       analystId: "Demo Analyst",
       desk: "Global Surveillance (Demo Mode)",
+      role: "DEMO_ANALYST",
+      isDemo: true,
       avatarId: "crest",
       netDebtEbitdaHurdle: 3.5,
       interestCoverageHurdle: 2.5,
@@ -116,13 +120,14 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!signInIdentifier.trim()) {
-      setErrorMessage("Please enter your username or email address.");
+    const cleanIdent = signInIdentifier.trim();
+    if (!cleanIdent) {
+      setErrorMessage("Check your email or username");
       return;
     }
 
     if (!signInPassword) {
-      setErrorMessage("Please enter your password.");
+      setErrorMessage("Check your password");
       return;
     }
 
@@ -133,7 +138,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: signInIdentifier.trim(),
+          email: cleanIdent,
           password: signInPassword,
         }),
       });
@@ -141,7 +146,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        setErrorMessage(json.error || "Authentication failed. Please verify your credentials.");
+        setErrorMessage(json.error || "Check your email and password and try again");
         setIsLoading(false);
         return;
       }
@@ -152,23 +157,22 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         userName: userData.name,
         userEmail: userData.email,
         analystId: userData.name,
-        desk: userData.desk || "Credit Risk & Intelligence",
+        desk: userData.desk || "Global Credit Risk & Surveillance",
+        role: userData.role || (cleanIdent === "admin" ? "SUPER_ADMIN" : "ANALYST"),
+        isDemo: Boolean(userData.isDemo),
         avatarId: userData.avatar || "crest",
         netDebtEbitdaHurdle: userData.netDebtEbitdaHurdle ?? 3.5,
         interestCoverageHurdle: userData.interestCoverageHurdle ?? 2.5,
         currentRatioHurdle: userData.currentRatioHurdle ?? 1.1,
         sessionToken: userData.sessionToken,
-        authenticatedAt: userData.authenticatedAt || new Date().toISOString(),
+        authenticatedAt: userData.authenticatedAt,
       };
 
-      if (rememberMe) {
-        localStorage.setItem("fintraxis_session", JSON.stringify(session));
-      }
+      localStorage.setItem("fintraxis_session", JSON.stringify(session));
       setIsLoading(false);
       onAuthenticated(session);
-    } catch (err: unknown) {
-      console.error("Sign-in network error:", err);
-      setErrorMessage("Network error connecting to authentication service.");
+    } catch {
+      setErrorMessage("Unable to connect to the server. Please check your internet connection.");
       setIsLoading(false);
     }
   };
@@ -179,28 +183,19 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
     setSuccessMessage(null);
 
     if (!regName.trim()) {
-      setErrorMessage("Please enter your full name.");
+      setErrorMessage("Please enter your full name");
       return;
     }
-
-    if (!regEmail.trim()) {
-      setErrorMessage("Please enter an email address.");
+    if (!regEmail.trim() || !regEmail.includes("@")) {
+      setErrorMessage("Please enter a valid email address");
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(regEmail.trim())) {
-      setErrorMessage("Please enter a valid email address (e.g. name@gmail.com).");
+    if (!regPassword || regPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long");
       return;
     }
-
-    if (regPassword.length < 8) {
-      setErrorMessage("Password must be at least 8 characters.");
-      return;
-    }
-
     if (regPassword !== regConfirmPassword) {
-      setErrorMessage("Passwords do not match. Please re-enter.");
+      setErrorMessage("Passwords do not match");
       return;
     }
 
@@ -214,412 +209,369 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           name: regName.trim(),
           email: regEmail.trim(),
           password: regPassword,
-          desk: "Credit Risk & Intelligence",
-          avatar: "crest",
+          desk: "Global Credit Risk & Surveillance",
         }),
       });
 
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        setErrorMessage(json.error || "Account creation failed. Please try again.");
+        setErrorMessage(json.error || "Registration could not be completed.");
         setIsLoading(false);
         return;
       }
 
-      setSuccessMessage("Account created successfully! Please sign in with your credentials.");
+      setSuccessMessage("Account created successfully. You can now sign in.");
       setMode("SIGN_IN");
-      setSignInIdentifier(regEmail);
+      setSignInIdentifier(regEmail.trim());
       setSignInPassword("");
       setIsLoading(false);
-    } catch (err: unknown) {
-      console.error("Registration network error:", err);
-      setErrorMessage("Network error creating account.");
+    } catch {
+      setErrorMessage("Unable to reach the server. Please check your connection.");
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#070A0F] text-[#F8FAFC] flex items-center justify-center p-3 sm:p-6 select-none font-mono overflow-y-auto">
-      {/* Background Radial Navy Accents */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-25"
-        style={{
-          backgroundImage: `radial-gradient(rgba(37, 99, 235, 0.25) 1px, transparent 1px)`,
-          backgroundSize: "32px 32px",
-        }}
-      />
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-[#2563EB]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-[#38BDF8]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#080B12] text-[#F3F6FC] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#3867F5]/30">
+      <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-[#101621] border border-[#253247] shadow-2xl rounded-xl overflow-hidden">
+        {/* =========================================================================
+            LEFT COLUMN: BRAND INTRODUCTION & VALUE PROPOSITIONS
+           ========================================================================= */}
+        <div className="lg:col-span-5 bg-[#0D131C] p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#253247] relative overflow-hidden">
+          {/* Subtle Ambient Gradient Glow */}
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#3867F5]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-[#38BDF8]/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Luxury Layout - BlackRock Obsidian Sapphire 10/10 */}
-      <div className="relative w-full max-w-5xl bg-[#090D17] border border-[#182337] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.98),0_0_40px_-10px_rgba(37,99,235,0.2)] z-10 rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto">
-        
-        {/* LEFT COLUMN: Wall Street Institutional Brand Showcase (5 cols on lg, below form on mobile) */}
-        <div className="order-2 lg:order-1 lg:col-span-5 bg-gradient-to-br from-[#0C1220] to-[#070A0F] p-6 sm:p-8 border-t lg:border-t-0 lg:border-r border-[#182337] flex flex-col justify-between space-y-6 relative overflow-hidden">
-          
-          {/* Abstract Institutional Network Graphic */}
-          <div className="absolute right-0 bottom-0 pointer-events-none opacity-20 transform translate-x-8 translate-y-8">
-            <svg width="220" height="220" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="100" cy="100" r="80" stroke="#38BDF8" strokeWidth="1" strokeDasharray="4 4" />
-              <circle cx="100" cy="100" r="50" stroke="#2563EB" strokeWidth="1" />
-              <circle cx="100" cy="100" r="20" fill="#2563EB" fillOpacity="0.2" stroke="#38BDF8" strokeWidth="1.5" />
-              <line x1="20" y1="100" x2="180" y2="100" stroke="#1E293B" strokeWidth="1" />
-              <line x1="100" y1="20" x2="100" y2="180" stroke="#1E293B" strokeWidth="1" />
-              <circle cx="40" cy="60" r="3" fill="#38BDF8" />
-              <circle cx="160" cy="60" r="3" fill="#10B981" />
-              <circle cx="150" cy="140" r="3" fill="#2563EB" />
-              <circle cx="50" cy="140" r="3" fill="#EF4444" />
-              <line x1="100" y1="100" x2="40" y2="60" stroke="#38BDF8" strokeWidth="0.8" />
-              <line x1="100" y1="100" x2="160" y2="60" stroke="#10B981" strokeWidth="0.8" />
-              <line x1="100" y1="100" x2="150" y2="140" stroke="#2563EB" strokeWidth="0.8" />
-              <line x1="100" y1="100" x2="50" y2="140" stroke="#EF4444" strokeWidth="0.8" />
-            </svg>
-          </div>
+          {/* Top Brand & Headlines */}
+          <div className="relative z-10 flex flex-col gap-4">
+            <PeacockLogo size="lg" showLockup={true} />
 
-          <div className="space-y-6 relative z-10">
-            {/* Royal Crest Lockup */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <PeacockLogo size="lg" showLockup={false} />
-                <div>
-                  <div className="text-sm font-bold tracking-[0.25em] text-[#FFFFFF] uppercase">
-                    FINTRAXIS
-                  </div>
-                  <div className="text-[9.5px] text-[#38BDF8] tracking-widest uppercase font-semibold">
-                    SOVEREIGN WEALTH &bull; EST. 2026
-                  </div>
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#0F1626] border border-[#2563EB]/40 rounded text-[10px] text-[#38BDF8] font-bold">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-                <span>LEVEL 3 CLEARANCE // WALL STREET DESK</span>
-              </div>
-            </div>
-
-            {/* Prestige Pitch - Section 6.1 Headline */}
-            <div className="space-y-2">
-              <h1 className="text-lg sm:text-xl font-bold text-[#FFFFFF] tracking-tight leading-snug">
-                Understand the numbers behind the risk.
+            <div className="mt-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#F3F6FC] leading-tight">
+                Understand your company&apos;s financial health.
               </h1>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
-                Auditable corporate financial intelligence and early-warning terminal engineered for corporate debt syndicates and Investment Committees.
+              <p className="text-sm text-[#9AA8BC] mt-2 leading-relaxed">
+                Explore financial results, spot risks, and test what could happen next.
               </p>
             </div>
 
-            {/* 4 Pillars of Wall Street Clearance */}
-            <div className="space-y-2.5 pt-2 border-t border-[#182337]">
-              <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
-                  <TrendingUp className="w-3 h-3" />
+            {/* Subtle Abstract Financial Chart SVG */}
+            <div className="my-3 py-3 border-y border-[#253247]/60">
+              <svg viewBox="0 0 340 90" className="w-full h-20 overflow-visible text-[#38BDF8]" fill="none">
+                <defs>
+                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3867F5" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#3867F5" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+                {/* Horizontal reference grid lines */}
+                <line x1="0" y1="20" x2="340" y2="20" stroke="#253247" strokeDasharray="3 3" />
+                <line x1="0" y1="50" x2="340" y2="50" stroke="#253247" strokeDasharray="3 3" />
+                <line x1="0" y1="80" x2="340" y2="80" stroke="#253247" strokeDasharray="3 3" />
+
+                {/* Shaded Area under Curve */}
+                <path
+                  d="M 0,70 Q 50,45 100,55 T 200,30 T 280,38 T 340,15 L 340,90 L 0,90 Z"
+                  fill="url(#chartGradient)"
+                />
+                {/* Smooth Curve */}
+                <path
+                  d="M 0,70 Q 50,45 100,55 T 200,30 T 280,38 T 340,15"
+                  stroke="#38BDF8"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                {/* Pulse Highlight Nodes */}
+                <circle cx="200" cy="30" r="3.5" fill="#38BDF8" />
+                <circle cx="340" cy="15" r="4" fill="#16A879" />
+              </svg>
+            </div>
+
+            {/* 3 Concise Benefit Points */}
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
+                <div className="w-7 h-7 rounded bg-[#3867F5]/20 flex items-center justify-center text-[#38BDF8] shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#FFFFFF]">Multi-Period Audited Financials</div>
-                  <div className="text-[10px] text-[#64748B]">Regulatory XBRL disclosures across NSE, BSE, NASDAQ &amp; NYSE.</div>
+                  <div className="text-xs font-semibold text-[#F3F6FC]">Clear financial data</div>
+                  <div className="text-[11px] text-[#9AA8BC]">Direct SEC & XBRL reporting without guesses</div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
-                  <Landmark className="w-3 h-3" />
+              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
+                <div className="w-7 h-7 rounded bg-[#F5B942]/20 flex items-center justify-center text-[#F5B942] shrink-0">
+                  <Activity className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#FFFFFF]">Monetary Transmission Shock Lab</div>
-                  <div className="text-[10px] text-[#64748B]">Real-time RBI Repo Rate (5.50%) &amp; US Fed Funds stress testing.</div>
+                  <div className="text-xs font-semibold text-[#F3F6FC]">Early risk signals</div>
+                  <div className="text-[11px] text-[#9AA8BC]">Automated debt alerts and solvency hurdles</div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 text-xs">
-                <div className="w-5 h-5 rounded bg-[#101A2E] border border-[#2563EB]/40 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
-                  <FileText className="w-3 h-3" />
+              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
+                <div className="w-7 h-7 rounded bg-[#16A879]/20 flex items-center justify-center text-[#16A879] shrink-0">
+                  <Sliders className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-bold text-[#FFFFFF]">Boardroom Presentation PDF Deck</div>
-                  <div className="text-[10px] text-[#64748B]">1-Click PowerPoint-style underwriting memos with cryptographic seal.</div>
+                  <div className="text-xs font-semibold text-[#F3F6FC]">Simple scenario testing</div>
+                  <div className="text-[11px] text-[#9AA8BC]">Simulate interest rate shocks and revenue drops</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Security Node Attestation */}
-          <div className="pt-4 border-t border-[#182337] flex items-center justify-between text-[10px] text-[#64748B] relative z-10">
-            <span className="flex items-center gap-1.5 text-[#10B981]">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
-              <span>NODE: MUM-01 // NY-02</span>
-            </span>
-            <span className="text-[#38BDF8] font-mono">AES-256 VAULT</span>
+          {/* Bottom Security Assurance Note */}
+          <div className="mt-6 pt-4 border-t border-[#253247]/60 text-[11px] text-[#9AA8BC] flex items-center justify-between font-mono">
+            <span>SECURE SYSTEM</span>
+            <span className="text-[#16A879]">NODE 24 ACTIVE</span>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Slick Credential Vault (7 cols on lg, top on mobile) */}
-        <div className="order-1 lg:order-2 lg:col-span-7 p-6 sm:p-8 flex flex-col justify-center space-y-5 bg-[#090D17]">
-          
-          {/* Highlighted VIP 1-Click Guest Analyst Pass */}
-          <div className="p-4 bg-gradient-to-r from-[#0E1629] to-[#0A101E] border border-[#2563EB]/60 rounded-xl space-y-2.5 shadow-lg relative overflow-hidden group">
-            <div className="absolute top-0 right-0 px-3 py-0.5 bg-[#2563EB] text-white text-[9px] font-bold uppercase tracking-wider rounded-bl">
-              1-CLICK GUEST PASS
+        {/* =========================================================================
+            RIGHT COLUMN: WELCOME & LOGIN / REGISTRATION FORM
+           ========================================================================= */}
+        <div className="lg:col-span-7 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-[#101621]">
+          <div className="max-w-md w-full mx-auto flex flex-col gap-5">
+            {/* Form Header */}
+            <div>
+              <h2 className="text-2xl font-bold text-[#F3F6FC] tracking-tight">
+                Welcome to FINTRAXIS
+              </h2>
+              <p className="text-xs text-[#9AA8BC] mt-1">
+                Sign in with your credentials or explore as a guest analyst.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#38BDF8] animate-pulse" />
-              <div className="text-xs font-bold text-[#FFFFFF] uppercase tracking-wider">
-                EXPLORE TERMINAL AS GUEST ANALYST
-              </div>
-            </div>
-            <p className="text-[11px] text-[#94A3B8] leading-relaxed">
-              No registration or password needed. Instantly launch full institutional clearance to inspect all modules, Groww-style charts, and stress simulations.
-            </p>
-            <button
-              type="button"
-              onClick={handleGuestLogin}
-              className="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:scale-[1.01]"
-            >
-              <span>ENTER DIRECTLY AS GUEST</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
 
-          <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-[#182337]"></div>
-            <span className="flex-shrink mx-3 text-[#64748B] text-[10px] uppercase font-mono tracking-widest">
-              OR USE ACCOUNT CREDENTIALS
-            </span>
-            <div className="flex-grow border-t border-[#182337]"></div>
-          </div>
-
-          {/* Segmented Sign In / Create Account Toggle */}
-          <div className="w-full grid grid-cols-2 gap-1 p-1 bg-[#070A0F] border border-[#182337] rounded-lg">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("SIGN_IN");
-                setErrorMessage(null);
-                setSuccessMessage(null);
-              }}
-              className={`py-2 text-xs font-medium transition-all flex items-center justify-center gap-2 rounded ${
-                mode === "SIGN_IN"
-                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
-              }`}
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Operator Sign In</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("REGISTER");
-                setErrorMessage(null);
-                setSuccessMessage(null);
-              }}
-              className={`py-2 text-xs font-medium transition-all flex items-center justify-center gap-2 rounded ${
-                mode === "REGISTER"
-                  ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                  : "text-[#94A3B8] hover:text-[#FFFFFF]"
-              }`}
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Register Account</span>
-            </button>
-          </div>
-
-          {/* Error / Success Notifications */}
-          {errorMessage && (
-            <div className="p-3 bg-[#EF4444]/10 border border-[#EF4444]/50 text-[#EF4444] text-xs flex items-center gap-2.5 rounded">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span className="leading-snug">{errorMessage}</span>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="p-3 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] text-xs flex items-center gap-2.5 rounded">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span className="leading-snug">{successMessage}</span>
-            </div>
-          )}
-
-          {/* FORM: Operator Sign In */}
-          {mode === "SIGN_IN" ? (
-            <form onSubmit={handleSignIn} className="space-y-3.5 text-xs">
-              <div className="space-y-1">
-                <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                  Username or Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={signInIdentifier}
-                    onChange={(e) => setSignInIdentifier(e.target.value)}
-                    required
-                    placeholder="e.g. user@gmail.com or username"
-                    className="w-full pl-9 pr-3 py-2 bg-[#070A0F] border border-[#182337] text-[#FFFFFF] placeholder-[#475569] focus:border-[#38BDF8] focus:outline-none text-xs font-mono rounded transition-colors"
-                  />
-                  <User className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showSignInPassword ? "text" : "password"}
-                    value={signInPassword}
-                    onChange={(e) => setSignInPassword(e.target.value)}
-                    required
-                    placeholder="Enter security password"
-                    className="w-full pl-9 pr-10 py-2 bg-[#070A0F] border border-[#182337] text-[#FFFFFF] placeholder-[#475569] focus:border-[#38BDF8] focus:outline-none text-xs font-mono rounded transition-colors"
-                  />
-                  <Lock className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
-                  <button
-                    type="button"
-                    onClick={() => setShowSignInPassword((prev) => !prev)}
-                    className="absolute right-3 top-2.5 text-[#64748B] hover:text-[#CBD5E1] transition-colors"
-                  >
-                    {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-[#94A3B8] hover:text-[#CBD5E1]">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-[#182337] bg-[#070A0F] text-[#2563EB] focus:ring-0 cursor-pointer w-3.5 h-3.5"
-                  />
-                  <span>Remember clearance on this device</span>
-                </label>
-              </div>
+            {/* Mode Switcher Tabs */}
+            <div className="flex p-1 bg-[#151E2D] border border-[#253247] rounded-lg font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("SIGN_IN");
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-1.5 rounded text-center transition-all flex items-center justify-center gap-1.5 ${
+                  mode === "SIGN_IN"
+                    ? "bg-[#3867F5] text-white font-bold shadow-sm"
+                    : "text-[#9AA8BC] hover:text-[#F3F6FC]"
+                }`}
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </button>
 
               <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-2.5 bg-[#182337] hover:bg-[#2563EB] border border-[#38BDF8]/50 text-[#38BDF8] hover:text-white font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                type="button"
+                onClick={() => {
+                  setMode("REGISTER");
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-1.5 rounded text-center transition-all flex items-center justify-center gap-1.5 ${
+                  mode === "REGISTER"
+                    ? "bg-[#3867F5] text-white font-bold shadow-sm"
+                    : "text-[#9AA8BC] hover:text-[#F3F6FC]"
+                }`}
               >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>AUTHENTICATING...</span>
-                  </span>
-                ) : (
-                  <>
-                    <span>SIGN IN WITH CREDENTIALS</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Create Account</span>
               </button>
-            </form>
-          ) : (
-            /* FORM: Register Account */
-            <form onSubmit={handleRegister} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    required
-                    placeholder="e.g. John Doe"
-                    className="w-full pl-9 pr-3 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
-                  />
-                  <User className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
-                </div>
-              </div>
+            </div>
 
-              <div className="space-y-1">
-                <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    required
-                    placeholder="e.g. user@gmail.com"
-                    className="w-full pl-9 pr-3 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
-                  />
-                  <Mail className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
-                </div>
+            {/* Error or Success Alert */}
+            {errorMessage && (
+              <div className="p-3 bg-[#F05252]/10 border border-[#F05252]/50 text-[#F05252] text-xs rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{errorMessage}</span>
               </div>
+            )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="space-y-1">
-                  <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                    Password (8+ chars)
+            {successMessage && (
+              <div className="p-3 bg-[#16A879]/10 border border-[#16A879]/50 text-[#16A879] text-xs rounded-lg flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
+            {/* =======================
+                FORM: SIGN IN
+               ======================= */}
+            {mode === "SIGN_IN" ? (
+              <form onSubmit={handleSignIn} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-[#F3F6FC]">
+                    Email or Username
                   </label>
                   <div className="relative">
                     <input
-                      type={showRegPassword ? "text" : "password"}
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      required
-                      placeholder="Min 8 characters"
-                      className="w-full pl-9 pr-8 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
+                      type="text"
+                      value={signInIdentifier}
+                      onChange={(e) => setSignInIdentifier(e.target.value)}
+                      placeholder="e.g. admin or analyst@fintraxis.terminal"
+                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] transition-colors"
+                      autoComplete="username"
                     />
-                    <Lock className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
+                    <Mail className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-[#F3F6FC]">
+                      Password
+                    </label>
+                    <span className="text-[11px] text-[#38BDF8] font-mono">
+                      Default: guest or admin
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showSignInPassword ? "text" : "password"}
+                      value={signInPassword}
+                      onChange={(e) => setSignInPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] transition-colors pr-10"
+                      autoComplete="current-password"
+                    />
                     <button
                       type="button"
-                      onClick={() => setShowRegPassword((prev) => !prev)}
-                      className="absolute right-2.5 top-2.5 text-[#64748B] hover:text-[#CBD5E1] transition-colors"
+                      onClick={() => setShowSignInPassword(!showSignInPassword)}
+                      className="absolute right-3 top-2.5 text-[#5A687D] hover:text-[#F3F6FC] p-0.5 transition-colors"
+                      aria-label={showSignInPassword ? "Hide password" : "Show password"}
                     >
-                      {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10.5px] text-[#94A3B8] uppercase font-bold tracking-wider">
-                    Confirm Password
+                {/* Primary Sign In Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-2.5 bg-[#3867F5] hover:bg-[#2c53cb] disabled:opacity-60 text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-all shadow-md mt-1 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>Sign In to Terminal</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                {/* Divider */}
+                <div className="relative my-1">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#253247]" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-mono">
+                    <span className="bg-[#101621] px-2 text-[#9AA8BC]">Or continue as</span>
+                  </div>
+                </div>
+
+                {/* Continue as Guest Button (Sandbox Demo) */}
+                <button
+                  type="button"
+                  onClick={handleGuestLogin}
+                  disabled={isLoading}
+                  className="w-full py-2.5 bg-[#151E2D] hover:bg-[#1a2639] border border-[#253247] text-[#38BDF8] hover:text-white font-mono text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
+                  <span>Explore as Guest Analyst (Demo Mode)</span>
+                </button>
+              </form>
+            ) : (
+              /* =======================
+                  FORM: CREATE ACCOUNT
+                 ======================= */
+              <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-[#F3F6FC]">
+                    Full Name
                   </label>
                   <div className="relative">
+                    <input
+                      type="text"
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      placeholder="e.g. Sarah Jenkins"
+                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
+                    />
+                    <User className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-[#F3F6FC]">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="analyst@fintraxis.terminal"
+                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
+                    />
+                    <Mail className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-medium text-[#F3F6FC]">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showRegPassword ? "text" : "password"}
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder="Min 6 chars"
+                        className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] pr-9"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword(!showRegPassword)}
+                        className="absolute right-2.5 top-3 text-[#5A687D] hover:text-[#F3F6FC]"
+                      >
+                        {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-medium text-[#F3F6FC]">
+                      Confirm Password
+                    </label>
                     <input
                       type={showRegPassword ? "text" : "password"}
                       value={regConfirmPassword}
                       onChange={(e) => setRegConfirmPassword(e.target.value)}
-                      required
-                      placeholder="Re-enter password"
-                      className="w-full pl-9 pr-3 py-2 bg-[#05070C] border border-[#1E293B] text-[#F8FAFC] placeholder-[#475569] focus:border-[#3B82F6] focus:outline-none text-xs font-mono rounded transition-colors"
+                      placeholder="Re-type"
+                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
                     />
-                    <Lock className="w-4 h-4 absolute left-3 top-2.5 text-[#64748B]" />
                   </div>
                 </div>
-              </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs uppercase tracking-wider rounded transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1 shadow-md"
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>REGISTERING...</span>
-                  </span>
-                ) : (
-                  <>
-                    <span>CREATE ACCOUNT &amp; PROCEED</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* Direct Guest Link at bottom */}
-          <div className="text-center pt-1 border-t border-[#1E293B]">
-            <button
-              onClick={handleGuestLogin}
-              className="text-[11px] text-[#94A3B8] hover:text-[#38BDF8] underline transition-colors cursor-pointer"
-            >
-              Want to skip login? Click here to continue as Guest Analyst
-            </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-2.5 bg-[#3867F5] hover:bg-[#2c53cb] disabled:opacity-60 text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-all shadow-md mt-2 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>Complete Registration</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>

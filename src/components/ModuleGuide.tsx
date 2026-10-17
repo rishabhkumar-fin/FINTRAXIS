@@ -13,6 +13,32 @@ interface GuideContent {
 }
 
 const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
+  "00_ADMIN": {
+    title: "OPERATIONAL GOVERNANCE CONSOLE: TELEMETRY & SYSTEM MASTER",
+    badge: "SYSTEM GOVERNANCE",
+    purpose:
+      "Centralized supervisory control center providing real-time infrastructure telemetry, Security Master entity management, global analytical risk policy calibration, user access control, and regulatory audit logging.",
+    actions: [
+      "Infrastructure Telemetry: Audit SQLite WAL concurrency, process memory, and data provider status.",
+      "Security Master Registry: Ingest new corporate issuers and trigger multi-period statement re-synchronizations.",
+      "Policy Hurdle Calibration: Adjust reference thresholds for Net Debt/EBITDA, Interest Coverage, and Current Ratio.",
+    ],
+    decisionRule:
+      "RULE 0.1: Administrative policy modifications are timestamped and committed to the system audit journal. Destructive operations require Lead Analyst or Super Admin clearance.",
+  },
+  overview: {
+    title: "CORPORATE OVERVIEW: EXECUTIVE HEALTH & MARKET VALUATION",
+    badge: "EXECUTIVE SUMMARY",
+    purpose:
+      "High-level executive briefing providing distinct separation between intraday market trading data and multi-period reported accounting fundamentals, with instant solvency status checks.",
+    actions: [
+      "Market vs Accounting: Compare live market capitalization against audited annual revenue and core EBIT.",
+      "Credit Hurdle Assessment: Review leverage (<= 3.50x), coverage (>= 2.50x), and liquidity (>= 1.10x) status.",
+      "Trajectory Inspection: Audit historical multi-period revenue momentum and operating profit trajectory.",
+    ],
+    decisionRule:
+      "RULE 0.2: Market valuation and reported accounting fundamentals must remain visually and conceptually separated to prevent mixing intraday market moves with fiscal accounting records.",
+  },
   "01_HUB": {
     title: "SECURITIES DIRECTORY: GLOBAL SECURITY MASTER & ENTITY RESOLUTION",
     badge: "OMNICHANNEL RESOLUTION",

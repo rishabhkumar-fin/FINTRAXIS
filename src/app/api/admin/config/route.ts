@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sqlite } from "@/db/index";
 import { logAuditEvent } from "@/lib/auditLogger";
+import { verifyOperatorClearance } from "@/lib/authGuard";
 
 export async function GET() {
   try {
@@ -23,8 +24,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "LEAD_ANALYST"]);
+    if (!clearance.allowed) {
+      return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
+    }
+
     const body = await request.json();
-    const { key, value, description, operator = "SUPER_ADMIN" } = body;
+    const { key, value, description } = body;
+    const operator = clearance.operator;
 
     if (!key || value === undefined) {
       return NextResponse.json({ success: false, error: "Key and Value are required" }, { status: 400 });

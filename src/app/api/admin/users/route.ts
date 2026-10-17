@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sqlite } from "@/db/index";
 import { logAuditEvent } from "@/lib/auditLogger";
+import { verifyOperatorClearance } from "@/lib/authGuard";
 
 interface UserAdminRow {
   id: string;
@@ -43,8 +44,14 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN"]);
+    if (!clearance.allowed) {
+      return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
+    }
+
     const body = await request.json();
-    const { id, role, desk, netDebtEbitdaHurdle, interestCoverageHurdle, currentRatioHurdle, operator = "SUPER_ADMIN" } = body;
+    const { id, role, desk, netDebtEbitdaHurdle, interestCoverageHurdle, currentRatioHurdle } = body;
+    const operator = clearance.operator;
 
     if (!id) {
       return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });
@@ -123,9 +130,14 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN"]);
+    if (!clearance.allowed) {
+      return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const operator = searchParams.get("operator") || "SUPER_ADMIN";
+    const operator = clearance.operator;
 
     if (!id) {
       return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });

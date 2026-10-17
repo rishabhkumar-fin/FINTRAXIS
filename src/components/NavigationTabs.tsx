@@ -4,6 +4,8 @@ import React from "react";
 import { Building2, FileSpreadsheet, Activity, AlertTriangle, Cpu, FileText } from "lucide-react";
 
 export type ModuleTab =
+  | "00_ADMIN"
+  | "overview"
   | "01_HUB"
   | "02_STATEMENTS"
   | "03_HEALTH"
