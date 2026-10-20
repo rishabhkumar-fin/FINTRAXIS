@@ -88,7 +88,11 @@ export function FinancialHealthWorkspace({
 
       {/* Render selected view */}
       {subView === "RATIOS" ? (
-        <HealthRatios profile={profile} onAuditMetric={onAuditMetric} />
+        <HealthRatios
+          profile={profile}
+          onAuditMetric={onAuditMetric}
+          onNavigateToTab={onNavigateToTab}
+        />
       ) : (
         <StatementsLedger
           profile={profile}

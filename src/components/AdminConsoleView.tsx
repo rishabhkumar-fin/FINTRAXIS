@@ -229,6 +229,26 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
   const [newUserRole, setNewUserRole] = useState("ANALYST");
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
+  // Manual company creation state
+  const [isManualCompanyOpen, setIsManualCompanyOpen] = useState(false);
+  const [manualSymbol, setManualSymbol] = useState("");
+  const [manualName, setManualName] = useState("");
+  const [manualExchange, setManualExchange] = useState("NASDAQ");
+  const [manualCurrency, setManualCurrency] = useState("USD");
+  const [manualSector, setManualSector] = useState("Technology");
+  const [isCreatingCompany, setIsCreatingCompany] = useState(false);
+
+  // Financial Statement Editor state
+  const [isStatementEditorOpen, setIsStatementEditorOpen] = useState(false);
+  const [statementCompany, setStatementCompany] = useState<IssuerItem | null>(null);
+  const [statementPeriod, setStatementPeriod] = useState("FY2024");
+  const [statementRevenue, setStatementRevenue] = useState("");
+  const [statementEbitda, setStatementEbitda] = useState("");
+  const [statementDebt, setStatementDebt] = useState("");
+  const [statementCash, setStatementCash] = useState("");
+  const [statementInterest, setStatementInterest] = useState("");
+  const [isSavingStatement, setIsSavingStatement] = useState(false);
+
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -371,6 +391,110 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
         }
       },
     });
+  };
+
+  // Handler: Manual Company Enrollment
+  const handleCreateManualCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualSymbol.trim() || !manualName.trim()) return;
+
+    setIsCreatingCompany(true);
+    try {
+      const res = await fetch("/api/admin/companies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-email": session?.userEmail || "admin@fintraxis.local",
+        },
+        body: JSON.stringify({
+          symbol: manualSymbol.trim().toUpperCase(),
+          name: manualName.trim(),
+          exchange: manualExchange,
+          currency: manualCurrency,
+          sector: manualSector,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification("success", `Successfully added new company: ${manualSymbol.toUpperCase()}`);
+        setManualSymbol("");
+        setManualName("");
+        setIsManualCompanyOpen(false);
+        loadAllData();
+      } else {
+        showNotification("error", data.error || "Failed to add company");
+      }
+    } catch {
+      showNotification("error", "Network error while creating company");
+    } finally {
+      setIsCreatingCompany(false);
+    }
+  };
+
+  // Handler: Open Financial Statement Editor
+  const handleOpenStatementEditor = async (company: IssuerItem) => {
+    setStatementCompany(company);
+    setStatementPeriod("FY2024");
+    setStatementRevenue("");
+    setStatementEbitda("");
+    setStatementDebt("");
+    setStatementCash("");
+    setStatementInterest("");
+    setIsStatementEditorOpen(true);
+
+    try {
+      const res = await fetch(`/api/admin/periods?companyId=${encodeURIComponent(company.id)}`);
+      const data = await res.json();
+      if (data.success && data.periods && data.periods.length > 0) {
+        const latestP = data.periods[0];
+        setStatementPeriod(latestP.period || "FY2024");
+        setStatementRevenue(latestP.revenue !== null && latestP.revenue !== undefined ? String(latestP.revenue) : "");
+        setStatementEbitda(latestP.ebitda !== null && latestP.ebitda !== undefined ? String(latestP.ebitda) : "");
+        setStatementDebt(latestP.totalDebt !== null && latestP.totalDebt !== undefined ? String(latestP.totalDebt) : "");
+        setStatementCash(latestP.cashAndEquivalents !== null && latestP.cashAndEquivalents !== undefined ? String(latestP.cashAndEquivalents) : "");
+        setStatementInterest(latestP.interestExpense !== null && latestP.interestExpense !== undefined ? String(latestP.interestExpense) : "");
+      }
+    } catch {
+      // Non-fatal
+    }
+  };
+
+  // Handler: Save Financial Statements
+  const handleSaveStatement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!statementCompany || !statementPeriod.trim()) return;
+
+    setIsSavingStatement(true);
+    try {
+      const res = await fetch("/api/admin/periods", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-operator-email": session?.userEmail || "admin@fintraxis.local",
+        },
+        body: JSON.stringify({
+          companyId: statementCompany.id,
+          period: statementPeriod.trim().toUpperCase(),
+          revenue: statementRevenue ? parseFloat(statementRevenue) : null,
+          ebitda: statementEbitda ? parseFloat(statementEbitda) : null,
+          totalDebt: statementDebt ? parseFloat(statementDebt) : null,
+          cashAndEquivalents: statementCash ? parseFloat(statementCash) : null,
+          interestExpense: statementInterest ? parseFloat(statementInterest) : null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification("success", `Updated ${statementCompany.symbol} ${statementPeriod} statements in SQLite!`);
+        setIsStatementEditorOpen(false);
+        loadAllData();
+      } else {
+        showNotification("error", data.error || "Failed to save financial statements");
+      }
+    } catch {
+      showNotification("error", "Network error while saving financial statements");
+    } finally {
+      setIsSavingStatement(false);
+    }
   };
 
   // Handler: Provision New User
@@ -1620,12 +1744,22 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Ingestion Panel */}
             <div className="bg-[#101621] border border-[#253247] p-4 rounded-xl flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#F3F6FC]">
-                <PlusCircle className="w-4 h-4 text-[#3867F5]" />
-                <span>REGISTER NEW SECURITY MASTER ISSUER</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#F3F6FC]">
+                  <PlusCircle className="w-4 h-4 text-[#3867F5]" />
+                  <span>REGISTER NEW SECURITY MASTER ISSUER</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsManualCompanyOpen(true)}
+                  className="px-2.5 py-1 bg-[#151E2D] hover:bg-[#253247] border border-[#253247] text-[#38BDF8] text-[10px] font-bold rounded flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <PlusCircle className="w-3 h-3" />
+                  <span>Manual Add Form</span>
+                </button>
               </div>
               <p className="text-xs text-[#9AA8BC]">
-                Ingest verified corporate profile and multi-period financial statements from official providers.
+                Ingest verified corporate profile and multi-period financial statements from official providers or use manual form.
               </p>
               <form onSubmit={handleIngestTicker} className="flex items-center gap-2 mt-1">
                 <input
@@ -1716,6 +1850,15 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
                           </td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
+                              {canModifyConfig && (
+                                <button
+                                  onClick={() => handleOpenStatementEditor(company)}
+                                  className="px-2 py-0.5 bg-[#151E2D] hover:bg-[#253247] border border-[#253247] text-[10px] text-[#10B981] hover:text-white rounded transition-colors cursor-pointer"
+                                  title="Edit Financial Statements in SQLite"
+                                >
+                                  Edit Statements
+                                </button>
+                              )}
                               {onNavigateToTab && (
                                 <button
                                   onClick={() => onNavigateToTab("01_HUB")}
@@ -2000,6 +2143,244 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
                     {isSavingPolicy ? "SAVING..." : "SAVE SETTINGS"}
                   </button>
                 )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Manual Add Company */}
+      {isManualCompanyOpen && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="max-w-md w-full bg-[#101621] border border-[#253247] rounded-2xl p-6 font-mono text-xs space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#253247] pb-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#3867F5]" />
+                <span className="font-bold text-white text-sm">Add New Security Master Company</span>
+              </div>
+              <button
+                onClick={() => setIsManualCompanyOpen(false)}
+                className="text-[#9AA8BC] hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateManualCompany} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Ticker Symbol *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. NVDA, AMZN"
+                  value={manualSymbol}
+                  onChange={(e) => setManualSymbol(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono uppercase focus:outline-none focus:border-[#3867F5]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Corporate Legal Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. NVIDIA Corporation"
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white focus:outline-none focus:border-[#3867F5]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Exchange *</label>
+                  <select
+                    value={manualExchange}
+                    onChange={(e) => setManualExchange(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white focus:outline-none focus:border-[#3867F5]"
+                  >
+                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="NYSE">NYSE</option>
+                    <option value="NSE / BSE">NSE / BSE (India)</option>
+                    <option value="Tokyo Stock Exchange (Prime)">Tokyo (Prime)</option>
+                    <option value="LSE">London (LSE)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Currency *</label>
+                  <select
+                    value={manualCurrency}
+                    onChange={(e) => setManualCurrency(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white focus:outline-none focus:border-[#3867F5]"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Sector / Industry *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Technology / Semiconductors"
+                  value={manualSector}
+                  onChange={(e) => setManualSector(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white focus:outline-none focus:border-[#3867F5]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#253247]">
+                <button
+                  type="button"
+                  onClick={() => setIsManualCompanyOpen(false)}
+                  className="px-4 py-2 bg-[#151E2D] hover:bg-[#253247] text-[#9AA8BC] rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingCompany}
+                  className="px-4 py-2 bg-[#3867F5] hover:bg-[#2c53cb] text-white font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  {isCreatingCompany ? "Creating..." : "Enroll Company"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Financial Statement Editor */}
+      {isStatementEditorOpen && statementCompany && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="max-w-xl w-full bg-[#101621] border border-[#253247] rounded-2xl p-6 font-mono text-xs space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#253247] pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
+                  <span className="font-bold text-white text-sm">Financial Statement Editor</span>
+                </div>
+                <div className="text-[11px] text-[#9AA8BC] mt-0.5">
+                  Issuer: <span className="text-[#38BDF8] font-bold">{statementCompany.symbol}</span> &bull; {statementCompany.name} ({statementCompany.currency})
+                </div>
+              </div>
+              <button
+                onClick={() => setIsStatementEditorOpen(false)}
+                className="text-[#9AA8BC] hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStatement} className="space-y-3.5">
+              <div className="p-2.5 bg-[#0A0E17] border border-[#253247] rounded-xl text-[11px] text-[#9AA8BC]">
+                Inputs saved here directly update the SQLite financial ledgers and recompute all analyst credit ratios, debt hurdles, and stress projections.
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Fiscal Period *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. FY2024, FY2025"
+                    value={statementPeriod}
+                    onChange={(e) => setStatementPeriod(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono uppercase focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Scale Unit</label>
+                  <div className="px-3 py-2 bg-[#151E2D]/50 border border-[#253247] rounded-lg text-[#9AA8BC]">
+                    {statementCompany.scaleUnit} ({statementCompany.currency})
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Consolidated Annual Revenue</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="e.g. 391035"
+                    value={statementRevenue}
+                    onChange={(e) => setStatementRevenue(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Operating Profit (EBITDA)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="e.g. 134690"
+                    value={statementEbitda}
+                    onChange={(e) => setStatementEbitda(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Total Funded Debt (Long + Short)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="e.g. 106595"
+                    value={statementDebt}
+                    onChange={(e) => setStatementDebt(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Cash &amp; Liquid Reserves</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="e.g. 29943"
+                    value={statementCash}
+                    onChange={(e) => setStatementCash(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[10px] text-[#9AA8BC] uppercase font-bold">Annual Interest Expense</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="e.g. 3933"
+                    value={statementInterest}
+                    onChange={(e) => setStatementInterest(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#151E2D] border border-[#253247] rounded-lg text-white font-mono focus:outline-none focus:border-[#3867F5]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-[#253247]">
+                <button
+                  type="button"
+                  onClick={() => setIsStatementEditorOpen(false)}
+                  className="px-4 py-2 bg-[#151E2D] hover:bg-[#253247] text-[#9AA8BC] rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingStatement}
+                  className="px-5 py-2 bg-[#10B981] hover:bg-[#059669] text-white font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  {isSavingStatement ? "Saving to SQLite..." : "Save Statements to SQLite"}
+                </button>
               </div>
             </form>
           </div>

@@ -144,50 +144,123 @@ export function CompanyHub({
         </div>
       </div>
 
-      {/* Featured Institutional Coverage Quick Selection */}
-      <div className="p-3 bg-[#090D17] border border-[#182337] rounded-sm space-y-2">
-        <div className="flex items-center justify-between text-[10px] text-[#5A687D]">
-          <span className="font-bold text-[#38BDF8] uppercase tracking-wider flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-[#38BDF8]" />
-            FEATURED INSTITUTIONAL COVERAGE // AUDITED REGISTRY
+      {/* 4 Core Quick-Select Company Cards for Streamlined Analyst Flow */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-[#F8FAFC] tracking-wider uppercase flex items-center gap-2">
+            <Database className="w-4 h-4 text-[#38BDF8]" />
+            <span>Pre-Seeded Issuer Directory &bull; Instant Solvency Analysis</span>
           </span>
-          <span className="hidden sm:inline">Click any ticker to inspect distinct audited multi-year statements</span>
+          <span className="text-[11px] text-[#64748B] hidden sm:inline">
+            Select an issuer to launch solvency &amp; covenant surveillance
+          </span>
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { symbol: "HAL.NS", name: "HAL (Defence)", flag: "🇮🇳" },
-            { symbol: "TCS.NS", name: "TCS (Tech)", flag: "🇮🇳" },
-            { symbol: "TATASTEEL.NS", name: "Tata Steel", flag: "🇮🇳" },
-            { symbol: "RELIANCE.NS", name: "Reliance Ind", flag: "🇮🇳" },
-            { symbol: "INFY.NS", name: "Infosys", flag: "🇮🇳" },
-            { symbol: "HDFCBANK.NS", name: "HDFC Bank", flag: "🇮🇳" },
-            { symbol: "NVDA", name: "NVIDIA", flag: "🇺🇸" },
-            { symbol: "MSFT", name: "Microsoft", flag: "🇺🇸" },
-            { symbol: "AAPL", name: "Apple", flag: "🇺🇸" },
-            { symbol: "GOOGL", name: "Alphabet", flag: "🇺🇸" },
-            { symbol: "AMZN", name: "Amazon", flag: "🇺🇸" },
-            { symbol: "TSLA", name: "Tesla", flag: "🇺🇸" },
-            { symbol: "7203.T", name: "Toyota", flag: "🇯🇵" },
+            {
+              id: "AAPL",
+              name: "Apple Inc.",
+              exchange: "NASDAQ",
+              country: "USA",
+              flag: "🇺🇸",
+              currency: "USD",
+              price: "$228.50",
+              sector: "Technology",
+              status: "FORTRESS",
+            },
+            {
+              id: "RELIANCE.NS",
+              name: "Reliance Industries",
+              exchange: "NSE / BSE",
+              country: "IND",
+              flag: "🇮🇳",
+              currency: "INR",
+              price: "₹2,940.00",
+              sector: "Energy & Retail",
+              status: "WATCHLIST",
+            },
+            {
+              id: "TCS.NS",
+              name: "Tata Consultancy Services",
+              exchange: "NSE / BSE",
+              country: "IND",
+              flag: "🇮🇳",
+              currency: "INR",
+              price: "₹3,920.00",
+              sector: "IT Services",
+              status: "DEBT FREE",
+            },
+            {
+              id: "MSFT",
+              name: "Microsoft Corporation",
+              exchange: "NASDAQ",
+              country: "USA",
+              flag: "🇺🇸",
+              currency: "USD",
+              price: "$425.00",
+              sector: "Software & Cloud",
+              status: "PRIME",
+            },
           ].map((item) => {
-            const isCurrent = selected?.symbol === item.symbol;
+            const isCurrent = selected?.symbol === item.id || selected?.id === item.id;
             return (
-              <button
-                key={item.symbol}
-                onClick={() => onSelectCompany(item.symbol)}
-                className={`px-2 py-1 border text-[11px] font-mono transition-all flex items-center gap-1.5 rounded-sm ${
+              <div
+                key={item.id}
+                onClick={() => {
+                  onSelectCompany(item.id);
+                }}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                   isCurrent
-                    ? "bg-[#2563EB] text-white border-[#38BDF8] font-bold shadow-[0_0_12px_rgba(37,99,235,0.4)]"
-                    : "bg-[#070A0F] hover:bg-[#0F1626] text-[#FFFFFF] border-[#182337] hover:border-[#38BDF8]"
+                    ? "bg-[#0D1527] border-[#38BDF8] shadow-[0_0_16px_rgba(56,189,248,0.2)]"
+                    : "bg-[#090E17] hover:bg-[#0E1524] border-[#1E293B] hover:border-[#38BDF8]/60"
                 }`}
               >
-                <span>{item.flag}</span>
-                <span className={isCurrent ? "text-white font-bold" : "text-[#38BDF8] font-semibold"}>
-                  {item.symbol}
-                </span>
-                <span className={isCurrent ? "text-[#CBD5E1] text-[10px]" : "text-[#64748B] text-[10px]"}>
-                  {item.name}
-                </span>
-              </button>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-[#38BDF8] flex items-center gap-1.5">
+                      <span>{item.flag}</span>
+                      <span>{item.id}</span>
+                    </span>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                        item.status === "DEBT FREE" || item.status === "FORTRESS" || item.status === "PRIME"
+                          ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                          : "bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </div>
+                  <div className="font-semibold text-xs text-white mt-1.5 truncate">
+                    {item.name}
+                  </div>
+                  <div className="text-[10px] text-[#94A3B8] mt-0.5">
+                    {item.exchange} &bull; {item.sector}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#1E293B]/70 flex items-center justify-between">
+                  <div>
+                    <div className="text-[9px] text-[#64748B] uppercase">Market Price</div>
+                    <div className="font-mono font-bold text-xs text-[#F8FAFC]">
+                      {item.price} <span className="text-[9px] text-[#64748B]">{item.currency}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectCompany(item.id);
+                      onNavigateToTab("02_HEALTH");
+                    }}
+                    className="px-2.5 py-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <span>Analyze</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>

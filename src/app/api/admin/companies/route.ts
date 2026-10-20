@@ -48,9 +48,95 @@ export async function GET() {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST"]);
+    if (!clearance.allowed) {
+      return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { symbol, name, exchange, currency, sector } = body;
+
+    if (!symbol || !name || !exchange || !currency || !sector) {
+      return NextResponse.json(
+        { success: false, error: "Symbol, Company Name, Exchange, Currency, and Sector are required" },
+        { status: 400 }
+      );
+    }
+
+    const cleanSymbol = symbol.toUpperCase().trim();
+    const cleanId = cleanSymbol;
+
+    // Check if company already exists
+    const existing = sqlite.prepare("SELECT id FROM companies WHERE id = ?").get(cleanId);
+    if (existing) {
+      return NextResponse.json(
+        { success: false, error: `Entity ${cleanSymbol} already exists in the security master.` },
+        { status: 409 }
+      );
+    }
+
+    const country = body.country || (exchange.includes("NSE") || exchange.includes("BSE") ? "IND" : exchange.includes("Tokyo") ? "JPN" : "USA");
+    const scaleUnit = body.scaleUnit || (currency === "INR" ? "Crores" : currency === "JPY" ? "Billions" : "Millions");
+    const industry = body.industry || sector;
+    const now = new Date().toISOString();
+    const sharePrice = body.sharePrice ? Number(body.sharePrice) : 100.0;
+    const marketCap = body.marketCap ? Number(body.marketCap) : 10000.0;
+    const fxRateToUsd = currency === "USD" ? 1.0 : currency === "INR" ? 0.0119 : 0.0067;
+
+    sqlite.prepare(`
+      INSERT INTO companies (
+        id, symbol, name, exchange, country, currency, scale_unit,
+        sector, industry, fiscal_year_end, accounting_standard,
+        fx_rate_to_usd, fx_timestamp, market_cap, share_price,
+        created_at, updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, 'March', 'IFRS / GAAP',
+        ?, ?, ?, ?,
+        ?, ?
+      )
+    `).run(
+      cleanId,
+      cleanSymbol,
+      name.trim(),
+      exchange.trim(),
+      country,
+      currency.toUpperCase().trim(),
+      scaleUnit,
+      sector.trim(),
+      industry.trim(),
+      fxRateToUsd,
+      now,
+      marketCap,
+      sharePrice,
+      now,
+      now
+    );
+
+    logAuditEvent(
+      "COMPANY_INGEST",
+      clearance.operator,
+      `Manually provisioned new company ${cleanSymbol} (${name.trim()}) in security master`,
+      "INFO"
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `Company ${cleanSymbol} enrolled successfully.`,
+      companyId: cleanId,
+    });
+  } catch (err: unknown) {
+    console.error("POST /api/admin/companies error:", err);
+    const msg = err instanceof Error ? err.message : "Failed to enroll company";
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
-    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "LEAD_ANALYST"]);
+    const clearance = verifyOperatorClearance(request, ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST"]);
     if (!clearance.allowed) {
       return NextResponse.json({ success: false, error: clearance.error }, { status: 403 });
     }

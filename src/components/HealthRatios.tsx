@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Layers, ShieldCheck, AlertTriangle, ShieldAlert, BarChart3, LayoutGrid, Info } from "lucide-react";
+import { Layers, BarChart3, LayoutGrid, Info, ArrowRight } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
-import { formatRatio, formatPct } from "@/lib/formatters";
+import { formatRatio, formatPct, formatFinancialValue } from "@/lib/formatters";
+import { ModuleTab } from "./NavigationTabs";
 
 interface HealthRatiosProps {
   profile: CompanyRiskProfile;
   onAuditMetric: (metricKey: string, period: string, label: string, value?: number | null) => void;
+  onNavigateToTab?: (tab: ModuleTab) => void;
 }
 
-export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
+export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: HealthRatiosProps) {
   const { latestRatios, periods, company, riskTier, riskScore } = profile;
   const latestPeriod = periods[0]?.period || "LATEST";
   const [activeView, setActiveView] = useState<"TILES" | "POWER_BI">("POWER_BI");
@@ -231,22 +233,41 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
 
   return (
     <div className="space-y-4 font-mono text-xs select-none">
-      {/* Executive Solvency Verdict Banner */}
-      <div className="p-4 bg-[#0F1420] border border-[#1E2536] rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
-        <div className="flex items-center gap-3.5">
-          <div className={`p-3 rounded-lg border ${isTier1 ? "bg-[#10B981]/15 border-[#10B981] text-[#10B981]" : isTier2 ? "bg-[#F59E0B]/15 border-[#F59E0B] text-[#F59E0B]" : "bg-[#F43F5E]/15 border-[#F43F5E] text-[#F43F5E]"}`}>
-            {isTier1 ? <ShieldCheck className="w-6 h-6" /> : isTier2 ? <AlertTriangle className="w-6 h-6" /> : <ShieldAlert className="w-6 h-6" />}
+      {/* 1. Big Visual Health Score Banner & Company Solvency Header */}
+      <div className="p-5 bg-[#0C111C] border border-[#1E293B] rounded-2xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 shadow-xl">
+        <div className="flex items-center gap-4">
+          {/* Big Visual Health Score */}
+          <div
+            className={`w-20 h-20 rounded-2xl flex flex-col items-center justify-center border font-mono shrink-0 shadow-lg ${
+              riskScore >= 80
+                ? "bg-[#10B981]/15 border-[#10B981] text-[#10B981]"
+                : riskScore >= 50
+                ? "bg-[#F59E0B]/15 border-[#F59E0B] text-[#F59E0B]"
+                : "bg-[#EF4444]/15 border-[#EF4444] text-[#EF4444]"
+            }`}
+          >
+            <span className="text-2xl font-black">{riskScore}</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">/ 100</span>
           </div>
+
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-base font-bold text-[#FFFFFF] tracking-wider uppercase">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-lg font-bold text-white tracking-wide uppercase font-mono">
                 {company.name} ({company.symbol})
               </span>
-              <span className={`text-[10px] px-2.5 py-0.5 border font-bold rounded ${isTier1 ? "border-[#10B981] text-[#10B981] bg-[#10B981]/10" : isTier2 ? "border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10" : "border-[#EF4444] text-[#EF4444] bg-[#EF4444]/10"}`}>
-                {riskTier.replace("_", " ")} &bull; {riskScore}/100
+              <span
+                className={`text-[10px] px-2.5 py-0.5 border font-bold rounded-full font-mono ${
+                  isTier1
+                    ? "border-[#10B981] text-[#10B981] bg-[#10B981]/10"
+                    : isTier2
+                    ? "border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10"
+                    : "border-[#EF4444] text-[#EF4444] bg-[#EF4444]/10"
+                }`}
+              >
+                {riskScore >= 80 ? "SAFE // INVESTMENT GRADE" : riskScore >= 50 ? "WATCHLIST SURVEILLANCE" : "DISTRESSED CREDIT"}
               </span>
             </div>
-            <div className="text-[11px] text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
+            <div className="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
               {isTier1
                 ? "Prime Solvency: Fortress balance sheet liquidity, substantial interest service cushion, and clean operating cash conversion."
                 : isTier2
@@ -256,30 +277,209 @@ export function HealthRatios({ profile, onAuditMetric }: HealthRatiosProps) {
           </div>
         </div>
 
-        {/* View Switcher: Power BI vs Detailed Tiles */}
-        <div className="flex items-center gap-1 bg-[#070A0F] border border-[#182337] p-1 rounded-lg self-end md:self-auto">
-          <button
-            onClick={() => setActiveView("POWER_BI")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeView === "POWER_BI"
-                ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                : "text-[#94A3B8] hover:text-[#FFFFFF]"
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>POWER BI BENCHMARKS</span>
-          </button>
-          <button
-            onClick={() => setActiveView("TILES")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeView === "TILES"
-                ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
-                : "text-[#94A3B8] hover:text-[#FFFFFF]"
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>METRIC CARDS</span>
-          </button>
+        {/* View Switcher & Proceed to Macro Simulator Shortcut */}
+        <div className="flex items-center gap-2 self-end lg:self-auto flex-wrap">
+          <div className="flex items-center gap-1 bg-[#070A0F] border border-[#1E293B] p-1 rounded-xl">
+            <button
+              onClick={() => setActiveView("POWER_BI")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeView === "POWER_BI"
+                  ? "bg-[#1E293B] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>BENCHMARKS</span>
+            </button>
+            <button
+              onClick={() => setActiveView("TILES")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeView === "TILES"
+                  ? "bg-[#1E293B] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>METRIC CARDS</span>
+            </button>
+          </div>
+
+          {onNavigateToTab && (
+            <button
+              onClick={() => onNavigateToTab("06_SIMULATOR")}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-md"
+            >
+              <span>Stress Simulator</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Core 3-Statement Summary Table (Across Last 3 Fiscal Years) */}
+      <div className="bg-[#0C111C] border border-[#1E293B] rounded-2xl overflow-hidden shadow-lg">
+        <div className="p-3.5 bg-[#0F1626] border-b border-[#1E293B] flex items-center justify-between">
+          <span className="font-mono text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#38BDF8]" />
+            <span>Core 3-Statement Summary &bull; 3-Year Audited Ledger</span>
+          </span>
+          <span className="text-[10px] text-[#64748B] font-mono">
+            Reporting: {company.currency} ({company.scaleUnit})
+          </span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs font-mono">
+            <thead className="bg-[#070A0F] text-[#94A3B8] uppercase text-[10px] border-b border-[#1E293B]">
+              <tr>
+                <th className="px-4 py-2.5">Fiscal Period</th>
+                <th className="px-4 py-2.5 text-right">Consolidated Revenue</th>
+                <th className="px-4 py-2.5 text-right">Operating Profit (EBITDA)</th>
+                <th className="px-4 py-2.5 text-right">Total Debt</th>
+                <th className="px-4 py-2.5 text-right">Cash Reserves</th>
+                <th className="px-4 py-2.5 text-center">Filing Source</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1E293B]/70">
+              {periods.slice(0, 3).map((p) => (
+                <tr key={p.id} className="hover:bg-[#111827]/60 transition-colors">
+                  <td className="px-4 py-3 font-bold text-[#38BDF8]">{p.period}</td>
+                  <td className="px-4 py-3 text-right text-white font-semibold">
+                    {formatFinancialValue(p.revenue, company.currency, company.scaleUnit)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[#10B981] font-semibold">
+                    {formatFinancialValue(p.ebitda, company.currency, company.scaleUnit)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[#F59E0B]">
+                    {p.totalDebt === 0 || p.totalDebt === null
+                      ? "Zero Debt"
+                      : formatFinancialValue(p.totalDebt, company.currency, company.scaleUnit)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-white">
+                    {formatFinancialValue(p.cashAndEquivalents, company.currency, company.scaleUnit)}
+                  </td>
+                  <td className="px-4 py-3 text-center text-[#64748B] text-[11px]">
+                    {p.filingForm} ({p.filingDate})
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 3. 3 Solvency Cards with Plain-English Tooltips */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        {/* Card 1: Net Debt / EBITDA (Leverage) */}
+        <div className="p-4 bg-[#0C111C] border border-[#1E293B] rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-[#64748B] uppercase tracking-wider">
+                1. LEVERAGE
+              </span>
+              <span
+                className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                  (latestRatios.netDebtToEbitda ?? 0) <= 2.5
+                    ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                    : (latestRatios.netDebtToEbitda ?? 0) <= 3.5
+                    ? "bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30"
+                    : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                }`}
+              >
+                {(latestRatios.netDebtToEbitda ?? 0) <= 3.5 ? "COMPLIANT" : "BREACH"}
+              </span>
+            </div>
+            <div className="font-bold text-sm text-white mt-1">
+              Net Debt / EBITDA
+            </div>
+            <div className="text-2xl font-black font-mono text-[#38BDF8] mt-1">
+              {(latestRatios.netDebtToEbitda ?? 0) <= 0
+                ? "0.0x (Net Cash)"
+                : `${latestRatios.netDebtToEbitda?.toFixed(2)}x`}
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[#1E293B]/70">
+            <div className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <span className="text-white font-semibold">Can it pay off debt with profits?</span>{" "}
+              {(latestRatios.netDebtToEbitda ?? 0) <= 0
+                ? "Yes. Cash reserves exceed total debt, rendering the company debt-free."
+                : `Takes ~${latestRatios.netDebtToEbitda?.toFixed(1)} years of operating profit to eliminate debt, well below the 3.50x bank hurdle.`}
+            </div>
+            <div className="text-[10px] font-mono text-[#64748B] mt-1.5">
+              Institutional Hurdle: &le; 3.50x
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Interest Coverage (Debt Service) */}
+        <div className="p-4 bg-[#0C111C] border border-[#1E293B] rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-[#64748B] uppercase tracking-wider">
+                2. DEBT SERVICE
+              </span>
+              <span
+                className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                  (latestRatios.interestCoverage ?? 99) >= 2.5
+                    ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                    : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                }`}
+              >
+                {(latestRatios.interestCoverage ?? 99) >= 2.5 ? "COMPLIANT" : "AT RISK"}
+              </span>
+            </div>
+            <div className="font-bold text-sm text-white mt-1">
+              Interest Coverage
+            </div>
+            <div className="text-2xl font-black font-mono text-[#10B981] mt-1">
+              {latestRatios.interestCoverage !== null ? `${latestRatios.interestCoverage.toFixed(1)}x` : "FORTRESS"}
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[#1E293B]/70">
+            <div className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <span className="text-white font-semibold">Can it afford annual interest?</span>{" "}
+              {latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
+                ? `Operating earnings cover loan interest ${latestRatios.interestCoverage.toFixed(1)}x over, insulating against rate shocks.`
+                : "Operating earnings comfortably exceed borrowing costs."}
+            </div>
+            <div className="text-[10px] font-mono text-[#64748B] mt-1.5">
+              Institutional Hurdle: &ge; 2.50x
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Current Ratio (Liquidity) */}
+        <div className="p-4 bg-[#0C111C] border border-[#1E293B] rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold text-[#64748B] uppercase tracking-wider">
+                3. LIQUIDITY
+              </span>
+              <span
+                className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                  (latestRatios.currentRatio ?? 1) >= 1.10
+                    ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                    : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                }`}
+              >
+                {(latestRatios.currentRatio ?? 1) >= 1.10 ? "COMPLIANT" : "WATCHLIST"}
+              </span>
+            </div>
+            <div className="font-bold text-sm text-white mt-1">
+              Current Ratio
+            </div>
+            <div className="text-2xl font-black font-mono text-[#F59E0B] mt-1">
+              {latestRatios.currentRatio !== null ? `${latestRatios.currentRatio.toFixed(2)}x` : "1.00x"}
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[#1E293B]/70">
+            <div className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <span className="text-white font-semibold">Can it pay bills over the next 12 months?</span>{" "}
+              Holds {latestRatios.currentRatio?.toFixed(2) || "1.00"} dollars of liquid short-term assets for every $1.00 of upcoming liabilities.
+            </div>
+            <div className="text-[10px] font-mono text-[#64748B] mt-1.5">
+              Institutional Hurdle: &ge; 1.10x
+            </div>
+          </div>
         </div>
       </div>
 

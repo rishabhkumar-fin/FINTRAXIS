@@ -1,4 +1,4 @@
-import { CompanyEntity, FinancialPeriodData } from "./types";
+import type { CompanyEntity, FinancialPeriodData } from "./types.ts";
 
 export interface CuratedCompanyProfile {
   company: CompanyEntity;

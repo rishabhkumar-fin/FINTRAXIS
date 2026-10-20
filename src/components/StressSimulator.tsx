@@ -498,9 +498,9 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         </div>
         <button
           onClick={() => onNavigateToTab?.("07_REPORTS")}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0"
+          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0 cursor-pointer"
         >
-          <span>Generate Research Report</span>
+          <span>Generate 1-Click Executive Credit Memo</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

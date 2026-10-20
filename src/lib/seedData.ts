@@ -1,4 +1,4 @@
-import { CompanyEntity, FinancialPeriodData, AuditRecord } from "./types";
+import type { CompanyEntity, FinancialPeriodData, AuditRecord } from "./types.ts";
 
 export const SEED_COMPANIES: CompanyEntity[] = [
   {

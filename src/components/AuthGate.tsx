@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   Activity,
   Sliders,
-  Sparkles,
+  TrendingUp,
+  Lock,
 } from "lucide-react";
 
 export interface SessionClearance {
@@ -58,58 +59,66 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 1-Click Guest Analyst Access (Isolated Demo Session)
-  const handleGuestLogin = async () => {
+  // Quick 1-Click Login (Analyst or Admin)
+  const handleQuickRoleLogin = async (roleType: "ANALYST" | "ADMIN") => {
     setIsLoading(true);
     setErrorMessage(null);
+
+    const email = roleType === "ADMIN" ? "admin@fintraxis.local" : "analyst@fintraxis.local";
+    const password = roleType === "ADMIN" ? "admin123" : "analyst123";
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isDemo: true }),
+        body: JSON.stringify({ email, password }),
       });
+
       const json = await res.json();
-      if (json.success && json.user) {
-        const demoUser = json.user;
-        const guestSession: SessionClearance = {
-          id: demoUser.id,
-          userName: demoUser.name,
-          userEmail: demoUser.email,
-          analystId: "Demo Analyst",
-          desk: demoUser.desk,
-          role: "DEMO_ANALYST",
-          isDemo: true,
-          avatarId: "crest",
-          netDebtEbitdaHurdle: demoUser.netDebtEbitdaHurdle ?? 3.5,
-          interestCoverageHurdle: demoUser.interestCoverageHurdle ?? 2.5,
-          currentRatioHurdle: demoUser.currentRatioHurdle ?? 1.1,
-          sessionToken: demoUser.sessionToken,
-          authenticatedAt: demoUser.authenticatedAt,
+      if (res.ok && json.success && json.user) {
+        const u = json.user;
+        const session: SessionClearance = {
+          id: u.id,
+          userName: u.name,
+          userEmail: u.email,
+          analystId: u.name,
+          desk: u.desk || (roleType === "ADMIN" ? "Global Systems & Risk Governance" : "Credit Risk & Underwriting"),
+          role: u.role || (roleType === "ADMIN" ? "SUPER_ADMIN" : "ANALYST"),
+          isDemo: false,
+          avatarId: u.avatar || (roleType === "ADMIN" ? "security" : "crest"),
+          netDebtEbitdaHurdle: u.netDebtEbitdaHurdle ?? 3.5,
+          interestCoverageHurdle: u.interestCoverageHurdle ?? 2.5,
+          currentRatioHurdle: u.currentRatioHurdle ?? 1.1,
+          sessionToken: u.sessionToken,
+          authenticatedAt: u.authenticatedAt,
         };
-        localStorage.setItem("fintraxis_session", JSON.stringify(guestSession));
+
+        localStorage.setItem("fintraxis_session", JSON.stringify(session));
         setIsLoading(false);
-        onAuthenticated(guestSession);
+        onAuthenticated(session);
         return;
       }
     } catch {
-      // Offline fallback
+      // Fallback local session if server route fails
     }
 
+    // Direct local fallback session
     const fallbackSession: SessionClearance = {
-      id: "usr_demo_session",
-      userName: "Demo Analyst",
-      userEmail: "demo@fintraxis.terminal",
-      analystId: "Demo Analyst",
-      desk: "Global Surveillance (Demo Mode)",
-      role: "DEMO_ANALYST",
-      isDemo: true,
-      avatarId: "crest",
+      id: roleType === "ADMIN" ? "usr_admin_local" : "usr_analyst_local",
+      userName: roleType === "ADMIN" ? "Institutional Administrator" : "Sarah Jenkins",
+      userEmail: email,
+      analystId: roleType === "ADMIN" ? "Admin Operator" : "Credit Analyst",
+      desk: roleType === "ADMIN" ? "Global Systems & Risk Governance" : "Credit Risk & Underwriting",
+      role: roleType === "ADMIN" ? "SUPER_ADMIN" : "ANALYST",
+      isDemo: false,
+      avatarId: roleType === "ADMIN" ? "security" : "crest",
       netDebtEbitdaHurdle: 3.5,
       interestCoverageHurdle: 2.5,
       currentRatioHurdle: 1.1,
-      sessionToken: `tok_demo_${Date.now()}`,
+      sessionToken: `tok_local_${Date.now()}`,
       authenticatedAt: new Date().toISOString(),
     };
+
     localStorage.setItem("fintraxis_session", JSON.stringify(fallbackSession));
     setIsLoading(false);
     onAuthenticated(fallbackSession);
@@ -122,12 +131,12 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
 
     const cleanIdent = signInIdentifier.trim();
     if (!cleanIdent) {
-      setErrorMessage("Check your email or username");
+      setErrorMessage("Please enter your email or username");
       return;
     }
 
     if (!signInPassword) {
-      setErrorMessage("Check your password");
+      setErrorMessage("Please enter your password");
       return;
     }
 
@@ -146,7 +155,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        setErrorMessage(json.error || "Check your email and password and try again");
+        setErrorMessage(json.error || "Invalid email or password. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -158,7 +167,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         userEmail: userData.email,
         analystId: userData.name,
         desk: userData.desk || "Global Credit Risk & Surveillance",
-        role: userData.role || (cleanIdent === "admin" ? "SUPER_ADMIN" : "ANALYST"),
+        role: userData.role || (cleanIdent.includes("admin") ? "SUPER_ADMIN" : "ANALYST"),
         isDemo: Boolean(userData.isDemo),
         avatarId: userData.avatar || "crest",
         netDebtEbitdaHurdle: userData.netDebtEbitdaHurdle ?? 3.5,
@@ -172,7 +181,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       setIsLoading(false);
       onAuthenticated(session);
     } catch {
-      setErrorMessage("Unable to connect to the server. Please check your internet connection.");
+      setErrorMessage("Unable to connect to the authentication server.");
       setIsLoading(false);
     }
   };
@@ -209,7 +218,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           name: regName.trim(),
           email: regEmail.trim(),
           password: regPassword,
-          desk: "Global Credit Risk & Surveillance",
+          desk: "Credit Risk & Underwriting",
         }),
       });
 
@@ -233,129 +242,173 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080B12] text-[#F3F6FC] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#3867F5]/30">
-      <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-[#101621] border border-[#253247] shadow-2xl rounded-xl overflow-hidden">
+    <div className="min-h-screen bg-[#070A0F] text-[#F8FAFC] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#38BDF8]/30">
+      <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-[#0C111C] border border-[#1E293B] shadow-2xl rounded-2xl overflow-hidden">
         {/* =========================================================================
-            LEFT COLUMN: BRAND INTRODUCTION & VALUE PROPOSITIONS
+            LEFT COLUMN: BRAND INTRODUCTION & PROBLEM-SOLVING VALUE
            ========================================================================= */}
-        <div className="lg:col-span-5 bg-[#0D131C] p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#253247] relative overflow-hidden">
+        <div className="lg:col-span-5 bg-[#090D16] p-6 sm:p-8 lg:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#1E293B] relative overflow-hidden">
           {/* Subtle Ambient Gradient Glow */}
-          <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#3867F5]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#2563EB]/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-[#38BDF8]/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Top Brand & Headlines */}
           <div className="relative z-10 flex flex-col gap-4">
-            <PeacockLogo size="lg" showLockup={true} />
+            <div className="flex items-center gap-3">
+              <PeacockLogo size="md" showLockup={false} />
+              <div>
+                <span className="font-mono font-bold tracking-widest text-sm text-white">
+                  FINTRAXIS
+                </span>
+                <span className="block text-[10px] font-mono text-[#38BDF8] tracking-wider uppercase">
+                  Institutional Risk Terminal
+                </span>
+              </div>
+            </div>
 
-            <div className="mt-4">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#F3F6FC] leading-tight">
-                Understand your company&apos;s financial health.
+            <div className="mt-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+                Corporate Credit Health &amp; Solvency Surveillance
               </h1>
-              <p className="text-sm text-[#9AA8BC] mt-2 leading-relaxed">
-                Explore financial results, spot risks, and test what could happen next.
+              <p className="text-xs text-[#94A3B8] mt-2 leading-relaxed">
+                A fast, auditable terminal that ingests balance sheets, verifies 3 core credit ratios, flags bank covenant breaches, and simulates adverse macro scenarios.
               </p>
             </div>
 
-            {/* Subtle Abstract Financial Chart SVG */}
-            <div className="my-3 py-3 border-y border-[#253247]/60">
-              <svg viewBox="0 0 340 90" className="w-full h-20 overflow-visible text-[#38BDF8]" fill="none">
-                <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3867F5" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#3867F5" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                {/* Horizontal reference grid lines */}
-                <line x1="0" y1="20" x2="340" y2="20" stroke="#253247" strokeDasharray="3 3" />
-                <line x1="0" y1="50" x2="340" y2="50" stroke="#253247" strokeDasharray="3 3" />
-                <line x1="0" y1="80" x2="340" y2="80" stroke="#253247" strokeDasharray="3 3" />
-
-                {/* Shaded Area under Curve */}
-                <path
-                  d="M 0,70 Q 50,45 100,55 T 200,30 T 280,38 T 340,15 L 340,90 L 0,90 Z"
-                  fill="url(#chartGradient)"
-                />
-                {/* Smooth Curve */}
-                <path
-                  d="M 0,70 Q 50,45 100,55 T 200,30 T 280,38 T 340,15"
-                  stroke="#38BDF8"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Pulse Highlight Nodes */}
-                <circle cx="200" cy="30" r="3.5" fill="#38BDF8" />
-                <circle cx="340" cy="15" r="4" fill="#16A879" />
-              </svg>
-            </div>
-
-            {/* 3 Concise Benefit Points */}
-            <div className="flex flex-col gap-2.5">
-              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
-                <div className="w-7 h-7 rounded bg-[#3867F5]/20 flex items-center justify-center text-[#38BDF8] shrink-0">
+            {/* 3 Core Value Cards */}
+            <div className="flex flex-col gap-2.5 mt-2">
+              <div className="flex items-start gap-3 p-3 bg-[#111827]/70 border border-[#1E293B] rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-[#2563EB]/20 flex items-center justify-center text-[#38BDF8] shrink-0 mt-0.5">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-[#F3F6FC]">Clear financial data</div>
-                  <div className="text-[11px] text-[#9AA8BC]">Direct SEC & XBRL reporting without guesses</div>
+                  <div className="text-xs font-semibold text-white">3 Core Credit Solvency Ratios</div>
+                  <div className="text-[11px] text-[#94A3B8] leading-normal">
+                    Net Debt / EBITDA, Interest Coverage, and Current Ratio computed with zero formula errors.
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
-                <div className="w-7 h-7 rounded bg-[#F5B942]/20 flex items-center justify-center text-[#F5B942] shrink-0">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-[#F3F6FC]">Early risk signals</div>
-                  <div className="text-[11px] text-[#9AA8BC]">Automated debt alerts and solvency hurdles</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-2 bg-[#151E2D]/80 border border-[#253247] rounded-lg">
-                <div className="w-7 h-7 rounded bg-[#16A879]/20 flex items-center justify-center text-[#16A879] shrink-0">
+              <div className="flex items-start gap-3 p-3 bg-[#111827]/70 border border-[#1E293B] rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-[#F59E0B]/20 flex items-center justify-center text-[#F59E0B] shrink-0 mt-0.5">
                   <Sliders className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-[#F3F6FC]">Simple scenario testing</div>
-                  <div className="text-[11px] text-[#9AA8BC]">Simulate interest rate shocks and revenue drops</div>
+                  <div className="text-xs font-semibold text-white">Macro Stress Simulator</div>
+                  <div className="text-[11px] text-[#94A3B8] leading-normal">
+                    Two-slider scenario testing: rate hikes (+0.5% to +3.0%) &amp; revenue shocks (-5% to -25%).
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-[#111827]/70 border border-[#1E293B] rounded-xl">
+                <div className="w-7 h-7 rounded-lg bg-[#10B981]/20 flex items-center justify-center text-[#10B981] shrink-0 mt-0.5">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white">1-Click Underwriting Memo</div>
+                  <div className="text-[11px] text-[#94A3B8] leading-normal">
+                    Printable 1-page executive tearsheet with cryptographic SHA-256 integrity stamp.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Bottom Security Assurance Note */}
-          <div className="mt-6 pt-4 border-t border-[#253247]/60 text-[11px] text-[#9AA8BC] flex items-center justify-between font-mono">
-            <span>SECURE SYSTEM</span>
-            <span className="text-[#16A879]">NODE 24 ACTIVE</span>
+          <div className="mt-6 pt-4 border-t border-[#1E293B]/60 text-[11px] text-[#64748B] flex items-center justify-between font-mono">
+            <span>LOCAL DATABASE ACTIVE</span>
+            <span className="text-[#10B981] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              SQLITE &bull; WAL MODE
+            </span>
           </div>
         </div>
 
         {/* =========================================================================
-            RIGHT COLUMN: WELCOME & LOGIN / REGISTRATION FORM
+            RIGHT COLUMN: 1-CLICK DEMO ACCESS & CREDENTIALS SIGN-IN
            ========================================================================= */}
-        <div className="lg:col-span-7 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-[#101621]">
+        <div className="lg:col-span-7 p-6 sm:p-8 lg:p-10 flex flex-col justify-center bg-[#0C111C]">
           <div className="max-w-md w-full mx-auto flex flex-col gap-5">
             {/* Form Header */}
             <div>
-              <h2 className="text-2xl font-bold text-[#F3F6FC] tracking-tight">
-                Welcome to FINTRAXIS
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                Terminal Access
               </h2>
-              <p className="text-xs text-[#9AA8BC] mt-1">
-                Sign in with your credentials or explore as a guest analyst.
+              <p className="text-xs text-[#94A3B8] mt-1">
+                Choose a role for instant 1-click access or enter your operator credentials.
               </p>
             </div>
 
+            {/* Quick 1-Click Role Access Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleQuickRoleLogin("ANALYST")}
+                disabled={isLoading}
+                className="p-3.5 bg-[#111827] hover:bg-[#1A2333] border border-[#2563EB]/40 hover:border-[#38BDF8] rounded-xl text-left transition-all group cursor-pointer shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="w-7 h-7 rounded-lg bg-[#2563EB]/20 flex items-center justify-center text-[#38BDF8]">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#2563EB]/15 text-[#38BDF8] border border-[#2563EB]/30 rounded">
+                    ANALYST
+                  </span>
+                </div>
+                <div className="font-bold text-xs text-white group-hover:text-[#38BDF8] transition-colors">
+                  Login as Credit Analyst
+                </div>
+                <div className="text-[11px] text-[#94A3B8] mt-0.5 leading-snug">
+                  Research solvency, stress test &amp; export briefs
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickRoleLogin("ADMIN")}
+                disabled={isLoading}
+                className="p-3.5 bg-[#111827] hover:bg-[#1A2333] border border-[#8B5CF6]/40 hover:border-[#A78BFA] rounded-xl text-left transition-all group cursor-pointer shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center text-[#A78BFA]">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/30 rounded">
+                    ADMIN
+                  </span>
+                </div>
+                <div className="font-bold text-xs text-white group-hover:text-[#A78BFA] transition-colors">
+                  Login as Admin
+                </div>
+                <div className="text-[11px] text-[#94A3B8] mt-0.5 leading-snug">
+                  Manage companies, hurdles &amp; audit trails
+                </div>
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#1E293B]" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase font-mono">
+                <span className="bg-[#0C111C] px-3 text-[#64748B]">Or sign in with email</span>
+              </div>
+            </div>
+
             {/* Mode Switcher Tabs */}
-            <div className="flex p-1 bg-[#151E2D] border border-[#253247] rounded-lg font-mono text-xs">
+            <div className="flex p-1 bg-[#111827] border border-[#1E293B] rounded-lg font-mono text-xs">
               <button
                 type="button"
                 onClick={() => {
                   setMode("SIGN_IN");
                   setErrorMessage(null);
                 }}
-                className={`flex-1 py-1.5 rounded text-center transition-all flex items-center justify-center gap-1.5 ${
+                className={`flex-1 py-1.5 rounded-md text-center transition-all flex items-center justify-center gap-1.5 ${
                   mode === "SIGN_IN"
-                    ? "bg-[#3867F5] text-white font-bold shadow-sm"
-                    : "text-[#9AA8BC] hover:text-[#F3F6FC]"
+                    ? "bg-[#2563EB] text-white font-bold shadow-sm"
+                    : "text-[#94A3B8] hover:text-white"
                 }`}
               >
                 <LogIn className="w-3.5 h-3.5" />
@@ -368,10 +421,10 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                   setMode("REGISTER");
                   setErrorMessage(null);
                 }}
-                className={`flex-1 py-1.5 rounded text-center transition-all flex items-center justify-center gap-1.5 ${
+                className={`flex-1 py-1.5 rounded-md text-center transition-all flex items-center justify-center gap-1.5 ${
                   mode === "REGISTER"
-                    ? "bg-[#3867F5] text-white font-bold shadow-sm"
-                    : "text-[#9AA8BC] hover:text-[#F3F6FC]"
+                    ? "bg-[#2563EB] text-white font-bold shadow-sm"
+                    : "text-[#94A3B8] hover:text-white"
                 }`}
               >
                 <UserPlus className="w-3.5 h-3.5" />
@@ -381,26 +434,24 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
 
             {/* Error or Success Alert */}
             {errorMessage && (
-              <div className="p-3 bg-[#F05252]/10 border border-[#F05252]/50 text-[#F05252] text-xs rounded-lg flex items-start gap-2">
+              <div className="p-3 bg-[#EF4444]/10 border border-[#EF4444]/40 text-[#EF4444] text-xs rounded-xl flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {successMessage && (
-              <div className="p-3 bg-[#16A879]/10 border border-[#16A879]/50 text-[#16A879] text-xs rounded-lg flex items-start gap-2">
+              <div className="p-3 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] text-xs rounded-xl flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{successMessage}</span>
               </div>
             )}
 
-            {/* =======================
-                FORM: SIGN IN
-               ======================= */}
+            {/* FORM: SIGN IN */}
             {mode === "SIGN_IN" ? (
-              <form onSubmit={handleSignIn} className="flex flex-col gap-4">
+              <form onSubmit={handleSignIn} className="flex flex-col gap-3.5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#F3F6FC]">
+                  <label className="text-xs font-medium text-[#E2E8F0]">
                     Email or Username
                   </label>
                   <div className="relative">
@@ -408,21 +459,21 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                       type="text"
                       value={signInIdentifier}
                       onChange={(e) => setSignInIdentifier(e.target.value)}
-                      placeholder="e.g. admin or analyst@fintraxis.terminal"
-                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] transition-colors"
+                      placeholder="analyst@fintraxis.local or admin@fintraxis.local"
+                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors"
                       autoComplete="username"
                     />
-                    <Mail className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                    <Mail className="w-4 h-4 text-[#64748B] absolute right-3.5 top-3 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-[#F3F6FC]">
+                    <label className="text-xs font-medium text-[#E2E8F0]">
                       Password
                     </label>
                     <span className="text-[11px] text-[#38BDF8] font-mono">
-                      Default: guest or admin
+                      Default: analyst123 / admin123
                     </span>
                   </div>
                   <div className="relative">
@@ -431,13 +482,13 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] transition-colors pr-10"
+                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors pr-10"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignInPassword(!showSignInPassword)}
-                      className="absolute right-3 top-2.5 text-[#5A687D] hover:text-[#F3F6FC] p-0.5 transition-colors"
+                      className="absolute right-3 top-2.5 text-[#64748B] hover:text-white p-0.5 transition-colors"
                       aria-label={showSignInPassword ? "Hide password" : "Show password"}
                     >
                       {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -445,50 +496,27 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                   </div>
                 </div>
 
-                {/* Primary Sign In Button */}
+                {/* Sign In Button */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 bg-[#3867F5] hover:bg-[#2c53cb] disabled:opacity-60 text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-all shadow-md mt-1 cursor-pointer"
+                  className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md mt-1 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span>Sign In to Terminal</span>
+                      <span>Enter Terminal Workspace</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
-
-                {/* Divider */}
-                <div className="relative my-1">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#253247]" />
-                  </div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-mono">
-                    <span className="bg-[#101621] px-2 text-[#9AA8BC]">Or continue as</span>
-                  </div>
-                </div>
-
-                {/* Continue as Guest Button (Sandbox Demo) */}
-                <button
-                  type="button"
-                  onClick={handleGuestLogin}
-                  disabled={isLoading}
-                  className="w-full py-2.5 bg-[#151E2D] hover:bg-[#1a2639] border border-[#253247] text-[#38BDF8] hover:text-white font-mono text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
-                  <span>Explore as Guest Analyst (Demo Mode)</span>
-                </button>
               </form>
             ) : (
-              /* =======================
-                  FORM: CREATE ACCOUNT
-                 ======================= */
-              <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
+              /* FORM: CREATE ACCOUNT */
+              <form onSubmit={handleRegister} className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#F3F6FC]">
+                  <label className="text-xs font-medium text-[#E2E8F0]">
                     Full Name
                   </label>
                   <div className="relative">
@@ -496,15 +524,15 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                       type="text"
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder="e.g. Sarah Jenkins"
-                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
+                      placeholder="e.g. Alex Mercer"
+                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB]"
                     />
-                    <User className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                    <User className="w-4 h-4 text-[#64748B] absolute right-3.5 top-3 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#F3F6FC]">
+                  <label className="text-xs font-medium text-[#E2E8F0]">
                     Email Address
                   </label>
                   <div className="relative">
@@ -512,16 +540,16 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                       type="email"
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder="analyst@fintraxis.terminal"
-                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
+                      placeholder="analyst@fintraxis.local"
+                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB]"
                     />
-                    <Mail className="w-4 h-4 text-[#5A687D] absolute right-3.5 top-3 pointer-events-none" />
+                    <Mail className="w-4 h-4 text-[#64748B] absolute right-3.5 top-3 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-[#F3F6FC]">
+                    <label className="text-xs font-medium text-[#E2E8F0]">
                       Password
                     </label>
                     <div className="relative">
@@ -530,12 +558,12 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                         value={regPassword}
                         onChange={(e) => setRegPassword(e.target.value)}
                         placeholder="Min 6 chars"
-                        className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5] pr-9"
+                        className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] pr-9"
                       />
                       <button
                         type="button"
                         onClick={() => setShowRegPassword(!showRegPassword)}
-                        className="absolute right-2.5 top-3 text-[#5A687D] hover:text-[#F3F6FC]"
+                        className="absolute right-2.5 top-3 text-[#64748B] hover:text-white"
                       >
                         {showRegPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -543,7 +571,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-[#F3F6FC]">
+                    <label className="text-xs font-medium text-[#E2E8F0]">
                       Confirm Password
                     </label>
                     <input
@@ -551,7 +579,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                       value={regConfirmPassword}
                       onChange={(e) => setRegConfirmPassword(e.target.value)}
                       placeholder="Re-type"
-                      className="w-full px-3.5 py-2.5 bg-[#151E2D] border border-[#253247] rounded-lg text-sm text-[#F3F6FC] placeholder:text-[#5A687D] focus:outline-none focus:border-[#3867F5]"
+                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB]"
                     />
                   </div>
                 </div>
@@ -559,7 +587,7 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 bg-[#3867F5] hover:bg-[#2c53cb] disabled:opacity-60 text-white font-semibold text-sm rounded-lg flex items-center justify-center gap-2 transition-all shadow-md mt-2 cursor-pointer"
+                  className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-60 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md mt-2 cursor-pointer"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
