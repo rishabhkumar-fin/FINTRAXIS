@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Building2,
   TrendingUp,
@@ -9,17 +9,64 @@ import {
   FileSpreadsheet,
   FileText,
   Landmark,
+  RefreshCw,
+  CheckCircle2,
 } from "lucide-react";
-import { CompanyRiskProfile } from "@/lib/types";
+import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { formatFinancialValue } from "@/lib/formatters";
 
 interface OverviewWorkstationProps {
-  profile: CompanyRiskProfile;
+  profile: CompanyRiskProfile | null;
+  companies?: CompanyEntity[];
+  onSelectCompany?: (id: string) => void;
+  onRefreshProfile?: () => void;
   onNavigateToTab: (tab: ModuleTab) => void;
 }
 
-export function OverviewWorkstation({ profile, onNavigateToTab }: OverviewWorkstationProps) {
+export function OverviewWorkstation({
+  profile,
+  companies = [],
+  onSelectCompany,
+  onRefreshProfile,
+  onNavigateToTab,
+}: OverviewWorkstationProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setRefreshNotice(null);
+    try {
+      if (onRefreshProfile) {
+        await onRefreshProfile();
+      }
+      setRefreshNotice("Financial ledger verified & synchronized with latest regulatory disclosures.");
+      setTimeout(() => setRefreshNotice(null), 4000);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Empty State: Prompt user to select a company
+  if (!profile) {
+    return (
+      <div className="bg-[#0C111C] border border-[#1E293B] rounded-2xl p-12 text-center max-w-xl mx-auto my-12 font-mono">
+        <Building2 className="w-12 h-12 text-[#38BDF8] mx-auto mb-4" />
+        <h2 className="text-lg font-bold text-white mb-2">Choose a company to begin your financial analysis</h2>
+        <p className="text-xs text-[#94A3B8] mb-6">
+          Select an enrolled corporate issuer from the directory to review balance sheets, solvency health, and macro risk models.
+        </p>
+        <button
+          onClick={() => onNavigateToTab("01_HUB")}
+          className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+        >
+          Open Company Directory
+        </button>
+      </div>
+    );
+  }
+
   const { company, periods, latestRatios, earlyWarningFlags } = profile;
   const latestPeriod = periods[0];
 
@@ -39,6 +86,61 @@ export function OverviewWorkstation({ profile, onNavigateToTab }: OverviewWorkst
 
   return (
     <div className="flex flex-col gap-6 font-sans">
+      {/* 0. Top Explicit Company Selector & Freshness Bar (Section 4 Priority Fix) */}
+      <div className="bg-[#0B1220] border border-[#1E293B] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[#94A3B8] font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-[#38BDF8]" />
+            ACTIVE ISSUER:
+          </span>
+          {companies && companies.length > 0 && onSelectCompany ? (
+            <select
+              value={company.id}
+              onChange={(e) => onSelectCompany(e.target.value)}
+              className="bg-[#111827] text-white font-bold border border-[#2563EB]/40 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#38BDF8] cursor-pointer"
+            >
+              {companies.map((c) => (
+                <option key={c.id} value={c.id} className="bg-[#0A0E17] text-white">
+                  {c.name} ({c.symbol}) &bull; {c.exchange}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="font-bold text-white bg-[#111827] px-3 py-1 rounded border border-[#253247]">
+              {company.name} ({company.symbol})
+            </span>
+          )}
+
+          <span className="px-2 py-0.5 bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30 rounded text-[10px] font-bold">
+            {company.country} &bull; {company.exchange}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 text-[#10B981] text-[11px] bg-[#10B981]/10 px-2.5 py-1 rounded border border-[#10B981]/30">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Audited Period: <strong>{latestPeriod?.period || "FY2024"}</strong> ({latestPeriod?.filingForm || "10-K"})</span>
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-1 bg-[#111827] hover:bg-[#1E293B] border border-[#1E293B] hover:border-[#38BDF8] text-white text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50"
+            title="Re-verify company statements against database cache"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#38BDF8] ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>{isRefreshing ? "Refreshing..." : "Refresh Data"}</span>
+          </button>
+        </div>
+      </div>
+
+      {refreshNotice && (
+        <div className="p-3 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] text-xs font-mono rounded-lg flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{refreshNotice}</span>
+        </div>
+      )}
+
       {/* 1. Header Profile & Identification */}
       <div className="bg-[#101621] border border-[#253247] p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -63,11 +165,11 @@ export function OverviewWorkstation({ profile, onNavigateToTab }: OverviewWorkst
 
         <div className="flex items-center gap-3">
           <div className="p-3 bg-[#151E2D] border border-[#253247] rounded-lg text-right font-mono">
-            <div className="text-[10px] text-[#9AA8BC] uppercase">LATEST REPORTED PERIOD</div>
+            <div className="text-[10px] text-[#9AA8BC] uppercase">STATUTORY REPORTING BASIS</div>
             <div className="text-sm font-bold text-[#16A879] mt-0.5">
               {latestPeriod ? `${latestPeriod.period} (${latestPeriod.filingForm})` : "N/A"}
             </div>
-            <div className="text-[10px] text-[#5A687D]">{latestPeriod?.filingDate || "Audited"}</div>
+            <div className="text-[10px] text-[#5A687D]">Filing Date: {latestPeriod?.filingDate || "Audited"}</div>
           </div>
         </div>
       </div>

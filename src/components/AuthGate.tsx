@@ -268,11 +268,32 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
 
             <div className="mt-2">
               <h1 className="text-xl sm:text-2xl font-bold text-white leading-snug">
-                Corporate Credit Health &amp; Solvency Surveillance
+                Welcome to FINTRAXIS
               </h1>
               <p className="text-xs text-[#94A3B8] mt-2 leading-relaxed">
-                A fast, auditable terminal that ingests balance sheets, verifies 3 core credit ratios, flags bank covenant breaches, and simulates adverse macro scenarios.
+                Understand financial performance. Identify risk. Make informed decisions.
               </p>
+            </div>
+
+            {/* Subtle Institutional Moving Financial Line Animation */}
+            <div className="w-full h-8 overflow-hidden relative my-1 rounded bg-[#070A10]/60 border border-[#1E293B]/60 flex items-center">
+              <svg className="w-full h-full" viewBox="0 0 400 32" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="finLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#2563EB" stopOpacity="0.2" />
+                    <stop offset="50%" stopColor="#38BDF8" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 0 20 Q 50 8, 100 16 T 200 10 T 300 22 T 400 6"
+                  fill="none"
+                  stroke="url(#finLineGrad)"
+                  strokeWidth="2"
+                  strokeDasharray="8 4"
+                  className="animate-pulse"
+                />
+              </svg>
             </div>
 
             {/* 3 Core Value Cards */}

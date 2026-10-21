@@ -74,66 +74,62 @@ export function SidebarNavigation({
   const userRole = session?.role || (session?.isDemo ? "DEMO_ANALYST" : "ANALYST");
   const isAdmin = userRole === "SUPER_ADMIN" || userRole === "ADMIN";
 
-  // Canonical Navigation: Admin (role-gated) + Overview + 6 Core Modules + Research Reports
+  // Canonical Navigation: Admin Console + Overview + 6 Core Workstations
   const navItems = [
-    ...(isAdmin
-      ? [
-          {
-            id: "00_ADMIN" as ModuleTab,
-            name: "Admin Console",
-            shortDesc: "Operational Governance & Supervision",
-            icon: ShieldCheck,
-            badge: "ADMIN",
-            badgeColor: "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10",
-          },
-        ]
-      : []),
+    {
+      id: "00_ADMIN" as ModuleTab,
+      name: "Admin Panel",
+      shortDesc: "Governance, Data & Settings",
+      icon: ShieldCheck,
+      badge: isAdmin ? "ADMIN" : "GOVERNANCE",
+      badgeColor: isAdmin ? "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10" : "text-[#94A3B8] border-[#334155] bg-[#1E293B]/40",
+    },
     {
       id: "overview" as ModuleTab,
       name: "Overview",
       shortDesc: "Executive Financial Summary",
       icon: LayoutDashboard,
       badge: "SUMMARY",
-      badgeColor: "text-[#16A879] border-[#16A879]/40 bg-[#16A879]/10",
+      badgeColor: "text-[#10B981] border-[#10B981]/40 bg-[#10B981]/10",
     },
     {
       id: "01_HUB" as ModuleTab,
-      name: "Company Intelligence",
-      shortDesc: "Securities Search & Chart",
+      name: "Company Directory",
+      shortDesc: "Securities Search & Profile",
       icon: Building2,
-      badge: "MODULE 1",
+      badge: "DIRECTORY",
       badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
       id: "02_HEALTH" as ModuleTab,
       name: "Financial Health",
-      shortDesc: "3-Statements & Credit Solvency",
+      shortDesc: "Solvency & 3-Statement Ledger",
       icon: Activity,
-      badge: "MODULE 2",
+      badge: "SOLVENCY",
       badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
       id: "03_VULNERABILITY" as ModuleTab,
       name: "Vulnerability Monitor",
-      shortDesc: "Early Warning & Debt Maturity",
+      shortDesc: "Early Warning & Debt Rollover",
       icon: ShieldAlert,
-      badge: earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "MODULE 3",
-      badgeColor: earlyWarningCount > 0 ? "text-[#F05252] border-[#F05252]/40" : "text-[#16A879] border-[#16A879]/40",
+      badge: earlyWarningCount > 0 ? `${earlyWarningCount} FLAGS` : "SURVEILLANCE",
+      badgeColor: earlyWarningCount > 0 ? "text-[#F43F5E] border-[#F43F5E]/40 bg-[#F43F5E]/10" : "text-[#10B981] border-[#10B981]/40 bg-[#10B981]/10",
     },
     {
       id: "04_DEPENDENCIES" as ModuleTab,
       name: "Business Dependencies",
-      shortDesc: "Disclosed Sourcing & Bottlenecks",
+      shortDesc: "Supply Chain & Customer Ties",
       icon: Network,
-      badge: "MODULE 4",
+      badge: "SUPPLY",
       badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
       id: "05_CONCENTRATION" as ModuleTab,
       name: "Concentration & Exposure",
-      shortDesc: "Segment & Geographic HHI Risk",
+      shortDesc: "Segment & Geographic Risk",
       icon: PieChart,
-      badge: "MODULE 5",
+      badge: "EXPOSURE",
       badgeColor: "text-[#38BDF8] border-[#253247]",
     },
     {
@@ -141,16 +137,16 @@ export function SidebarNavigation({
       name: "Scenario Simulator",
       shortDesc: "Macro Shocks & Rate Testing",
       icon: SlidersHorizontal,
-      badge: "MODULE 6",
-      badgeColor: "text-[#F5B942] border-[#F5B942]/40",
+      badge: "SIMULATOR",
+      badgeColor: "text-[#F59E0B] border-[#F59E0B]/40 bg-[#F59E0B]/10",
     },
     {
       id: "07_REPORTS" as ModuleTab,
-      name: "Research Reports",
-      shortDesc: "Boardroom Tearsheet & PDF",
+      name: "Executive Credit Memo",
+      shortDesc: "Underwriting Tearsheet & PDF",
       icon: FileText,
-      badge: "REPORTS",
-      badgeColor: "text-[#9AA8BC] border-[#253247]",
+      badge: "EXPORT",
+      badgeColor: "text-[#94A3B8] border-[#334155]",
     },
   ];
 

@@ -80,7 +80,7 @@ export function BusinessDependencies({
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30">
-                MODULE 4
+                SUPPLY CHAIN &amp; PARTNERS
               </span>
               <span className="text-xs font-mono text-[#64748B]">
                 OPERATIONAL RELATIONSHIP SURVEILLANCE

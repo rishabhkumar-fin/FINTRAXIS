@@ -81,21 +81,21 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
 
   const ratioCards = [
     {
-      group: "LIQUIDITY RUNWAY & WORKING CAPITAL",
+      group: "1. LIQUIDITY & WORKING CAPITAL",
       items: [
         {
           key: "currentRatio",
           label: "Current Ratio",
           value: formatRatio(latestRatios.currentRatio),
           formula: "Total Current Assets / Total Current Liabilities",
-          explanation: "Measures whether short-term assets cover all bills due within 1 year.",
+          explanation: "What it means: The company reports ₹" + (latestRatios.currentRatio?.toFixed(2) ?? "1.00") + " of current assets for every ₹1.00 of current liabilities.",
           status:
             latestRatios.currentRatio !== null && latestRatios.currentRatio >= 1.2
               ? "TIER_1"
               : latestRatios.currentRatio !== null && latestRatios.currentRatio >= 1.0
               ? "TIER_2"
               : "TIER_3",
-          benchmark: "Hurdle: > 1.20x",
+          benchmark: "Hurdle: > 1.10x",
           progressPct: Math.min(100, Math.max(10, ((latestRatios.currentRatio ?? 1) / 2.0) * 100)),
         },
         {
@@ -103,7 +103,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           label: "Quick Acid-Test Ratio",
           value: formatRatio(latestRatios.quickRatio),
           formula: "(Cash + Marketable Securities + Receivables) / Current Liabilities",
-          explanation: "Excludes hard-to-sell inventory; tests instant emergency liquidity buffer.",
+          explanation: "Excludes hard-to-sell inventory; verifies instant emergency liquidity buffer.",
           status:
             latestRatios.quickRatio !== null && latestRatios.quickRatio >= 1.0
               ? "TIER_1"
@@ -118,7 +118,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           label: "Cash Ratio",
           value: formatRatio(latestRatios.cashRatio),
           formula: "Cash & Cash Equivalents / Total Current Liabilities",
-          explanation: "Pure cold-hard cash reserves versus near-term payment obligations.",
+          explanation: "Pure liquid cash reserves available to pay near-term obligations immediately.",
           status:
             latestRatios.cashRatio !== null && latestRatios.cashRatio >= 0.25
               ? "TIER_1"
@@ -129,77 +129,62 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       ],
     },
     {
-      group: "SOLVENCY, LEVERAGE & GEARING",
+      group: "2. DEBT, LEVERAGE & CASH FLOW",
       items: [
-        {
-          key: "interestCoverage",
-          label: "EBIT Interest Coverage",
-          value: formatRatio(latestRatios.interestCoverage),
-          formula: "Operating Income (EBIT) / Interest Expense",
-          explanation: "Operating profits available to service bank debt interest.",
-          status:
-            latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
-              ? "TIER_1"
-              : latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 2.0
-              ? "TIER_2"
-              : "TIER_3",
-          benchmark: "Inv-Grade: > 3.00x",
-          progressPct: Math.min(100, Math.max(10, ((latestRatios.interestCoverage ?? 2) / 10) * 100)),
-        },
         {
           key: "netDebtToEbitda",
           label: "Net Debt / EBITDA",
           value: formatRatio(latestRatios.netDebtToEbitda),
           formula: "(Total Debt - Cash & Liquid Assets) / EBITDA",
-          explanation: "Years of operating cash flow needed to pay off debt (negative = net cash!).",
+          explanation: "What it means: It would take " + (latestRatios.netDebtToEbitda?.toFixed(2) ?? "N/A") + " years of operating profits to extinguish all net debt (negative = net cash surplus!).",
           status:
             latestRatios.netDebtToEbitda !== null && latestRatios.netDebtToEbitda <= 2.5
               ? "TIER_1"
-              : latestRatios.netDebtToEbitda !== null && latestRatios.netDebtToEbitda <= 4.0
+              : latestRatios.netDebtToEbitda !== null && latestRatios.netDebtToEbitda <= 3.5
               ? "TIER_2"
               : "TIER_3",
-          benchmark: "Ceiling: < 3.00x",
+          benchmark: "Ceiling: ≤ 3.50x",
           progressPct: Math.max(10, Math.min(100, 100 - ((latestRatios.netDebtToEbitda ?? 1) / 5) * 100)),
+        },
+        {
+          key: "interestCoverage",
+          label: "EBIT Interest Coverage",
+          value: formatRatio(latestRatios.interestCoverage),
+          formula: "Operating Income (EBIT) / Interest Expense",
+          explanation: "What it means: The company can pay its annual financing interest charges " + (latestRatios.interestCoverage?.toFixed(2) ?? "N/A") + " times from operating earnings.",
+          status:
+            latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
+              ? "TIER_1"
+              : latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 2.5
+              ? "TIER_2"
+              : "TIER_3",
+          benchmark: "Floor: ≥ 2.50x",
+          progressPct: Math.min(100, Math.max(10, ((latestRatios.interestCoverage ?? 2) / 10) * 100)),
         },
         {
           key: "debtToEquity",
           label: "Debt-to-Equity (D/E)",
           value: formatRatio(latestRatios.debtToEquity),
           formula: "Total Debt / Total Shareholders Equity",
-          explanation: "Total borrowing leverage relative to shareholder net worth.",
+          explanation: "Total bank borrowing leverage relative to shareholder net worth.",
           status:
             latestRatios.debtToEquity !== null && latestRatios.debtToEquity <= 1.5
               ? "TIER_1"
               : "TIER_2",
-          benchmark: "Prudent: < 1.50x",
+          benchmark: "Prudent: ≤ 1.50x",
           progressPct: Math.max(10, Math.min(100, 100 - ((latestRatios.debtToEquity ?? 0.5) / 3) * 100)),
         },
       ],
     },
     {
-      group: "EARNINGS QUALITY & CONVERSION",
+      group: "3. PROFITABILITY MARGINS",
       items: [
-        {
-          key: "cfoToNetIncome",
-          label: "CFO / Net Income Conversion",
-          value: formatRatio(latestRatios.cfoToNetIncome),
-          formula: "Cash from Operations (CFO) / Reported Net Income",
-          explanation: "Quality of earnings: converts accounting profits into real bankable cash.",
-          status:
-            latestRatios.cfoToNetIncome !== null && latestRatios.cfoToNetIncome >= 0.9
-              ? "TIER_1"
-              : latestRatios.cfoToNetIncome !== null && latestRatios.cfoToNetIncome >= 0.6
-              ? "TIER_2"
-              : "TIER_3",
-          benchmark: "Target: > 0.85x",
-          progressPct: Math.min(100, Math.max(10, ((latestRatios.cfoToNetIncome ?? 0.8) / 1.5) * 100)),
-        },
         {
           key: "grossMarginPct",
           label: "Gross Profit Margin",
           value: formatPct(latestRatios.grossMarginPct),
           formula: "Gross Profit / Total Revenue * 100",
-          explanation: "Profitability remaining after direct manufacturing or service delivery costs.",
+          explanation: "Profitability remaining after direct production and product delivery costs.",
           status: "TIER_1",
           benchmark: "Pricing Power",
           progressPct: Math.min(100, Math.max(10, (latestRatios.grossMarginPct ?? 30) * 1.5)),
@@ -209,10 +194,25 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           label: "Operating (EBIT) Margin",
           value: formatPct(latestRatios.operatingMarginPct),
           formula: "EBIT / Total Revenue * 100",
-          explanation: "Core operational efficiency before deducting financing costs and taxes.",
+          explanation: "Core operational earnings margin before deducting interest expenses and corporate taxes.",
           status: "TIER_1",
           benchmark: "Efficiency",
           progressPct: Math.min(100, Math.max(10, (latestRatios.operatingMarginPct ?? 15) * 2.5)),
+        },
+        {
+          key: "cfoToNetIncome",
+          label: "CFO / Net Income Cash Conversion",
+          value: formatRatio(latestRatios.cfoToNetIncome),
+          formula: "Cash from Operations (CFO) / Reported Net Income",
+          explanation: "Quality of earnings: verifies that reported book profits are backed by actual bankable cash.",
+          status:
+            latestRatios.cfoToNetIncome !== null && latestRatios.cfoToNetIncome >= 0.9
+              ? "TIER_1"
+              : latestRatios.cfoToNetIncome !== null && latestRatios.cfoToNetIncome >= 0.6
+              ? "TIER_2"
+              : "TIER_3",
+          benchmark: "Quality: ≥ 0.85x",
+          progressPct: Math.min(100, Math.max(10, ((latestRatios.cfoToNetIncome ?? 0.8) / 1.5) * 100)),
         },
       ],
     },

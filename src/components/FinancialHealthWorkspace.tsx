@@ -41,10 +41,10 @@ export function FinancialHealthWorkspace({
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30">
-                MODULE 2
+                FINANCIAL HEALTH &amp; SOLVENCY
               </span>
               <span className="text-xs font-mono text-[#64748B]">
-                FINANCIAL HEALTH & 3-STATEMENT ACCOUNTING VERIFICATION
+                3-STATEMENT ACCOUNTING VERIFICATION
               </span>
             </div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2.5 font-mono">

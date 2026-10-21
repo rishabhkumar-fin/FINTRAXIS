@@ -199,8 +199,8 @@ export function CommandPalette({
               onClick={() => handleExecute("1")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[1] COMPANY HUB</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 1</span>
+              <span className="text-[#E1E7EC] font-bold">[1] COMPANY DIRECTORY</span>
+              <span className="text-[10px] text-[#5A687D]">DIRECTORY</span>
             </button>
 
             <button
@@ -208,39 +208,39 @@ export function CommandPalette({
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
               <span className="text-[#E1E7EC] font-bold">[2] FINANCIAL HEALTH</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 2</span>
+              <span className="text-[10px] text-[#5A687D]">SOLVENCY</span>
             </button>
 
             <button
               onClick={() => handleExecute("3")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[3] VULNERABILITY</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 3</span>
+              <span className="text-[#E1E7EC] font-bold">[3] VULNERABILITY MONITOR</span>
+              <span className="text-[10px] text-[#5A687D]">SURVEILLANCE</span>
             </button>
 
             <button
               onClick={() => handleExecute("4")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[4] DEPENDENCIES</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 4</span>
+              <span className="text-[#E1E7EC] font-bold">[4] BUSINESS DEPENDENCIES</span>
+              <span className="text-[10px] text-[#5A687D]">SUPPLY CHAIN</span>
             </button>
 
             <button
               onClick={() => handleExecute("5")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[5] CONCENTRATION</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 5</span>
+              <span className="text-[#E1E7EC] font-bold">[5] CONCENTRATION &amp; EXPOSURE</span>
+              <span className="text-[10px] text-[#5A687D]">DIVERSIFICATION</span>
             </button>
 
             <button
               onClick={() => handleExecute("6")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[6] SIMULATOR</span>
-              <span className="text-[10px] text-[#5A687D]">MODULE 6</span>
+              <span className="text-[#E1E7EC] font-bold">[6] SCENARIO SIMULATOR</span>
+              <span className="text-[10px] text-[#5A687D]">STRESS TEST</span>
             </button>
 
             <button

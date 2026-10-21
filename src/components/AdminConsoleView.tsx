@@ -30,15 +30,20 @@ import { SessionClearance } from "./AuthGate";
 import { ModuleTab } from "./NavigationTabs";
 
 export type AdminSubTab =
-  | "telemetry"
+  | "overview"
   | "users"
+  | "sources"
+  | "quality"
+  | "risk"
+  | "activity"
+  | "settings"
+  | "telemetry"
   | "permissions"
   | "providers"
   | "policies"
   | "issuers"
   | "jobs"
-  | "audit"
-  | "settings";
+  | "audit";
 
 interface AdminStats {
   counts: {
@@ -181,7 +186,7 @@ interface AdminConsoleViewProps {
 }
 
 export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewProps) {
-  const [activeTab, setActiveTab] = useState<AdminSubTab>("telemetry");
+  const [activeTab, setActiveTab] = useState<AdminSubTab>("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [issuers, setIssuers] = useState<IssuerItem[]>([]);
   const [usersList, setUsersList] = useState<UserItem[]>([]);
@@ -1099,20 +1104,59 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
         </div>
       </div>
 
+      {/* Non-Admin Awareness & 1-Click Role Switcher */}
+      {!canManageUsers && (
+        <div className="bg-[#0F172A] border border-[#38BDF8]/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-5 h-5 text-[#38BDF8] shrink-0" />
+            <div>
+              <span className="font-bold text-white block">ANALYST READ-ONLY GOVERNANCE MODE</span>
+              <span className="text-[#94A3B8]">
+                Viewing live telemetry with Analyst clearance. To edit risk hurdles, enroll securities, or manage accounts, Administrator clearance is required.
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const adminSession = {
+                ...session,
+                id: "USR_ADMIN_SUPER",
+                userName: "System Administrator",
+                userEmail: "admin@fintraxis.local",
+                analystId: "Super Administrator",
+                desk: "Global Systems & Risk Governance",
+                role: "SUPER_ADMIN",
+                isDemo: false,
+                avatarId: "security",
+                netDebtEbitdaHurdle: 3.5,
+                interestCoverageHurdle: 2.5,
+                currentRatioHurdle: 1.1,
+                authenticatedAt: new Date().toISOString(),
+                sessionToken: "adm_session_direct",
+              };
+              localStorage.setItem("fintraxis_session", JSON.stringify(adminSession));
+              window.location.reload();
+            }}
+            className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg whitespace-nowrap transition-colors cursor-pointer shrink-0 shadow-sm"
+          >
+            Switch to Administrator Session
+          </button>
+        </div>
+      )}
+
       {/* =========================================================================
-          NINE SUB-SECTIONS NAVIGATION BAR (A THROUGH I)
+          SEVEN SIMPLIFIED SUB-SECTIONS (SPECIFICATION REQUIREMENT)
          ========================================================================= */}
       <div className="flex items-center gap-1.5 overflow-x-auto border-b border-[#253247] pb-2 font-mono text-xs scrollbar-none">
         {[
-          { id: "telemetry", label: "A. Overview", icon: Server },
-          { id: "users", label: "B. Users & Access", icon: Users, badge: stats?.counts.users },
-          { id: "permissions", label: "C. Permissions", icon: ShieldCheck },
-          { id: "providers", label: "D. Data Providers", icon: Radio, badge: providersList.length || 3 },
-          { id: "policies", label: "E. Risk Policies", icon: Sliders },
-          { id: "issuers", label: "F. Company Registry", icon: Building2, badge: stats?.counts.companies },
-          { id: "jobs", label: "G. Operations & Jobs", icon: Play, badge: jobsList.length || 4 },
-          { id: "audit", label: "H. Audit Journal", icon: FileText, badge: stats?.counts.auditLogs },
-          { id: "settings", label: "I. App Settings", icon: Settings2 },
+          { id: "overview", label: "1. Overview", icon: Server },
+          { id: "users", label: "2. Users & Access", icon: Users, badge: stats?.counts.users },
+          { id: "sources", label: "3. Data Sources", icon: Radio, badge: providersList.length || 3 },
+          { id: "quality", label: "4. Data Quality", icon: Building2, badge: stats?.counts.companies },
+          { id: "risk", label: "5. Risk Settings", icon: Sliders },
+          { id: "activity", label: "6. Activity Log", icon: FileText, badge: stats?.counts.auditLogs },
+          { id: "settings", label: "7. Settings", icon: Settings2 },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1143,9 +1187,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       </div>
 
       {/* =========================================================================
-          SECTION A: ADMINISTRATION OVERVIEW & TELEMETRY
+          SECTION 1: OVERVIEW & SYSTEM TELEMETRY
          ========================================================================= */}
-      {activeTab === "telemetry" && (
+      {(activeTab === "overview" || activeTab === "telemetry") && (
         <div className="flex flex-col gap-6 font-mono">
           {/* Top 5 Key Metric Cards */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
@@ -1292,9 +1336,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION B: USER & ACCESS MANAGEMENT
+          SECTION 2: USERS & ACCESS MANAGEMENT
          ========================================================================= */}
-      {activeTab === "users" && (
+      {(activeTab === "users" || activeTab === "permissions") && (
         <div className="flex flex-col gap-5 font-mono">
           {/* Header Action Bar */}
           <div className="bg-[#101621] border border-[#253247] p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -1503,9 +1547,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION D: DATA PROVIDER MANAGEMENT
+          SECTION 3: DATA SOURCES & PROVIDER MANAGEMENT
          ========================================================================= */}
-      {activeTab === "providers" && (
+      {(activeTab === "sources" || activeTab === "providers") && (
         <div className="flex flex-col gap-5 font-mono">
           <div className="bg-[#101621] border border-[#253247] p-5 rounded-xl flex items-center justify-between">
             <div>
@@ -1583,9 +1627,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION E: FINANCIAL RISK CONFIGURATION
+          SECTION 5: RISK SETTINGS & COVENANT POLICY CALIBRATION
          ========================================================================= */}
-      {activeTab === "policies" && (
+      {(activeTab === "risk" || activeTab === "policies") && (
         <div className="flex flex-col gap-6 font-mono">
           <div className="bg-[#101621] border border-[#253247] p-6 rounded-xl">
             <div className="border-b border-[#253247] pb-4 mb-6">
@@ -1596,6 +1640,21 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
                 Configure global thresholds that trigger early warning flags across all analyst workspaces. 
                 Modifications are committed to the audit trail with operator provenance.
               </p>
+              {/* Guidance: What it does / Current Status / Impact */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-[11px]">
+                <div className="p-3 bg-[#151E2D] border border-[#253247] rounded-lg">
+                  <span className="text-[#38BDF8] font-bold block mb-1">WHAT THIS DOES</span>
+                  <p className="text-[#9AA8BC]">Defines terminal-wide hurdle limits for leverage, coverage floor, and liquidity.</p>
+                </div>
+                <div className="p-3 bg-[#151E2D] border border-[#253247] rounded-lg">
+                  <span className="text-[#16A879] font-bold block mb-1">CURRENT STATUS</span>
+                  <p className="text-[#9AA8BC]">Net Debt/EBITDA: {leverageHurdle}x &bull; Interest Cov: {coverageHurdle}x &bull; Current Ratio: {liquidityHurdle}x</p>
+                </div>
+                <div className="p-3 bg-[#151E2D] border border-[#253247] rounded-lg">
+                  <span className="text-[#F5B942] font-bold block mb-1">IMPACT OF CHANGE</span>
+                  <p className="text-[#9AA8BC]">Directly recalibrates automated early-warning flags for all analysts upon saving.</p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSavePolicies} className="flex flex-col gap-6 max-w-3xl">
@@ -1737,10 +1796,31 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION F: COMPANY REGISTRY & DATA QUALITY
+          SECTION 4: DATA QUALITY & ISSUER REGISTRY
          ========================================================================= */}
-      {activeTab === "issuers" && (
+      {(activeTab === "quality" || activeTab === "issuers") && (
         <div className="flex flex-col gap-5 font-mono">
+          {/* Data Quality Overview Card */}
+          <div className="bg-[#101621] border border-[#253247] p-4 rounded-xl">
+            <h3 className="text-sm font-bold text-[#F3F6FC] uppercase">Financial Data Quality &amp; Statement Integrity</h3>
+            <p className="text-xs text-[#9AA8BC] mt-1">
+              Verifies reporting completeness, balance sheet arithmetic equality, and enables manual financial statement updates.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 text-[11px]">
+              <div className="p-2.5 bg-[#151E2D] border border-[#253247] rounded-lg">
+                <span className="text-[#38BDF8] font-bold block mb-0.5">WHAT THIS DOES</span>
+                <p className="text-[#9AA8BC]">Audits Assets = Liabilities + Equity identity and manages historical financial periods.</p>
+              </div>
+              <div className="p-2.5 bg-[#151E2D] border border-[#253247] rounded-lg">
+                <span className="text-[#16A879] font-bold block mb-0.5">CURRENT STATUS</span>
+                <p className="text-[#9AA8BC]">{issuers.length} enrolled securities &bull; {stats?.counts.financialPeriods ?? 0} audited fiscal periods</p>
+              </div>
+              <div className="p-2.5 bg-[#151E2D] border border-[#253247] rounded-lg">
+                <span className="text-[#F5B942] font-bold block mb-0.5">IMPACT OF CHANGE</span>
+                <p className="text-[#9AA8BC]">Statement Editor updates propagate instantly to Solvency, Health Ratios, and Simulator.</p>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Ingestion Panel */}
             <div className="bg-[#101621] border border-[#253247] p-4 rounded-xl flex flex-col gap-3">
@@ -1952,9 +2032,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION H: SECURITY AUDIT JOURNAL
+          SECTION 6: ACTIVITY LOG & AUDIT TRAIL
          ========================================================================= */}
-      {activeTab === "audit" && (
+      {(activeTab === "activity" || activeTab === "audit") && (
         <div className="flex flex-col gap-5 font-mono">
           <div className="bg-[#101621] border border-[#253247] p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -2043,9 +2123,9 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
       )}
 
       {/* =========================================================================
-          SECTION I: APPLICATION & WORKSPACE SETTINGS
+          SECTION 7: APPLICATION & WORKSPACE SETTINGS
          ========================================================================= */}
-      {activeTab === "settings" && (
+      {(activeTab === "settings" || activeTab === "jobs") && (
         <div className="flex flex-col gap-6 font-mono">
           <div className="bg-[#101621] border border-[#253247] p-6 rounded-xl">
             <div className="border-b border-[#253247] pb-4 mb-6">

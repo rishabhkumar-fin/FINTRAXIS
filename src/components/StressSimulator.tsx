@@ -22,15 +22,32 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     rateShockBps: 200,
   });
 
-  const simulation = latest ? runStressSimulation(latest, inputs) : profile.simulation;
+  const [committedInputs, setCommittedInputs] = useState<StressSimulationInputs>({
+    revenueShockPct: -10,
+    cogsInflationPct: 5,
+    rateShockBps: 200,
+  });
+
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const handleRunSimulation = () => {
+    setIsSimulating(true);
+    setTimeout(() => {
+      setCommittedInputs(inputs);
+      setHasPendingChanges(false);
+      setIsSimulating(false);
+    }, 150);
+  };
 
   const handlePreset = (rev: number, cogs: number, rate: number) => {
-    setInputs({
-      revenueShockPct: rev,
-      cogsInflationPct: cogs,
-      rateShockBps: rate,
-    });
+    const next = { revenueShockPct: rev, cogsInflationPct: cogs, rateShockBps: rate };
+    setInputs(next);
+    setCommittedInputs(next);
+    setHasPendingChanges(false);
   };
+
+  const simulation = latest ? runStressSimulation(latest, committedInputs) : profile.simulation;
 
   const formatCurr = (val: number | null | undefined) =>
     formatFinancialValue(val, company.currency, company.scaleUnit);
@@ -247,12 +264,13 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             max="15"
             step="1"
             value={inputs.revenueShockPct}
-            onChange={(e) =>
+            onChange={(e) => {
               setInputs((prev) => ({
                 ...prev,
                 revenueShockPct: parseFloat(e.target.value),
-              }))
-            }
+              }));
+              setHasPendingChanges(true);
+            }}
             className="w-full accent-[#2563EB] cursor-pointer"
           />
           <div className="flex justify-between text-[9px] text-[#64748B]">
@@ -283,12 +301,13 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             max="20"
             step="1"
             value={inputs.cogsInflationPct}
-            onChange={(e) =>
+            onChange={(e) => {
               setInputs((prev) => ({
                 ...prev,
                 cogsInflationPct: parseFloat(e.target.value),
-              }))
-            }
+              }));
+              setHasPendingChanges(true);
+            }}
             className="w-full accent-[#2563EB] cursor-pointer"
           />
           <div className="flex justify-between text-[9px] text-[#64748B]">
@@ -315,12 +334,13 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             max="500"
             step="25"
             value={inputs.rateShockBps}
-            onChange={(e) =>
+            onChange={(e) => {
               setInputs((prev) => ({
                 ...prev,
                 rateShockBps: parseFloat(e.target.value),
-              }))
-            }
+              }));
+              setHasPendingChanges(true);
+            }}
             className="w-full accent-[#2563EB] cursor-pointer"
           />
           <div className="flex justify-between text-[9px] text-[#64748B]">
@@ -332,6 +352,46 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             <strong className="text-[#38BDF8]">Client Impact:</strong> {(latest?.totalDebt ?? 0) === 0 ? "Immune (zero funded debt)." : `Extra bank interest cost of ${formatCurr(extraInterestPaid)}.`}
           </div>
         </div>
+      </div>
+
+      {/* Explicit Run Simulation Trigger (Section 11 Requirement) */}
+      <div className="p-4 bg-[#0B1220] border border-[#1E293B] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs shadow-md">
+        <div className="flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${hasPendingChanges ? "bg-[#F59E0B] animate-ping" : "bg-[#10B981]"}`} />
+          <div>
+            <div className="font-bold text-white flex items-center gap-2">
+              <span>{hasPendingChanges ? "Assumptions modified — ready to simulate" : "Simulation active & verified"}</span>
+              {hasPendingChanges && (
+                <span className="px-1.5 py-0.2 bg-[#F59E0B]/20 border border-[#F59E0B]/40 text-[#F59E0B] text-[10px] rounded">
+                  Pending Recalculation
+                </span>
+              )}
+            </div>
+            <div className="text-[11px] text-[#94A3B8] mt-0.5">
+              {hasPendingChanges
+                ? "Click 'Run Simulation' to compute deterministic stress outcomes on debt service and covenants."
+                : `Active Model: Revenue: ${committedInputs.revenueShockPct}%, COGS: +${committedInputs.cogsInflationPct}%, Rates: +${committedInputs.rateShockBps} bps.`}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleRunSimulation}
+          disabled={isSimulating}
+          className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-[#2563EB]/30 shrink-0"
+        >
+          {isSimulating ? (
+            <>
+              <RotateCcw className="w-4 h-4 animate-spin" />
+              <span>Computing...</span>
+            </>
+          ) : (
+            <>
+              <Cpu className="w-4 h-4" />
+              <span>Run Simulation</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* POWER BI VISUAL COMPARISON BARS (BASELINE VS STRESSED) */}

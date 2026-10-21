@@ -49,20 +49,36 @@ export default function FintraxisTerminalPage() {
   const [selectedAuditRecord, setSelectedAuditRecord] = useState<AuditRecord | null>(null);
   const [activeAuditKey, setActiveAuditKey] = useState<string | null>(null);
 
-  // Hydration safety & Session Restoral
+  // Hydration safety & Session Restoral with URL parameter recognition
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("fintraxis_session");
+    let initialTab: ModuleTab = "00_ADMIN";
+
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         setSession(parsed);
         const isAdmin = parsed.role === "SUPER_ADMIN" || parsed.role === "ADMIN";
-        setActiveTab(isAdmin ? "00_ADMIN" : "overview");
+        initialTab = isAdmin ? "00_ADMIN" : "overview";
       } catch (e) {
         console.warn("Corrupt session in storage, resetting:", e);
       }
     }
+
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlTab = searchParams.get("tab") as ModuleTab | null;
+      const urlCompany = searchParams.get("company");
+      if (urlTab) {
+        initialTab = urlTab;
+      }
+      if (urlCompany) {
+        setSelectedCompanyId(urlCompany);
+      }
+    }
+
+    setActiveTab(initialTab);
   }, []);
 
   // Global Keyboard Shortcuts (Ctrl+K, Ctrl+Shift+L, 1-6 Modules)
@@ -348,10 +364,13 @@ export default function FintraxisTerminalPage() {
             />
           )}
 
-          {/* Module 02: Executive Corporate Overview */}
-          {activeTab === "overview" && profile && (
+          {/* Executive Corporate Overview */}
+          {activeTab === "overview" && (
             <OverviewWorkstation
               profile={profile}
+              companies={companies}
+              onSelectCompany={(id) => setSelectedCompanyId(id)}
+              onRefreshProfile={() => loadProfile(selectedCompanyId)}
               onNavigateToTab={(tab) => setActiveTab(tab)}
             />
           )}

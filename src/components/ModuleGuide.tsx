@@ -40,7 +40,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 0.2: Market valuation and reported accounting fundamentals must remain visually and conceptually separated to prevent mixing intraday market moves with fiscal accounting records.",
   },
   "01_HUB": {
-    title: "MODULE 1: COMPANY INTELLIGENCE WORKSPACE & SECURITIES MASTER",
+    title: "COMPANY INTELLIGENCE WORKSPACE & SECURITIES MASTER",
     badge: "COMPANY INTELLIGENCE",
     purpose:
       "Universal entity resolution across USA (SEC EDGAR), India (NSE/BSE), Japan (TSE), and global exchanges. Ingests raw reported financials, maintains native currency preservation, and maps securities to local SQLite master database.",
@@ -53,7 +53,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 1.1: Financial figures must strictly maintain native as-reported reporting currency (ISO 4217). Cross-border comparisons require auditable reference FX rates.",
   },
   "02_HEALTH": {
-    title: "MODULE 2: FINANCIAL HEALTH ANALYSIS & 3-STATEMENT ACCOUNTING",
+    title: "FINANCIAL HEALTH ANALYSIS & 3-STATEMENT ACCOUNTING",
     badge: "FINANCIAL HEALTH",
     purpose:
       "Explains the company's financial condition using genuine multi-period 3-statement financial ledgers (Income Statement, Balance Sheet, Cash Flow) and reproducible credit solvency ratios.",
@@ -66,7 +66,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 2.1: All financial metrics are calculated via pure backend functions. Zero silent arithmetic substitutions are permitted.",
   },
   "02_STATEMENTS": {
-    title: "MODULE 2: FINANCIAL STATEMENTS (XBRL AUDIT TRAIL)",
+    title: "FINANCIAL STATEMENTS (XBRL AUDIT TRAIL)",
     badge: "LINE-ITEM PROVENANCE",
     purpose:
       "Full 3-statement provenance engine (Income Statement, Balance Sheet, Cash Flow) across multi-period annual filings with cell-level XBRL audit lineage.",
@@ -78,7 +78,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 2.2: Every statement cell must tie back to a verified SEC EDGAR or statutory filing tag.",
   },
   "03_HEALTH": {
-    title: "MODULE 2: CREDIT RISK & SOLVENCY ASSESSMENT",
+    title: "CREDIT RISK & SOLVENCY ASSESSMENT",
     badge: "SOLVENCY HEALTH",
     purpose:
       "Evaluates capital structure robustness, cash flow quality, debt service capacity, and DuPont ROE breakdown.",
@@ -90,7 +90,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 2.3: Altman Z-Score < 1.81 signifies distress. Interest Coverage < 2.50x triggers automatic credit facility covenant review.",
   },
   "03_VULNERABILITY": {
-    title: "MODULE 3: FINANCIAL VULNERABILITY MONITOR & SURVEILLANCE",
+    title: "FINANCIAL VULNERABILITY MONITOR & SURVEILLANCE",
     badge: "EARLY WARNING",
     purpose:
       "Identifies early potential financial deterioration, working capital stress, refinancing walls, and debt covenant proximity.",
@@ -103,7 +103,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 3.1: Two or more CRITICAL flags require mandatory Investment Committee Escalation and temporary freeze on credit facility expansions.",
   },
   "04_VULNERABILITY": {
-    title: "MODULE 3: FINANCIAL VULNERABILITY MONITOR",
+    title: "FINANCIAL VULNERABILITY MONITOR",
     badge: "EARLY WARNING",
     purpose:
       "Algorithmic surveillance monitoring capital erosion, aggressive accounting red-flags, liquidity contraction, and covenant proximity.",
@@ -114,7 +114,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 3.2: Configurable hurdles calibrate against operator underwriting guidelines.",
   },
   "04_DEPENDENCIES": {
-    title: "MODULE 4: BUSINESS DEPENDENCY INTELLIGENCE",
+    title: "BUSINESS DEPENDENCY INTELLIGENCE",
     badge: "BUSINESS DEPENDENCIES",
     purpose:
       "Uncovers disclosed operational dependencies, single-source suppliers, sovereign infrastructure licensors, and major customer distribution channels from statutory notes.",
@@ -127,7 +127,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 4.1: If supplier or customer individual identities are withheld as confidential trade secrets under regulatory exemptions, the platform explicitly notes the limitation without fabricating counterparties.",
   },
   "05_CONCENTRATION": {
-    title: "MODULE 5: CONCENTRATION & EXPOSURE ANALYSIS",
+    title: "CONCENTRATION & EXPOSURE ANALYSIS",
     badge: "CONCENTRATION & EXPOSURE",
     purpose:
       "Quantifies revenue diversification across operating product divisions and geographic jurisdictions using the Herfindahl-Hirschman Index (HHI).",
@@ -137,10 +137,10 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "Herfindahl-Hirschman Index: Assess market concentration regime (<1,500 Diversified, 1,500-2,500 Moderate, >2,500 Concentrated).",
     ],
     decisionRule:
-      "RULE 5.1: High product or geographic concentration (HHI > 2,500) mandates stress testing for regional macro downturns in Module 6.",
+      "RULE 5.1: High product or geographic concentration (HHI > 2,500) mandates stress testing for regional macro downturns.",
   },
   "05_SIMULATOR": {
-    title: "MODULE 6: SCENARIO & RESILIENCE SIMULATOR",
+    title: "SCENARIO & RESILIENCE SIMULATOR",
     badge: "STRESS SIMULATION",
     purpose:
       "Simulates enterprise resilience under severe macroeconomic shocks (revenue contraction, input inflation, and monetary benchmark rate hikes).",
@@ -152,7 +152,7 @@ const MODULE_GUIDES: Record<ModuleTab, GuideContent> = {
       "RULE 6.1: Modeled estimates represent synthetic stress transmissions, not predictive guarantees of future performance.",
   },
   "06_SIMULATOR": {
-    title: "MODULE 6: SCENARIO & RESILIENCE SIMULATOR",
+    title: "SCENARIO & RESILIENCE SIMULATOR",
     badge: "STRESS SIMULATION",
     purpose:
       "Simulates enterprise resilience under severe macroeconomic shocks (revenue contraction, input inflation, and monetary benchmark rate hikes).",
