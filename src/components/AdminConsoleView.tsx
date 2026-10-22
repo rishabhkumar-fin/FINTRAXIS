@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { SessionClearance } from "./AuthGate";
 import { ModuleTab } from "./NavigationTabs";
+import { WorkstationNextStep } from "./WorkstationNav";
 
 export type AdminSubTab =
   | "overview"
@@ -1251,6 +1252,34 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
             </div>
           </div>
 
+          {/* Ephemeral vs Persistent Storage Status Alert */}
+          <div className="p-4 bg-[#0B1220] border border-[#1E293B] rounded-xl flex items-start gap-3.5 text-xs font-mono shadow-sm">
+            <div className="p-2 bg-[#2563EB]/15 border border-[#38BDF8]/40 rounded-lg text-[#38BDF8] shrink-0 mt-0.5">
+              <Database className="w-4 h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-bold text-white tracking-wider uppercase text-[11px]">
+                  STORAGE ENGINE ARCHITECTURE &bull; RUNTIME PERSISTENCE
+                </span>
+                <span className={`px-2 py-0.5 text-[10px] rounded font-bold border ${
+                  stats?.database.isVercel
+                    ? "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/40"
+                    : "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40"
+                }`}>
+                  {stats?.database.isVercel
+                    ? "VERCEL SERVERLESS CONTAINER (/tmp/fintraxis.db)"
+                    : "LOCAL EDGE HOST (data/fintraxis.db)"}
+                </span>
+              </div>
+              <p className="text-[#94A3B8] leading-relaxed text-[11px]">
+                {stats?.database.isVercel
+                  ? "Runtime operations (admin edits, user provisioning, custom hurdle calibration) execute against high-performance SQLite WAL in /tmp. Note: Vercel serverless containers are ephemeral; permanent baseline company records remain versioned and immutable in repository seed files."
+                  : "Database is running on localhost with Write-Ahead Logging (WAL) enabled on data/fintraxis.db. All mutations, company enrollments, and operator clearings persist directly to disk."}
+              </p>
+            </div>
+          </div>
+
           {/* Engine & Runtime Diagnostics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="bg-[#101621] border border-[#253247] p-5 rounded-xl">
@@ -2465,6 +2494,20 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
             </form>
           </div>
         </div>
+      )}
+      {onNavigateToTab && (
+        <WorkstationNextStep
+          currentTab="00_ADMIN"
+          nextTab="overview"
+          nextTitle="Executive Corporate Overview"
+          nextCode="OVERVIEW"
+          reason="Return to the financial analysis workstations to review company risk models, run stress tests, or generate IC briefs."
+          onNavigate={onNavigateToTab}
+          relatedLinks={[
+            { tab: "01_HUB", label: "Company Hub" },
+            { tab: "02_HEALTH", label: "3-Statement Solvency" },
+          ]}
+        />
       )}
     </div>
   );

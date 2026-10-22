@@ -15,6 +15,7 @@ import {
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { formatFinancialValue } from "@/lib/formatters";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface OverviewWorkstationProps {
   profile: CompanyRiskProfile | null;
@@ -86,14 +87,17 @@ export function OverviewWorkstation({
 
   return (
     <div className="flex flex-col gap-6 font-sans">
-      {/* 0. Top Explicit Company Selector & Freshness Bar (Section 4 Priority Fix) */}
-      <div className="bg-[#0B1220] border border-[#1E293B] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
+      {/* Workstation Standard Institutional Header */}
+      <WorkstationHeader
+        code="OVERVIEW"
+        title="Executive Corporate Overview"
+        company={company}
+        period={latestPeriod?.period || "FY2024"}
+        filingForm={latestPeriod?.filingForm || "10-K"}
+        question="What is this company's high-level financial health, capital structure, and current credit risk posture?"
+      >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[#94A3B8] font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-            <Building2 className="w-3.5 h-3.5 text-[#38BDF8]" />
-            ACTIVE ISSUER:
-          </span>
-          {companies && companies.length > 0 && onSelectCompany ? (
+          {companies && companies.length > 0 && onSelectCompany && (
             <select
               value={company.id}
               onChange={(e) => onSelectCompany(e.target.value)}
@@ -105,34 +109,19 @@ export function OverviewWorkstation({
                 </option>
               ))}
             </select>
-          ) : (
-            <span className="font-bold text-white bg-[#111827] px-3 py-1 rounded border border-[#253247]">
-              {company.name} ({company.symbol})
-            </span>
           )}
-
-          <span className="px-2 py-0.5 bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30 rounded text-[10px] font-bold">
-            {company.country} &bull; {company.exchange}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[#10B981] text-[11px] bg-[#10B981]/10 px-2.5 py-1 rounded border border-[#10B981]/30">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Audited Period: <strong>{latestPeriod?.period || "FY2024"}</strong> ({latestPeriod?.filingForm || "10-K"})</span>
-          </div>
 
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#111827] hover:bg-[#1E293B] border border-[#1E293B] hover:border-[#38BDF8] text-white text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111827] hover:bg-[#1E293B] border border-[#1E293B] hover:border-[#38BDF8] text-white text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50"
             title="Re-verify company statements against database cache"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-[#38BDF8] ${isRefreshing ? "animate-spin" : ""}`} />
-            <span>{isRefreshing ? "Refreshing..." : "Refresh Data"}</span>
+            <span>{isRefreshing ? "Refreshing..." : "Refresh"}</span>
           </button>
         </div>
-      </div>
+      </WorkstationHeader>
 
       {refreshNotice && (
         <div className="p-3 bg-[#10B981]/10 border border-[#10B981]/40 text-[#10B981] text-xs font-mono rounded-lg flex items-center gap-2">
@@ -140,39 +129,6 @@ export function OverviewWorkstation({
           <span>{refreshNotice}</span>
         </div>
       )}
-
-      {/* 1. Header Profile & Identification */}
-      <div className="bg-[#101621] border border-[#253247] p-5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-[#3867F5]/20 border border-[#3867F5]/40 text-[#38BDF8] text-[10px] font-mono font-bold tracking-wider rounded">
-              EXECUTIVE CORPORATE OVERVIEW
-            </span>
-            <span className="text-xs text-[#9AA8BC] font-mono">
-              {company.accountingStandard} &bull; {company.fiscalYearEnd} FYE
-            </span>
-          </div>
-          <div className="flex items-baseline gap-3 mt-1.5">
-            <h2 className="text-2xl font-bold text-[#F3F6FC] tracking-tight">{company.name}</h2>
-            <span className="text-sm font-mono font-bold text-[#38BDF8]">
-              {company.symbol} ({company.exchange})
-            </span>
-          </div>
-          <p className="text-xs text-[#9AA8BC] mt-0.5">
-            {company.sector} &bull; {company.industry} &bull; {company.country}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#151E2D] border border-[#253247] rounded-lg text-right font-mono">
-            <div className="text-[10px] text-[#9AA8BC] uppercase">STATUTORY REPORTING BASIS</div>
-            <div className="text-sm font-bold text-[#16A879] mt-0.5">
-              {latestPeriod ? `${latestPeriod.period} (${latestPeriod.filingForm})` : "N/A"}
-            </div>
-            <div className="text-[10px] text-[#5A687D]">Filing Date: {latestPeriod?.filingDate || "Audited"}</div>
-          </div>
-        </div>
-      </div>
 
       {/* 2. Distinct Separation: Market Data vs Accounting Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -454,6 +410,20 @@ export function OverviewWorkstation({
           </div>
         </button>
       </div>
+
+      {/* Sequential Next Step in Workflow */}
+      <WorkstationNextStep
+        currentTab="overview"
+        nextTab="01_HUB"
+        nextTitle="Company Intelligence Hub"
+        nextCode="DESK 01"
+        reason="Examine interactive price charts, audited filing history, and cross-peer comparative fundamentals."
+        onNavigate={onNavigateToTab}
+        relatedLinks={[
+          { tab: "02_HEALTH", label: "3-Statement Solvency" },
+          { tab: "03_VULNERABILITY", label: "Vulnerability Monitor" },
+        ]}
+      />
     </div>
   );
 }

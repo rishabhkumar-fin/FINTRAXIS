@@ -9,6 +9,7 @@ import { CompanyChartModal } from "./CompanyChartModal";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
 import { NormalizedMarketSearchItem } from "@/app/api/market/search/route";
 import { GrowwStockChart } from "./GrowwStockChart";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface CompanyHubProps {
   companies: CompanyEntity[];
@@ -111,6 +112,16 @@ export function CompanyHub({
 
   return (
     <div className="space-y-4 font-mono text-xs">
+      {/* Workstation Standard Institutional Header */}
+      <WorkstationHeader
+        code="DESK 01"
+        title="Securities Directory & Intelligence Hub"
+        company={selected}
+        period={activeProfile?.periods[0]?.period}
+        filingForm={activeProfile?.periods[0]?.filingForm}
+        question="Which corporate issuer are we evaluating, and what are its market valuation, audited filing dates, and peer fundamentals?"
+      />
+
       {/* Omnibar Global Market Search - Full Width & Clean */}
       <div className="p-3 bg-[#0E131A] border border-[#1E2536] rounded-sm">
         <div className="relative w-full">
@@ -681,27 +692,19 @@ export function CompanyHub({
         </div>
       </div>
 
-      {/* Sequential Next Step Recommendation Card */}
-      <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border border-[#38BDF8]/30 rounded-lg p-5 flex flex-col md:flex-row items-center justify-between gap-4 font-mono">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#38BDF8] font-bold">
-            RECOMMENDED WORKFLOW STEP 2 OF 6
-          </div>
-          <div className="text-sm font-bold text-white mt-1">
-            Next: Assess Financial Health, Statements & Solvency
-          </div>
-          <div className="text-xs text-[#94A3B8] mt-0.5">
-            Review the 3-statement accounting ledger, XBRL line items, working capital, and credit solvency ratios for {selected?.name || "the selected issuer"}.
-          </div>
-        </div>
-        <button
-          onClick={() => onNavigateToTab("02_HEALTH")}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0"
-        >
-          <span>Assess Financial Health (Module 2)</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Sequential Next Step in Workflow */}
+      <WorkstationNextStep
+        currentTab="01_HUB"
+        nextTab="02_HEALTH"
+        nextTitle="Financial Health & 3-Statement Solvency"
+        nextCode="DESK 02"
+        reason={`Review the 3-statement accounting ledger, XBRL line items, working capital, and credit solvency ratios for ${selected?.name || "the selected issuer"}.`}
+        onNavigate={onNavigateToTab}
+        relatedLinks={[
+          { tab: "overview", label: "Executive Overview" },
+          { tab: "03_VULNERABILITY", label: "Vulnerability Monitor" },
+        ]}
+      />
 
       {/* Power BI Deep Interactive Chart Inspector Modal */}
       <CompanyChartModal

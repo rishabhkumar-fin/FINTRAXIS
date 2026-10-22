@@ -2,11 +2,9 @@
 
 import React, { useState } from "react";
 import {
-  PieChart,
   Globe2,
   Layers,
   Info,
-  ArrowRight,
   TrendingUp,
   BarChart2,
   FileCheck2,
@@ -14,6 +12,7 @@ import {
 import { CompanyRiskProfile } from "@/lib/types";
 import { getConcentrationAnalysis } from "@/lib/businessDisclosures";
 import { ModuleTab } from "./NavigationTabs";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface ConcentrationExposureProps {
   profile: CompanyRiskProfile;
@@ -66,39 +65,25 @@ export function ConcentrationExposure({
 
   return (
     <div className="space-y-6">
-      {/* Module Header */}
-      <div className="bg-[#0D121F] border border-[#1E293B] rounded-lg p-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30">
-                REVENUE DIVERSIFICATION
-              </span>
-              <span className="text-xs font-mono text-[#64748B]">
-                SEGMENT & GEOGRAPHIC DIVERSIFICATION AUDIT
-              </span>
-            </div>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2.5">
-              <PieChart className="w-5 h-5 text-[#38BDF8]" />
-              Concentration & Exposure Analysis
-            </h1>
-            <p className="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
-              Measures where the entity&apos;s commercial revenues and cash flows originate across business
-              divisions and geographic jurisdictions. Evaluates revenue vulnerability via the{" "}
-              <span className="text-white font-medium">Herfindahl-Hirschman Index (HHI)</span>.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="px-2.5 py-1 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 rounded flex items-center gap-1.5">
-              <FileCheck2 className="w-3.5 h-3.5" />
-              <span>{analysis.regulatoryStandard}</span>
-            </span>
-          </div>
+      {/* Workstation Standard Institutional Header */}
+      <WorkstationHeader
+        code="DESK 05"
+        title="Concentration & Exposure Analysis"
+        company={company}
+        period={profile.periods[0]?.period}
+        filingForm={profile.periods[0]?.filingForm}
+        question="How concentrated is revenue and supply among top counterparties, and does it exceed prudential risk thresholds?"
+      >
+        <div className="flex items-center gap-2 font-mono text-xs">
+          <span className="px-2.5 py-1 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 rounded flex items-center gap-1.5">
+            <FileCheck2 className="w-3.5 h-3.5" />
+            <span>{analysis.regulatoryStandard}</span>
+          </span>
         </div>
+      </WorkstationHeader>
 
-        {/* KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-[#1E293B]/70 font-mono text-xs">
+      {/* KPI Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
           <div className="bg-[#0A0E17] border border-[#1E293B] rounded p-3">
             <div className="text-[10px] text-[#64748B] uppercase tracking-wider">Top Business Line</div>
             <div className="text-base font-bold text-white mt-1 truncate" title={analysis.topSegmentName}>
@@ -139,7 +124,6 @@ export function ConcentrationExposure({
             </div>
           </div>
         </div>
-      </div>
 
       {/* View Switcher: Business vs Geographic */}
       <div className="flex items-center justify-between border-b border-[#1E293B] pb-2 text-xs font-mono">
@@ -289,27 +273,19 @@ export function ConcentrationExposure({
         </div>
       </div>
 
-      {/* Sequential Next Step Recommendation Card */}
-      <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border border-[#38BDF8]/30 rounded-lg p-5 flex flex-col md:flex-row items-center justify-between gap-4 font-mono">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#38BDF8] font-bold">
-            RECOMMENDED WORKFLOW STEP 6 OF 6
-          </div>
-          <div className="text-sm font-bold text-white mt-1">
-            Next: Test Adverse Macro Shocks in Stress & Resilience Simulator
-          </div>
-          <div className="text-xs text-[#94A3B8] mt-0.5">
-            Subject this entity&apos;s cash flows and debt covenants to modeled interest rate hikes, revenue contraction, and margin compression.
-          </div>
-        </div>
-        <button
-          onClick={() => onNavigateToTab?.("06_SIMULATOR")}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0"
-        >
-          <span>Run Stress Simulation (Module 6)</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Sequential Next Step in Workflow */}
+      <WorkstationNextStep
+        currentTab="05_CONCENTRATION"
+        nextTab="06_SIMULATOR"
+        nextTitle="Scenario & Resilience Simulator"
+        nextCode="DESK 06"
+        reason="Subject this entity's cash flows and debt covenants to modeled interest rate hikes, revenue contraction, and margin compression."
+        onNavigate={(tab) => onNavigateToTab?.(tab)}
+        relatedLinks={[
+          { tab: "07_REPORTS", label: "Executive Credit Memo" },
+          { tab: "02_HEALTH", label: "3-Statement Solvency" },
+        ]}
+      />
     </div>
   );
 }

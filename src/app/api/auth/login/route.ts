@@ -5,6 +5,7 @@ import { eq, or, sql } from "drizzle-orm";
 import crypto from "crypto";
 import { checkAuthRateLimit, recordFailedAuthAttempt, resetAuthRateLimit, createDemoSession } from "@/lib/authRateLimit";
 import { logAuditEvent } from "@/lib/auditLogger";
+import { createSignedSessionToken, SESSION_COOKIE_NAME } from "@/lib/sessionToken";
 
 export async function POST(request: Request) {
   try {
@@ -14,6 +15,21 @@ export async function POST(request: Request) {
     // If explicit demo access requested, issue isolated demo session
     if (isDemoRequest) {
       const demo = createDemoSession();
+      const signedToken = createSignedSessionToken({
+        id: demo.id,
+        name: demo.name,
+        email: demo.email,
+        desk: demo.desk,
+        avatar: demo.avatar,
+        role: "DEMO_ANALYST",
+        isDemo: true,
+        netDebtEbitdaHurdle: 3.5,
+        interestCoverageHurdle: 2.5,
+        currentRatioHurdle: 1.1,
+        authenticatedAt: demo.authenticatedAt,
+      });
+      demo.sessionToken = signedToken;
+
       logAuditEvent("DEMO_SESSION", "Guest", "Guest demo session initiated", "INFO");
       const response = NextResponse.json({
         success: true,
@@ -22,8 +38,8 @@ export async function POST(request: Request) {
       });
 
       response.cookies.set({
-        name: "fintraxis_session",
-        value: demo.sessionToken,
+        name: SESSION_COOKIE_NAME,
+        value: signedToken,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -142,8 +158,22 @@ export async function POST(request: Request) {
     resetAuthRateLimit(identifier);
 
     const isGuest = user.email.startsWith("guest@") || user.name.toLowerCase().includes("guest");
-    const userRole = user.role || (user.email === "admin@fintraxis.terminal" || user.name.toLowerCase().includes("admin") ? "SUPER_ADMIN" : (isGuest ? "DEMO_ANALYST" : "ANALYST"));
-    const sessionToken = `SOV-${crypto.randomBytes(12).toString("hex").toUpperCase()}`;
+    const userRole = (user.role || (user.email === "admin@fintraxis.terminal" || user.name.toLowerCase().includes("admin") ? "SUPER_ADMIN" : (isGuest ? "DEMO_ANALYST" : "ANALYST"))) as "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+    const nowIso = new Date().toISOString();
+
+    const signedToken = createSignedSessionToken({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      desk: user.desk,
+      avatar: user.avatar,
+      role: userRole,
+      isDemo: isGuest,
+      netDebtEbitdaHurdle: user.netDebtEbitdaHurdle ?? 3.50,
+      interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
+      currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
+      authenticatedAt: nowIso,
+    });
 
     logAuditEvent("AUTH_LOGIN", user.email, `Session established: ${user.name} [Role: ${userRole}]`, "INFO");
 
@@ -159,8 +189,8 @@ export async function POST(request: Request) {
       netDebtEbitdaHurdle: user.netDebtEbitdaHurdle ?? 3.50,
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
       currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
-      sessionToken,
-      authenticatedAt: new Date().toISOString(),
+      sessionToken: signedToken,
+      authenticatedAt: nowIso,
     };
 
     const response = NextResponse.json({
@@ -170,8 +200,8 @@ export async function POST(request: Request) {
     });
 
     response.cookies.set({
-      name: "fintraxis_session",
-      value: sessionToken,
+      name: SESSION_COOKIE_NAME,
+      value: signedToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

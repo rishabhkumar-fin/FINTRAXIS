@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  Network,
   FileText,
   ExternalLink,
   Plus,
@@ -14,6 +13,7 @@ import {
 import { CompanyRiskProfile, BusinessDependency } from "@/lib/types";
 import { getBusinessDependencies } from "@/lib/businessDisclosures";
 import { ModuleTab } from "./NavigationTabs";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface BusinessDependenciesProps {
   profile: CompanyRiskProfile;
@@ -74,42 +74,26 @@ export function BusinessDependencies({
 
   return (
     <div className="space-y-6">
-      {/* Module Header */}
-      <div className="bg-[#0D121F] border border-[#1E293B] rounded-lg p-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30">
-                SUPPLY CHAIN &amp; PARTNERS
-              </span>
-              <span className="text-xs font-mono text-[#64748B]">
-                OPERATIONAL RELATIONSHIP SURVEILLANCE
-              </span>
-            </div>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2.5">
-              <Network className="w-5 h-5 text-[#38BDF8]" />
-              Business Dependency Intelligence
-            </h1>
-            <p className="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
-              Examines disclosed business relationships, single-source operational bottlenecks,
-              and critical partner dependencies reported in regulatory filings for{" "}
-              <span className="text-white font-medium">{company.name} ({company.symbol})</span>.
-            </p>
-          </div>
+      {/* Workstation Standard Institutional Header */}
+      <WorkstationHeader
+        code="DESK 04"
+        title="Business Dependency Intelligence & Supply Chain Architecture"
+        company={company}
+        period={profile.periods[0]?.period}
+        filingForm={profile.periods[0]?.filingForm}
+        question="What single points of failure exist in this company's operations, supply chains, key suppliers, and utility dependencies?"
+      >
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1E293B] hover:bg-[#2A374D] text-[#38BDF8] border border-[#38BDF8]/30 rounded text-xs font-mono transition-colors cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Record Analyst Note</span>
+        </button>
+      </WorkstationHeader>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1E293B] hover:bg-[#2A374D] text-[#38BDF8] border border-[#38BDF8]/30 rounded text-xs font-mono transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Record Analyst Note</span>
-            </button>
-          </div>
-        </div>
-
-        {/* High-Level Dependency KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-[#1E293B]/70 font-mono text-xs">
+      {/* High-Level Dependency KPI Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
           <div className="bg-[#0A0E17] border border-[#1E293B] rounded p-3">
             <div className="text-[10px] text-[#64748B] uppercase tracking-wider">Disclosed Counterparties</div>
             <div className="text-lg font-bold text-white mt-1">{dependencies.length}</div>
@@ -140,7 +124,6 @@ export function BusinessDependencies({
             <div className="text-[10px] text-[#94A3B8] mt-0.5">Statutory Footnotes & 10-K</div>
           </div>
         </div>
-      </div>
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 border-b border-[#1E293B] pb-2 text-xs font-mono">
@@ -401,6 +384,19 @@ export function BusinessDependencies({
           </div>
         </div>
       )}
+      {/* Sequential Next Step in Workflow */}
+      <WorkstationNextStep
+        currentTab="04_DEPENDENCIES"
+        nextTab="05_CONCENTRATION"
+        nextTitle="Concentration & Exposure Analysis"
+        nextCode="DESK 05"
+        reason="Quantify revenue and supplier Herfindahl-Hirschman (HHI) concentration metrics and geographic exposure."
+        onNavigate={(tab) => onNavigateToTab?.(tab)}
+        relatedLinks={[
+          { tab: "03_VULNERABILITY", label: "Vulnerability Monitor" },
+          { tab: "06_SIMULATOR", label: "Scenario Simulator" },
+        ]}
+      />
     </div>
   );
 }

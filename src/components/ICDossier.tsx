@@ -26,13 +26,20 @@ import { CompanyRiskProfile } from "@/lib/types";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
 import { SessionClearance } from "./AuthGate";
 import { WallStreetAvatar, AvatarPresetId } from "./WallStreetAvatar";
+import { ModuleTab } from "./NavigationTabs";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface ICDossierProps {
   profile: CompanyRiskProfile;
   session?: SessionClearance | null;
+  onNavigateToTab?: (tab: ModuleTab) => void;
 }
 
-export function ICDossier({ profile, session }: ICDossierProps) {
+export function ICDossier({
+  profile,
+  session,
+  onNavigateToTab,
+}: ICDossierProps) {
   const { company, periods, latestRatios, riskScore, earlyWarningFlags, simulation } = profile;
   const latest = periods[0];
   const prior = periods[1];
@@ -272,6 +279,18 @@ Synchronized live on FINTRAXIS Terminal.`;
 
   return (
     <div className="space-y-4 font-mono text-xs select-none">
+      {/* Workstation Standard Institutional Header (Hidden on Print) */}
+      <div className="no-print">
+        <WorkstationHeader
+          code="DESK 07"
+          title="Investment Committee Research Brief & Memo Export"
+          company={company}
+          period={latest?.period}
+          filingForm={latest?.filingForm}
+          question="What is the final credit recommendation, risk rating, covenant clearance, and audit trail for supervisory approval?"
+        />
+      </div>
+
       {/* =========================================================================
           TOP ACTION & PRESENTATION CONTROLS (Hidden on Print)
          ========================================================================= */}
@@ -1624,6 +1643,22 @@ Synchronized live on FINTRAXIS Terminal.`;
             </div>
           </div>
       </div>
+      {onNavigateToTab && (
+        <div className="no-print mt-4">
+          <WorkstationNextStep
+            currentTab="07_REPORTS"
+            nextTab="overview"
+            nextTitle="Executive Corporate Overview"
+            nextCode="OVERVIEW"
+            reason="Cycle back to the high-level dashboard to evaluate another security or refine underwriting hurdles."
+            onNavigate={onNavigateToTab}
+            relatedLinks={[
+              { tab: "01_HUB", label: "Company Hub" },
+              { tab: "00_ADMIN", label: "Admin Panel" },
+            ]}
+          />
+        </div>
+      )}
     </div>
   );
 }

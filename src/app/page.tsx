@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AuthGate, SessionClearance } from "@/components/AuthGate";
 import { SidebarNavigation } from "@/components/SidebarNavigation";
 import { MacroTickerTape } from "@/components/MacroTickerTape";
@@ -30,6 +30,7 @@ import { Loader2, AlertCircle, Sparkles, Menu, Search } from "lucide-react";
 
 export default function FintraxisTerminalPage() {
   const [mounted, setMounted] = useState<boolean>(false);
+  const [isVerifyingAuth, setIsVerifyingAuth] = useState<boolean>(true);
   const [session, setSession] = useState<SessionClearance | null>(null);
   const [activeTab, setActiveTab] = useState<ModuleTab>("00_ADMIN");
   const [companies, setCompanies] = useState<CompanyEntity[]>(SEED_COMPANIES);
@@ -37,6 +38,10 @@ export default function FintraxisTerminalPage() {
   const [profile, setProfile] = useState<CompanyRiskProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Scroll Container & Request Abort Refs
+  const mainScrollRef = useRef<HTMLElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Command Palette, Settings Modal & AI Copilot State
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
@@ -49,36 +54,147 @@ export default function FintraxisTerminalPage() {
   const [selectedAuditRecord, setSelectedAuditRecord] = useState<AuditRecord | null>(null);
   const [activeAuditKey, setActiveAuditKey] = useState<string | null>(null);
 
-  // Hydration safety & Session Restoral with URL parameter recognition
+  // URL Synchronization Helper (Source of Truth)
+  const updateUrl = useCallback((tab: ModuleTab, companyId: string) => {
+    if (typeof window === "undefined") return;
+    const currentParams = new URLSearchParams(window.location.search);
+    if (currentParams.get("tab") === tab && currentParams.get("company") === companyId) {
+      return;
+    }
+    currentParams.set("tab", tab);
+    currentParams.set("company", companyId);
+    const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+    window.history.pushState({ tab, companyId }, "", newUrl);
+  }, []);
+
+  const handleSelectTab = useCallback((tab: ModuleTab) => {
+    setActiveTab(tab);
+    updateUrl(tab, selectedCompanyId);
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [selectedCompanyId, updateUrl]);
+
+  const handleSelectCompany = useCallback((companyId: string) => {
+    setSelectedCompanyId(companyId);
+    updateUrl(activeTab, companyId);
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [activeTab, updateUrl]);
+
+  // Handle browser Back / Forward navigation (PopState)
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("fintraxis_session");
-    let initialTab: ModuleTab = "00_ADMIN";
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const urlTab = params.get("tab") as ModuleTab | null;
+      const urlCompany = params.get("company");
+      if (urlTab) setActiveTab(urlTab);
+      if (urlCompany) setSelectedCompanyId(urlCompany);
+      if (mainScrollRef.current) {
+        mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+      }
+    };
 
-    if (stored) {
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Reset scroll position to top whenever activeTab or selectedCompanyId changes
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [activeTab, selectedCompanyId]);
+
+  // Hydration safety & Server-Trusted Session Verification on Initial Startup
+  useEffect(() => {
+    let isCancelled = false;
+
+    const verifySessionAndInit = async () => {
+      let initialTab: ModuleTab = "00_ADMIN";
+      let initialCompany = "AAPL";
+
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlTab = searchParams.get("tab") as ModuleTab | null;
+        const urlCompany = searchParams.get("company");
+        if (urlTab) initialTab = urlTab;
+        if (urlCompany) initialCompany = urlCompany;
+      }
+
+      setSelectedCompanyId(initialCompany);
+
       try {
-        const parsed = JSON.parse(stored);
-        setSession(parsed);
-        const isAdmin = parsed.role === "SUPER_ADMIN" || parsed.role === "ADMIN";
-        initialTab = isAdmin ? "00_ADMIN" : "overview";
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const json = await res.json();
+          if (!isCancelled && json.success && json.user) {
+            const u = json.user;
+            const verifiedSession: SessionClearance = {
+              id: u.id,
+              userName: u.name,
+              userEmail: u.email,
+              analystId: u.name,
+              desk: u.desk,
+              role: u.role,
+              isDemo: u.isDemo,
+              avatarId: u.avatar,
+              netDebtEbitdaHurdle: u.netDebtEbitdaHurdle ?? 3.5,
+              interestCoverageHurdle: u.interestCoverageHurdle ?? 2.5,
+              currentRatioHurdle: u.currentRatioHurdle ?? 1.1,
+              sessionToken: u.sessionToken,
+              authenticatedAt: u.authenticatedAt,
+            };
+            setSession(verifiedSession);
+            localStorage.setItem("fintraxis_session", JSON.stringify(verifiedSession));
+
+            if (typeof window !== "undefined" && !new URLSearchParams(window.location.search).get("tab")) {
+              const isAdmin = verifiedSession.role === "SUPER_ADMIN" || verifiedSession.role === "ADMIN";
+              initialTab = isAdmin ? "00_ADMIN" : "overview";
+            }
+            setActiveTab(initialTab);
+            setIsVerifyingAuth(false);
+            setMounted(true);
+            return;
+          }
+        }
       } catch (e) {
-        console.warn("Corrupt session in storage, resetting:", e);
+        console.warn("Server session check error, checking storage fallback:", e);
       }
-    }
 
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      const urlTab = searchParams.get("tab") as ModuleTab | null;
-      const urlCompany = searchParams.get("company");
-      if (urlTab) {
-        initialTab = urlTab;
+      // Offline / LocalStorage fallback
+      const stored = localStorage.getItem("fintraxis_session");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (!isCancelled) {
+            setSession(parsed);
+            if (typeof window !== "undefined" && !new URLSearchParams(window.location.search).get("tab")) {
+              const isAdmin = parsed.role === "SUPER_ADMIN" || parsed.role === "ADMIN";
+              initialTab = isAdmin ? "00_ADMIN" : "overview";
+            }
+          }
+        } catch {
+          localStorage.removeItem("fintraxis_session");
+        }
+      } else {
+        if (!isCancelled) setSession(null);
       }
-      if (urlCompany) {
-        setSelectedCompanyId(urlCompany);
-      }
-    }
 
-    setActiveTab(initialTab);
+      if (!isCancelled) {
+        setActiveTab(initialTab);
+        setIsVerifyingAuth(false);
+        setMounted(true);
+      }
+    };
+
+    verifySessionAndInit();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   // Global Keyboard Shortcuts (Ctrl+K, Ctrl+Shift+L, 1-6 Modules)
@@ -113,26 +229,34 @@ export default function FintraxisTerminalPage() {
         target.isContentEditable;
 
       if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "1") setActiveTab("01_HUB");
-        else if (e.key === "2") setActiveTab("02_HEALTH");
-        else if (e.key === "3") setActiveTab("03_VULNERABILITY");
-        else if (e.key === "4") setActiveTab("04_DEPENDENCIES");
-        else if (e.key === "5") setActiveTab("05_CONCENTRATION");
-        else if (e.key === "6") setActiveTab("06_SIMULATOR");
-        else if (e.key === "7") setActiveTab("07_REPORTS");
-        else if (e.key === "8") setActiveTab("overview");
+        if (e.key === "1") handleSelectTab("01_HUB");
+        else if (e.key === "2") handleSelectTab("02_HEALTH");
+        else if (e.key === "3") handleSelectTab("03_VULNERABILITY");
+        else if (e.key === "4") handleSelectTab("04_DEPENDENCIES");
+        else if (e.key === "5") handleSelectTab("05_CONCENTRATION");
+        else if (e.key === "6") handleSelectTab("06_SIMULATOR");
+        else if (e.key === "7") handleSelectTab("07_REPORTS");
+        else if (e.key === "8") handleSelectTab("overview");
         else if (e.key === "9") setIsAiOpen((prev) => !prev);
-        else if (e.key === "0") setActiveTab("00_ADMIN");
+        else if (e.key === "0") handleSelectTab("00_ADMIN");
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleSelectTab]);
 
-  const handleLockSession = () => {
+  const handleLockSession = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.warn("Logout notification error:", e);
+    }
     localStorage.removeItem("fintraxis_session");
     setSession(null);
+    if (typeof window !== "undefined") {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   };
 
   const handleUpdateSettings = (updated: OperatorSettings) => {
@@ -167,12 +291,20 @@ export default function FintraxisTerminalPage() {
     }
   }, []);
 
-  // Load Active Company Risk Profile
+  // Load Active Company Risk Profile with in-flight AbortController
   const loadProfile = useCallback(async (companyId: string) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/companies/${encodeURIComponent(companyId)}`);
+      const res = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
+        signal: controller.signal,
+      });
       const json = await res.json();
       if (json.success && json.data) {
         setProfile(json.data);
@@ -180,6 +312,9 @@ export default function FintraxisTerminalPage() {
         throw new Error(json.error || "Failed to load risk profile");
       }
     } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return; // Aborted by newer company selection
+      }
       console.error("Profile load failure:", err);
       const msg = err instanceof Error ? err.message : "Failed to load risk profile";
       setError(msg);
@@ -244,9 +379,17 @@ export default function FintraxisTerminalPage() {
     });
   };
 
-  // Prevent flash of content during hydration
-  if (!mounted) {
-    return <div className="min-h-screen bg-[#070A0F]" />;
+  // Prevent flash of content: Render neutral branded terminal splash while verifying clearance
+  if (isVerifyingAuth || !mounted) {
+    return (
+      <div className="min-h-screen bg-[#070A0F] flex flex-col items-center justify-center font-mono text-slate-400 gap-4 select-none">
+        <PeacockLogo size="lg" showLockup={false} />
+        <div className="flex items-center gap-2.5 text-xs tracking-widest text-[#38BDF8]">
+          <Loader2 className="w-4 h-4 animate-spin text-[#38BDF8]" />
+          <span>VERIFYING TERMINAL CLEARANCE &bull; FINTRAXIS SOVEREIGN</span>
+        </div>
+      </div>
+    );
   }
 
   // Enforce Real Authentication & Onboarding Gate
@@ -255,11 +398,10 @@ export default function FintraxisTerminalPage() {
       <AuthGate
         onAuthenticated={(s) => {
           setSession(s);
-          if (s.role === "SUPER_ADMIN" || s.role === "ADMIN") {
-            setActiveTab("00_ADMIN");
-          } else {
-            setActiveTab("overview");
-          }
+          const isAdmin = s.role === "SUPER_ADMIN" || s.role === "ADMIN";
+          const targetTab: ModuleTab = isAdmin ? "00_ADMIN" : "overview";
+          setActiveTab(targetTab);
+          updateUrl(targetTab, selectedCompanyId);
         }}
       />
     );
@@ -270,10 +412,10 @@ export default function FintraxisTerminalPage() {
       {/* Column 1: Vertical Institutional Left Sidebar */}
       <SidebarNavigation
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         companies={companies}
         activeProfile={profile}
-        onSelectCompany={(id) => setSelectedCompanyId(id)}
+        onSelectCompany={handleSelectCompany}
         session={session}
         onLogout={handleLockSession}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -337,7 +479,7 @@ export default function FintraxisTerminalPage() {
         />
 
         {/* Scrollable Workstation Canvas */}
-        <main className="flex-1 p-4 lg:p-6 max-w-[1720px] w-full mx-auto relative pb-20 overflow-y-auto">
+        <main ref={mainScrollRef} className="flex-1 p-4 lg:p-6 max-w-[1720px] w-full mx-auto relative pb-20 overflow-y-auto">
           {error && (
             <div className="mb-4 p-3 bg-[#F43F5E]/10 border border-[#F43F5E] text-[#F43F5E] text-xs flex items-center justify-between rounded">
               <div className="flex items-center gap-2">
@@ -360,7 +502,7 @@ export default function FintraxisTerminalPage() {
           {activeTab === "00_ADMIN" && (
             <AdminConsoleView
               session={session}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -369,9 +511,9 @@ export default function FintraxisTerminalPage() {
             <OverviewWorkstation
               profile={profile}
               companies={companies}
-              onSelectCompany={(id) => setSelectedCompanyId(id)}
+              onSelectCompany={handleSelectCompany}
               onRefreshProfile={() => loadProfile(selectedCompanyId)}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -380,8 +522,8 @@ export default function FintraxisTerminalPage() {
             <CompanyHub
               companies={companies}
               activeProfile={profile}
-              onSelectCompany={(id) => setSelectedCompanyId(id)}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onSelectCompany={handleSelectCompany}
+              onNavigateToTab={handleSelectTab}
               onRefreshMaster={loadCompanies}
               isLoading={isLoading}
             />
@@ -393,7 +535,7 @@ export default function FintraxisTerminalPage() {
               profile={profile}
               onAuditMetric={handleAuditMetric}
               activeAuditKey={activeAuditKey}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -402,7 +544,7 @@ export default function FintraxisTerminalPage() {
             <VulnerabilityMonitor
               profile={profile}
               session={session}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -410,7 +552,7 @@ export default function FintraxisTerminalPage() {
           {activeTab === "04_DEPENDENCIES" && profile && (
             <BusinessDependencies
               profile={profile}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -418,7 +560,7 @@ export default function FintraxisTerminalPage() {
           {activeTab === "05_CONCENTRATION" && profile && (
             <ConcentrationExposure
               profile={profile}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
@@ -426,13 +568,17 @@ export default function FintraxisTerminalPage() {
           {(activeTab === "06_SIMULATOR" || activeTab === "05_SIMULATOR") && profile && (
             <StressSimulator
               profile={profile}
-              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onNavigateToTab={handleSelectTab}
             />
           )}
 
           {/* Supporting Capability: Investment Committee Research Reports & Export */}
           {(activeTab === "07_REPORTS" || activeTab === "06_MEMO") && profile && (
-            <ICDossier profile={profile} session={session} />
+            <ICDossier
+              profile={profile}
+              session={session}
+              onNavigateToTab={handleSelectTab}
+            />
           )}
 
           {/* Fallback Loading State */}
@@ -462,13 +608,12 @@ export default function FintraxisTerminalPage() {
           isOpen={isCommandPaletteOpen}
           onClose={() => setIsCommandPaletteOpen(false)}
           onSelectCompany={(ticker) => {
-            setSelectedCompanyId(ticker);
-            loadProfile(ticker);
+            handleSelectCompany(ticker);
           }}
-          onSelectTab={(tab) => setActiveTab(tab)}
+          onSelectTab={handleSelectTab}
           onLockSession={handleLockSession}
           onExportMemo={() => {
-            setActiveTab("06_MEMO");
+            handleSelectTab("07_REPORTS");
             setTimeout(() => window.print(), 200);
           }}
         />

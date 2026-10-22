@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, RotateCcw, BarChart3, Info, ArrowRight } from "lucide-react";
+import { Cpu, RotateCcw, BarChart3, Info } from "lucide-react";
 import { CompanyRiskProfile, StressSimulationInputs } from "@/lib/types";
 import { runStressSimulation } from "@/lib/financialEngine";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
+import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
 
 interface StressSimulatorProps {
   profile: CompanyRiskProfile;
@@ -102,28 +103,15 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
 
   return (
     <div className="space-y-4 font-mono text-xs select-none">
-      {/* Simulation Header */}
-      <div className="p-4 bg-[#090E17] border border-[#1E293B] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#101A2E] border border-[#2563EB]/40 rounded-lg text-[#38BDF8]">
-            <Cpu className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[#F8FAFC] tracking-wider uppercase text-xs">
-                MACRO STRESS TESTING &amp; CLIENT SIMULATION LAB
-              </span>
-              <span className="px-2 py-0.5 bg-[#2563EB]/20 border border-[#2563EB] text-[#38BDF8] text-[10px] font-bold rounded">
-                DETERMINISTIC SENSITIVITY
-              </span>
-            </div>
-            <div className="text-[10px] text-[#94A3B8] mt-0.5">
-              Subject: {company.name} ({company.symbol}) &bull; Base Reporting: {company.currency} ({company.scaleUnit})
-            </div>
-          </div>
-        </div>
-
-        {/* Wall Street Institutional Scenario Presets */}
+      {/* Workstation Standard Institutional Header */}
+      <WorkstationHeader
+        code="DESK 06"
+        title="Scenario & Macro Resilience Simulator"
+        company={company}
+        period={latest?.period}
+        filingForm={latest?.filingForm}
+        question="Under severe macroeconomic stress or revenue decline, will the company breach debt covenants or exhaust operating liquidity?"
+      >
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[10px] text-[#38BDF8] uppercase font-bold tracking-wider">WALL ST PRESETS:</span>
           <button
@@ -164,7 +152,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
                 : "bg-[#191308] hover:bg-[#2A1F0D] border-[#F59E0B]/40 text-[#F59E0B]"
             }`}
           >
-            Stagflation Squeeze (-15% / +250bps)
+            Stagflation Shock (-15% / +250bps)
           </button>
           <button
             onClick={() => handlePreset(10, 0, -50)}
@@ -184,7 +172,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
+      </WorkstationHeader>
 
       {/* EXECUTIVE CLIENT VERDICT: CAN THIS FIRM SURVIVE ADVERSE MACRO SHOCKS? */}
       <div className="p-4 bg-[#0B111E] border border-[#2563EB]/40 rounded-xl space-y-3 shadow-lg">
@@ -543,27 +531,19 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         </table>
       </div>
 
-      {/* Sequential Next Step Recommendation Card */}
-      <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border border-[#38BDF8]/30 rounded-lg p-5 flex flex-col md:flex-row items-center justify-between gap-4 font-mono mt-6">
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[#38BDF8] font-bold">
-            RESEARCH WORKFLOW CONCLUSION
-          </div>
-          <div className="text-sm font-bold text-white mt-1">
-            Next: Generate Evidence-Backed Research Report & Boardroom Deck
-          </div>
-          <div className="text-xs text-[#94A3B8] mt-0.5">
-            Assemble analytical conclusions from all 6 core modules into an Investment Committee Credit Memo with cryptographic SHA-256 verification and PDF/CSV export.
-          </div>
-        </div>
-        <button
-          onClick={() => onNavigateToTab?.("07_REPORTS")}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded transition-colors shadow-lg shadow-[#2563EB]/30 shrink-0 cursor-pointer"
-        >
-          <span>Generate 1-Click Executive Credit Memo</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Sequential Next Step in Workflow */}
+      <WorkstationNextStep
+        currentTab="06_SIMULATOR"
+        nextTab="07_REPORTS"
+        nextTitle="Investment Committee Research Brief & Memo"
+        nextCode="DESK 07"
+        reason="Assemble analytical conclusions from all core modules into a formal credit brief with audit trail and committee recommendation."
+        onNavigate={(tab) => onNavigateToTab?.(tab)}
+        relatedLinks={[
+          { tab: "03_VULNERABILITY", label: "Vulnerability Monitor" },
+          { tab: "overview", label: "Executive Overview" },
+        ]}
+      />
     </div>
   );
 }

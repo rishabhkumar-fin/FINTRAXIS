@@ -1,4 +1,5 @@
 import { sqlite } from "../db/index.ts";
+import { extractSessionFromRequest } from "./sessionToken.ts";
 
 export type OperatorRole = "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
 
@@ -35,13 +36,76 @@ export function verifyOperatorClearance(
   requiredRoles: OperatorRole[] = ["SUPER_ADMIN", "ADMIN", "LEAD_ANALYST", "ANALYST", "DEMO_ANALYST"]
 ): ClearanceCheckResult {
   try {
+    // 1. Primary: Verify signed, stateless session token from cookie/headers
+    const signedSession = extractSessionFromRequest(request);
+    if (signedSession) {
+      if (signedSession.isDemo) {
+        const isAllowed = requiredRoles.includes("DEMO_ANALYST");
+        return {
+          allowed: isAllowed,
+          operator: signedSession.name || "Demo Analyst",
+          role: "DEMO_ANALYST",
+          isDemo: true,
+          userId: signedSession.id,
+          userEmail: signedSession.email,
+          error: isAllowed ? undefined : "Access Denied: Guest demo sessions operate in sandbox mode and cannot modify production records.",
+        };
+      }
+
+      // If user row exists in SQLite, ensure they are not deactivated
+      if (signedSession.email) {
+        try {
+          const userRow = sqlite
+            .prepare("SELECT id, name, role, status FROM users WHERE email = ?")
+            .get(signedSession.email.toLowerCase()) as { id: string; name: string; role: string; status: string } | undefined;
+
+          if (userRow && userRow.status === "DEACTIVATED") {
+            return {
+              allowed: false,
+              operator: signedSession.name,
+              role: signedSession.role,
+              isDemo: false,
+              userId: signedSession.id,
+              userEmail: signedSession.email,
+              error: "Access Denied: This operator account has been deactivated by a System Administrator.",
+            };
+          }
+        } catch {
+          // If DB check fails, rely on signed token
+        }
+      }
+
+      const isAllowed = requiredRoles.includes(signedSession.role);
+      if (!isAllowed) {
+        return {
+          allowed: false,
+          operator: signedSession.name,
+          role: signedSession.role,
+          isDemo: false,
+          userId: signedSession.id,
+          userEmail: signedSession.email,
+          error: `Access Denied: Your assigned role (${signedSession.role}) does not have permission to execute this administrative operation.`,
+        };
+      }
+
+      return {
+        allowed: true,
+        operator: signedSession.name,
+        role: signedSession.role,
+        isDemo: false,
+        userId: signedSession.id,
+        userEmail: signedSession.email,
+      };
+    }
+
+    // 2. Secondary fallback for automated test callers passing ?operator= or x-operator-email headers
     const cookieHeader = request.headers.get("cookie") || "";
     const sessionTokenMatch = cookieHeader.match(/fintraxis_session=([^;]+)/);
-    const sessionToken = sessionTokenMatch ? sessionTokenMatch[1] : request.headers.get("x-session-token");
+    const rawToken = sessionTokenMatch ? sessionTokenMatch[1] : request.headers.get("x-session-token");
     const operatorParam = new URL(request.url).searchParams.get("operator") || request.headers.get("x-operator-email");
 
     // Check for Demo Session pattern
-    if (sessionToken?.startsWith("DEMO-") || operatorParam === "guest" || operatorParam === "demo@fintraxis.terminal") {
+    if (rawToken?.startsWith("DEMO-") || operatorParam === "guest" || operatorParam === "demo@fintraxis.terminal") {
       const isAllowed = requiredRoles.includes("DEMO_ANALYST");
       return {
         allowed: isAllowed,
