@@ -18,6 +18,14 @@ export const companies = sqliteTable("companies", {
   fxTimestamp: text("fx_timestamp").notNull(),
   marketCap: real("market_cap"),
   sharePrice: real("share_price"),
+  // Phase 9 Additive Promoter / Ownership Governance
+  hasPromoterGroup: real("has_promoter_group").default(1), // 1 if disclosed promoter group exists, 0 if widely held
+  promoterHoldingPct: real("promoter_holding_pct"),
+  promoterPledgedPct: real("promoter_pledged_pct"), // % of promoter holding pledged
+  promoterPledgedCapitalPct: real("promoter_pledged_capital_pct"), // % of total share capital
+  promoterPledgeQuarter: text("promoter_pledge_quarter"),
+  promoterPledgeSourceUrl: text("promoter_pledge_source_url"),
+  promoterPledgeVerification: text("promoter_pledge_verification").default("NOT_INDEPENDENTLY_VERIFIED"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
@@ -82,6 +90,35 @@ export const financialPeriods = sqliteTable("financial_periods", {
   // Derived
   ebitda: real("ebitda"),
   ebitdaFormula: text("ebitda_formula"),
+
+  // Phase 9 Additive Financial Appraisal & Working Capital Fields
+  receivablesAgeingUnder90Days: real("receivables_ageing_under_90_days"),
+  workingCapitalBorrowings: real("working_capital_borrowings"),
+  intangibles: real("intangibles"),
+  contingentLiabilitiesTotal: real("contingent_liabilities_total"),
+  contingentLiabilitiesTax: real("contingent_liabilities_tax"),
+  contingentLiabilitiesGuarantees: real("contingent_liabilities_guarantees"),
+  contingentLiabilitiesClaims: real("contingent_liabilities_claims"),
+  contingentLiabilitiesSourceUrl: text("contingent_liabilities_source_url"),
+  contingentLiabilitiesVerification: text("contingent_liabilities_verification").default("NOT_INDEPENDENTLY_VERIFIED"),
+});
+
+export const debtInstruments = sqliteTable("debt_instruments", {
+  id: text("id").primaryKey(),
+  companyId: text("company_id")
+    .notNull()
+    .references(() => companies.id),
+  period: text("period").notNull(),
+  instrumentName: text("instrument_name").notNull(),
+  coupon: real("coupon"),
+  couponType: text("coupon_type").notNull().default("FIXED"),
+  currency: text("currency").notNull(),
+  maturityYear: text("maturity_year"),
+  principalAmount: real("principal_amount").notNull(),
+  sourceForm: text("source_form").notNull(),
+  filingDate: text("filing_date").notNull(),
+  sectionOrPage: text("section_or_page").notNull(),
+  verificationFlag: text("verification_flag").notNull().default("NOT_INDEPENDENTLY_VERIFIED"),
 });
 
 export const auditLineItems = sqliteTable("audit_line_items", {
@@ -158,3 +195,4 @@ export type User = typeof users.$inferSelect;
 export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type SystemJob = typeof systemJobs.$inferSelect;
+export type DebtInstrument = typeof debtInstruments.$inferSelect;

@@ -22,7 +22,10 @@ export type ConceptId =
   | "covenant-headroom"
   | "floating-debt"
   | "as-of-dates"
-  | "nd-explainer";
+  | "nd-explainer"
+  | "promoter-pledge"
+  | "drawing-power"
+  | "contingent-liabilities";
 
 interface ConceptTooltipProps {
   conceptId: ConceptId;

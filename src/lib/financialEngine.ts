@@ -5,12 +5,16 @@ import {
   RiskTier,
   StressSimulationInputs,
   StressSimulationResult,
+  CompanyEntity,
 } from "./types";
 import {
   calculateTolToTnw,
   calculateDebtServiceProxy,
   calculateAltmanZScore,
   calculateBeneishMScore,
+  calculatePromoterPledgeRisk,
+  calculateDrawingPower,
+  calculateContingentLiabilitiesRatio,
 } from "./financialCalculations";
 
 /**
@@ -20,7 +24,8 @@ import {
 export function calculateRatios(
   period: FinancialPeriodData,
   priorPeriod?: FinancialPeriodData | null,
-  isFinancialInstitution: boolean = false
+  isFinancialInstitution: boolean = false,
+  company?: CompanyEntity | null
 ): RatioAnalysis {
   const currentRatio =
     period.totalCurrentAssets && period.totalCurrentLiabilities && period.totalCurrentLiabilities > 0
@@ -163,6 +168,36 @@ export function calculateRatios(
     }
   }
 
+  // Promoter Share Pledging (SEBI LODR Reg 31)
+  const pledgeRes = calculatePromoterPledgeRisk({
+    hasDisclosedPromoterGroup: company ? company.hasPromoterGroup !== 0 : true,
+    promoterHoldingPct: company?.promoterHoldingPct,
+    pledgedPctOfPromoterHolding: company?.promoterPledgedPct,
+    pledgedPctOfTotalCapital: company?.promoterPledgedCapitalPct,
+  });
+  const promoterPledgeRatio = pledgeRes.isComputable ? pledgeRes.value : null;
+
+  // Indicative Drawing Power (Annual-statement indication)
+  const dpRes = calculateDrawingPower({
+    inventory: period.inventories,
+    tradeCreditors: period.accountsPayable,
+    eligibleReceivablesUnder90Days: period.receivablesAgeingUnder90Days,
+    workingCapitalBorrowings: period.workingCapitalBorrowings,
+    isBankOrFinancial: isFinancialInstitution,
+  });
+  const indicativeDrawingPower = dpRes.isComputable ? dpRes.value : null;
+
+  // Contingent Liabilities to Tangible Net Worth
+  const tnw =
+    period.totalShareholdersEquity !== null && period.totalShareholdersEquity !== undefined
+      ? period.totalShareholdersEquity - (period.intangibles ?? 0)
+      : null;
+  const clRes = calculateContingentLiabilitiesRatio({
+    totalContingentLiabilities: period.contingentLiabilitiesTotal,
+    tangibleNetWorth: tnw,
+  });
+  const contingentLiabilitiesRatio = clRes.isComputable ? clRes.value : null;
+
   return {
     currentRatio,
     quickRatio,
@@ -182,6 +217,9 @@ export function calculateRatios(
     altmanZZone,
     beneishMScore,
     beneishMZone,
+    promoterPledgeRatio,
+    indicativeDrawingPower,
+    contingentLiabilitiesRatio,
   };
 }
 

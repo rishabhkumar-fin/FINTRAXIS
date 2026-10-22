@@ -5,6 +5,7 @@ import { Layers, BarChart3, LayoutGrid, Info, ArrowRight, Scale } from "lucide-r
 import { CompanyRiskProfile } from "@/lib/types";
 import { formatRatio, formatPct, formatFinancialValue } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
+import { DrawingPowerCard } from "./DrawingPowerCard";
 
 interface HealthRatiosProps {
   profile: CompanyRiskProfile;
@@ -844,6 +845,9 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           <span className="text-[#38BDF8] ml-2 shrink-0">Standard Accord</span>
         </div>
       </div>
+
+      {/* Indicative Working Capital Drawing Power Card */}
+      <DrawingPowerCard company={company} period={periods[0]} />
     </div>
   );
 }

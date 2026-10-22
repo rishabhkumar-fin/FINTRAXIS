@@ -21,6 +21,13 @@ export interface CompanyEntity {
   fxTimestamp: string;
   marketCap?: number | null;
   sharePrice?: number | null;
+  hasPromoterGroup?: number | null; // 1 = promoter group disclosed, 0 = dispersed/none
+  promoterHoldingPct?: number | null;
+  promoterPledgedPct?: number | null; // % of promoter holding pledged
+  promoterPledgedCapitalPct?: number | null; // % of total equity capital
+  promoterPledgeQuarter?: string | null;
+  promoterPledgeSourceUrl?: string | null;
+  promoterPledgeVerification?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,6 +90,17 @@ export interface FinancialPeriodData {
   // Derived
   ebitda: number | null;
   ebitdaFormula?: string | null;
+
+  // Phase 9 Additive Working Capital & Appraisal Fields
+  receivablesAgeingUnder90Days?: number | null;
+  workingCapitalBorrowings?: number | null;
+  intangibles?: number | null;
+  contingentLiabilitiesTotal?: number | null;
+  contingentLiabilitiesTax?: number | null;
+  contingentLiabilitiesGuarantees?: number | null;
+  contingentLiabilitiesClaims?: number | null;
+  contingentLiabilitiesSourceUrl?: string | null;
+  contingentLiabilitiesVerification?: string | null;
 }
 
 export interface AuditRecord {
@@ -122,6 +140,10 @@ export interface RatioAnalysis {
   beneishMScore?: number | null;
   beneishMZone?: string | null;
   debtServiceProxy?: number | null;
+  // Phase 9 Additive Ratios
+  promoterPledgeRatio?: number | null;
+  indicativeDrawingPower?: number | null;
+  contingentLiabilitiesRatio?: number | null;
 }
 
 export interface EarlyWarningFlag {

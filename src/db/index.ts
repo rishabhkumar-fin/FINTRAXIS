@@ -113,6 +113,57 @@ try {
     // Column already exists
   }
 
+  // Phase 9 Additive Tables & Columns (Safe, additive migrations)
+  try {
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS debt_instruments (
+        id TEXT PRIMARY KEY,
+        company_id TEXT NOT NULL,
+        period TEXT NOT NULL,
+        instrument_name TEXT NOT NULL,
+        coupon REAL,
+        coupon_type TEXT NOT NULL DEFAULT 'FIXED',
+        currency TEXT NOT NULL,
+        maturity_year TEXT,
+        principal_amount REAL NOT NULL,
+        source_form TEXT NOT NULL,
+        filing_date TEXT NOT NULL,
+        section_or_page TEXT NOT NULL,
+        verification_flag TEXT NOT NULL DEFAULT 'NOT_INDEPENDENTLY_VERIFIED'
+      );
+    `);
+  } catch {
+    // Table already exists
+  }
+
+  const additiveCompanyCols = [
+    `ALTER TABLE companies ADD COLUMN has_promoter_group REAL DEFAULT 1;`,
+    `ALTER TABLE companies ADD COLUMN promoter_holding_pct REAL;`,
+    `ALTER TABLE companies ADD COLUMN promoter_pledged_pct REAL;`,
+    `ALTER TABLE companies ADD COLUMN promoter_pledged_capital_pct REAL;`,
+    `ALTER TABLE companies ADD COLUMN promoter_pledge_quarter TEXT;`,
+    `ALTER TABLE companies ADD COLUMN promoter_pledge_source_url TEXT;`,
+    `ALTER TABLE companies ADD COLUMN promoter_pledge_verification TEXT DEFAULT 'NOT_INDEPENDENTLY_VERIFIED';`,
+  ];
+  for (const sql of additiveCompanyCols) {
+    try { sqlite.exec(sql); } catch {}
+  }
+
+  const additivePeriodCols = [
+    `ALTER TABLE financial_periods ADD COLUMN receivables_ageing_under_90_days REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN working_capital_borrowings REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN intangibles REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_total REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_tax REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_guarantees REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_claims REAL;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_source_url TEXT;`,
+    `ALTER TABLE financial_periods ADD COLUMN contingent_liabilities_verification TEXT DEFAULT 'NOT_INDEPENDENTLY_VERIFIED';`,
+  ];
+  for (const sql of additivePeriodCols) {
+    try { sqlite.exec(sql); } catch {}
+  }
+
   // Seed default system_config if missing or insert new enterprise parameters
   const now = new Date().toISOString();
   const insertConfigOrIgnore = sqlite.prepare(`

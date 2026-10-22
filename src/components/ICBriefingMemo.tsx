@@ -37,6 +37,10 @@ Net Debt / EBITDA: ${formatRatio(latestRatios.netDebtToEbitda)}
 Current Ratio: ${formatRatio(latestRatios.currentRatio)}
 Quick Ratio: ${formatRatio(latestRatios.quickRatio)}
 CFO / Net Income Conversion: ${formatRatio(latestRatios.cfoToNetIncome)}
+TOL / TNW Multiple: ${formatRatio(latestRatios.tolToTnw)}
+Promoter Share Pledge %: ${company.hasPromoterGroup === 0 ? "N/A (Dispersed Ownership)" : company.promoterPledgedPct !== null && company.promoterPledgedPct !== undefined ? `${company.promoterPledgedPct.toFixed(2)}%` : "N/D"}
+Indicative Drawing Power: ${latestRatios.indicativeDrawingPower !== null && latestRatios.indicativeDrawingPower !== undefined ? formatCurr(latestRatios.indicativeDrawingPower) : "N/D"}
+Contingent Liabilities / Net Worth: ${latestRatios.contingentLiabilitiesRatio !== null && latestRatios.contingentLiabilitiesRatio !== undefined ? `${latestRatios.contingentLiabilitiesRatio.toFixed(2)}%` : "N/D"}
 
 2. EARLY WARNING SURVEILLANCE & COVENANT AUDIT
 ------------------------------------------------------
@@ -201,6 +205,38 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
               <div className="text-[10px] text-[#5A687D]">NET DEBT / EBITDA</div>
               <div className="text-sm font-bold font-mono-numbers text-[#2563EB] mt-0.5">
                 {formatRatio(latestRatios.netDebtToEbitda)}
+              </div>
+            </div>
+            <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
+              <div className="text-[10px] text-[#5A687D]">TOL / TNW MULTIPLE</div>
+              <div className="text-sm font-bold font-mono-numbers text-[#E1E7EC] mt-0.5">
+                {formatRatio(latestRatios.tolToTnw)}
+              </div>
+            </div>
+            <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
+              <div className="text-[10px] text-[#5A687D]">PROMOTER PLEDGE %</div>
+              <div className="text-sm font-bold font-mono-numbers text-[#E1E7EC] mt-0.5">
+                {company.hasPromoterGroup === 0
+                  ? "N/A"
+                  : company.promoterPledgedPct !== null && company.promoterPledgedPct !== undefined
+                  ? `${company.promoterPledgedPct.toFixed(1)}%`
+                  : "N/D"}
+              </div>
+            </div>
+            <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
+              <div className="text-[10px] text-[#5A687D]">INDICATIVE DRAWING POWER</div>
+              <div className="text-sm font-bold font-mono-numbers text-[#E1E7EC] mt-0.5">
+                {latestRatios.indicativeDrawingPower !== null && latestRatios.indicativeDrawingPower !== undefined
+                  ? formatCurr(latestRatios.indicativeDrawingPower)
+                  : "N/D"}
+              </div>
+            </div>
+            <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
+              <div className="text-[10px] text-[#5A687D]">CONTINGENT LIAB / TNW</div>
+              <div className="text-sm font-bold font-mono-numbers text-[#E1E7EC] mt-0.5">
+                {latestRatios.contingentLiabilitiesRatio !== null && latestRatios.contingentLiabilitiesRatio !== undefined
+                  ? `${latestRatios.contingentLiabilitiesRatio.toFixed(1)}%`
+                  : "N/D"}
               </div>
             </div>
           </div>

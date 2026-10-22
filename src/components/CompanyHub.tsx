@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Globe2, ArrowRight, Loader2, Database, BarChart3 } from "lucide-react";
+import { Search, Globe2, ArrowRight, Loader2, Database, BarChart3, ShieldCheck, ExternalLink } from "lucide-react";
 import { CompanyEntity, CompanyRiskProfile } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 import { VisualAnalyticsDashboard } from "./VisualAnalyticsDashboard";
 import { CompanyChartModal } from "./CompanyChartModal";
+import { ConceptTooltip } from "./ConceptTooltip";
 import { NormalizedMarketQuote } from "@/app/api/market/quote/[ticker]/route";
 import { NormalizedMarketSearchItem } from "@/app/api/market/search/route";
 import { GrowwStockChart } from "./GrowwStockChart";
@@ -569,6 +570,102 @@ export function CompanyHub({
                 </div>
               </div>
 
+              {/* Corporate Governance & Ownership Architecture (SEBI LODR Reg 31 / Ownership Disclosure) */}
+              <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg space-y-3 font-mono">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#182337] pb-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#38BDF8]" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      Corporate Governance &amp; Promoter Encumbrance Surveillance
+                    </span>
+                    <ConceptTooltip conceptId="promoter-pledge" />
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-[#94A3B8]">
+                    <span>DISCLOSURE STANDARD: SEBI (LODR) REG. 31 / SEC PROXY</span>
+                    <span className="px-1.5 py-0.2 bg-[#2563EB]/15 border border-[#2563EB]/40 text-[#60A5FA] rounded">
+                      AUDITED FILING
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                  {/* Promoter Holding % */}
+                  <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded">
+                    <div className="text-[9.5px] text-[#64748B] uppercase">PROMOTER GROUP HOLDING</div>
+                    <div className="text-base font-bold text-[#F8FAFC] mt-0.5">
+                      {selected.hasPromoterGroup === 0
+                        ? "N/A (Dispersed / Public)"
+                        : selected.promoterHoldingPct !== null && selected.promoterHoldingPct !== undefined
+                        ? `${selected.promoterHoldingPct.toFixed(2)}%`
+                        : "N/D (Not Stored)"}
+                    </div>
+                    <div className="text-[9px] text-[#94A3B8]">
+                      {selected.hasPromoterGroup === 0 ? "No controlling promoter group disclosed" : "Share of total paid-up equity"}
+                    </div>
+                  </div>
+
+                  {/* Pledged % of Promoter Holding */}
+                  <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded">
+                    <div className="flex items-center justify-between text-[9.5px] text-[#64748B] uppercase">
+                      <span>PROMOTER PLEDGE RATIO</span>
+                      <span className="text-[8px] text-[#38BDF8]">SEBI REG 31</span>
+                    </div>
+                    <div className="text-base font-bold mt-0.5">
+                      {selected.hasPromoterGroup === 0 ? (
+                        <span className="text-[#94A3B8]">N/A (No Promoter)</span>
+                      ) : selected.promoterPledgedPct !== null && selected.promoterPledgedPct !== undefined ? (
+                        <span className={selected.promoterPledgedPct <= 10 ? "text-[#10B981]" : selected.promoterPledgedPct <= 30 ? "text-[#F59E0B]" : "text-[#EF4444]"}>
+                          {selected.promoterPledgedPct.toFixed(2)}%
+                        </span>
+                      ) : (
+                        <span className="text-[#94A3B8]">N/D (Unavailable)</span>
+                      )}
+                    </div>
+                    <div className="text-[9px] text-[#94A3B8]">
+                      Ref: &le; 10% Low | 10-30% Moderate | &gt; 30% Elevated
+                    </div>
+                  </div>
+
+                  {/* Pledged % of Total Capital */}
+                  <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded">
+                    <div className="text-[9.5px] text-[#64748B] uppercase">PLEDGED % OF TOTAL CAPITAL</div>
+                    <div className="text-base font-bold text-[#F8FAFC] mt-0.5">
+                      {selected.hasPromoterGroup === 0
+                        ? "0.00% (Clean)"
+                        : selected.promoterPledgedCapitalPct !== null && selected.promoterPledgedCapitalPct !== undefined
+                        ? `${selected.promoterPledgedCapitalPct.toFixed(2)}%`
+                        : "N/D"}
+                    </div>
+                    <div className="text-[9px] text-[#94A3B8]">Encumbered shares / total equity base</div>
+                  </div>
+
+                  {/* Provenance & Verification */}
+                  <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded">
+                    <div className="text-[9.5px] text-[#64748B] uppercase">SOURCE PROVENANCE &amp; STATUS</div>
+                    <div className="text-xs font-bold text-[#38BDF8] mt-1 truncate">
+                      {selected.promoterPledgeQuarter || "Quarterly Shareholding Filing"}
+                    </div>
+                    <div className="text-[9px] text-[#94A3B8] mt-0.5 flex items-center justify-between">
+                      <span>{selected.promoterPledgeVerification || "Not independently verified"}</span>
+                      {selected.promoterPledgeSourceUrl && (
+                        <a
+                          href={selected.promoterPledgeSourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#38BDF8] hover:underline flex items-center gap-0.5"
+                        >
+                          FILING <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[9.5px] text-[#64748B] bg-[#05070B] p-2 border border-[#182337] rounded">
+                  <span className="font-semibold text-[#94A3B8]">Risk Note:</span> A pledge becomes a risk mainly through margin calls if the share price falls. Bands are illustrative reference levels (default 10% / 30%), user-adjustable, and not a published regulatory standard.
+                </div>
+              </div>
+
               {/* DATA COVERAGE & AUDIT GAP MATRIX (Phase 2 Standard) */}
               <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -629,6 +726,38 @@ export function CompanyHub({
                             </td>
                           );
                         })}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Trade Receivables Ageing (&lt; 90 Days)</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right">
+                            {p.receivablesAgeingUnder90Days !== null && p.receivablesAgeingUnder90Days !== undefined
+                              ? `✓ ${p.receivablesAgeingUnder90Days.toLocaleString()}`
+                              : "N/D (Requires Note Parsing)"}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Contingent Liabilities Disclosures</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right">
+                            {p.contingentLiabilitiesTotal !== null && p.contingentLiabilitiesTotal !== undefined
+                              ? `✓ Disclosed (${p.contingentLiabilitiesTotal.toLocaleString()})`
+                              : "N/D (Requires Note 19 Parsing)"}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Promoter Encumbrance Pattern</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right">
+                            {selected.hasPromoterGroup === 0
+                              ? "N/A (Dispersed Ownership)"
+                              : selected.promoterPledgedPct !== null && selected.promoterPledgedPct !== undefined
+                              ? `✓ ${selected.promoterPledgedPct}% Pledged`
+                              : "N/D (SEBI Reg 31 Check)"}
+                          </td>
+                        ))}
                       </tr>
                     </tbody>
                   </table>

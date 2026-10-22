@@ -207,6 +207,51 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
                   <strong>Indian Banking Benchmark:</strong> Commonly applied rule of thumb in Indian bank appraisal (IBA / consortium lending practice), typically &lt; 3.00x for manufacturing and infrastructure. Illustrative reference level, user-adjustable; not a statutory RBI limit.
                 </p>
               </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  9. PROMOTER SHARE PLEDGING (SEBI LODR REGULATION 31)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5 space-y-1">
+                  <div>Pledge Ratio (%) = (Promoter Shares Pledged ÷ Total Promoter Shares Held) × 100</div>
+                  <div>Pledged % of Total Capital = (Promoter Shares Pledged ÷ Total Paid-Up Capital) × 100</div>
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Source Standard:</strong> SEBI (Listing Obligations and Disclosure Requirements) Regulations 2015, Regulation 31, quarterly shareholding patterns filed on BSE and NSE.
+                </p>
+                <p className="text-[11px] text-[#94A3B8] mt-1">
+                  <strong>Risk Mechanism:</strong> A pledge becomes a risk primarily through lender margin calls if the stock price falls. Illustrative reference levels (user-adjustable, not statutory): Low &le; 10%, Moderate 10% - 30%, Elevated &gt; 30%. Applicability depends on the disclosure of a promoter or controlling group, not on the accounting standard.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  10. WORKING CAPITAL: INDICATIVE DRAWING POWER (INDIA)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5 space-y-1">
+                  <div>Paid Stock = max(0, Inventory − Trade Creditors for Goods)</div>
+                  <div>Eligible Receivables = Trade Receivables not older than 90 days (from Schedule III ageing note)</div>
+                  <div>Indicative DP = [Paid Stock × (1 − Margin_inv)] + [Eligible Receivables × (1 − Margin_rec)]</div>
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Appraisal Context:</strong> Real drawing power is computed monthly by the lending bank from verified stock and book-debt statements under sanction letter terms. This card uses annual-statement figures and provides only an indication. It is NOT an MPBF calculation (which relates to Tandon/Nayak maximum permissible bank finance).
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  11. CONTINGENT LIABILITIES TO TANGIBLE NET WORTH (IND-AS 37 / ASC 450)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5">
+                  Contingent Liabilities Ratio (%) = (Total Disclosed Contingent Liabilities ÷ Tangible Net Worth) × 100
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Source Note:</strong> Disclosed categories (disputed taxes, bank/corporate guarantees, claims not acknowledged as debt) extracted from audited footnotes.
+                </p>
+                <p className="text-[11px] text-[#94A3B8] mt-1">
+                  <strong>Risk Accord:</strong> Contingent liabilities are possible obligations. They may never crystallize, and the filing&apos;s estimate may be incomplete. Illustrative reference levels (user-adjustable): Low &le; 30%, Moderate 30% - 50%, Elevated &gt; 50%.
+                </p>
+              </div>
             </div>
           )}
 

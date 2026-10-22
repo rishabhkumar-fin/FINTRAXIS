@@ -231,7 +231,7 @@ export async function getCompanyDetails(
   const isFinancial = company.sector === "Financial Services" || company.sector === "Banking";
   const latestPeriod = periods[0] ?? null;
   const latestRatios = latestPeriod
-    ? calculateRatios(latestPeriod, periods[1] ?? null, isFinancial)
+    ? calculateRatios(latestPeriod, periods[1] ?? null, isFinancial, company)
     : {
         currentRatio: null,
         quickRatio: null,
@@ -251,6 +251,9 @@ export async function getCompanyDetails(
         altmanZZone: null,
         beneishMScore: null,
         beneishMZone: null,
+        promoterPledgeRatio: null,
+        indicativeDrawingPower: null,
+        contingentLiabilitiesRatio: null,
       };
 
   const { flags, score, tier } = evaluateEarlyWarnings(periods, latestRatios);

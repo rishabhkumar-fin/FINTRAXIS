@@ -991,3 +991,575 @@ export function calculateCovenantHeadroom(
     liquidityHeadroom: liqResult,
   };
 }
+
+// ============================================================================
+// PHASE 9: INSTITUTIONAL METRICS (PROMOTER PLEDGE, DRAWING POWER, CONTINGENTS, DEBT)
+// ============================================================================
+
+export interface PromoterPledgeInputs {
+  promoterSharesHeld?: number | null;
+  promoterSharesPledged?: number | null;
+  promoterHoldingPct?: number | null;
+  pledgedPctOfPromoterHolding?: number | null;
+  totalShares?: number | null;
+  pledgedPctOfTotalCapital?: number | null;
+  hasDisclosedPromoterGroup?: boolean;
+  lowThreshold?: number; // default 10.0
+  moderateThreshold?: number; // default 30.0
+}
+
+export interface PromoterPledgeResult extends ComputableResult<number> {
+  pledgedPctOfPromoter: number | null;
+  pledgedPctOfTotalCapital: number | null;
+  promoterHoldingPct: number | null;
+  riskTier: "LOW_RISK" | "MODERATE_RISK" | "ELEVATED_RISK" | "NOT_APPLICABLE" | "UNKNOWN";
+}
+
+/**
+ * Promoter Share Pledging (SEBI LODR Regulation 31 / Indian Appraisal Standard):
+ * Evaluates the percentage of promoter group shares encumbered to lenders.
+ * A high pledge ratio exposes the company to margin call liquidation risk if stock prices decline.
+ */
+export function calculatePromoterPledgeRisk(inputs: PromoterPledgeInputs): PromoterPledgeResult {
+  const formula = "Pledge Ratio (%) = (Promoter Shares Pledged ÷ Total Promoter Shares Held) × 100";
+  const lowThresh = inputs.lowThreshold ?? 10.0;
+  const modThresh = inputs.moderateThreshold ?? 30.0;
+
+  // 1. Check if entity has a disclosed promoter group
+  if (inputs.hasDisclosedPromoterGroup === false) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NOT_APPLICABLE",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: null,
+      riskTier: "NOT_APPLICABLE",
+      reason: "Not applicable: no promoter or controlling group disclosed in statutory filings (e.g. widely held / institutional ownership).",
+      interpretation: "Not applicable: no promoter or controlling group disclosed in filings.",
+    };
+  }
+
+  // 2. Validate presence of promoter holding
+  const hasPromoterPct = inputs.promoterHoldingPct !== undefined && inputs.promoterHoldingPct !== null;
+  const hasPromoterShares = inputs.promoterSharesHeld !== undefined && inputs.promoterSharesHeld !== null;
+
+  if (!hasPromoterPct && !hasPromoterShares) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: null,
+      riskTier: "UNKNOWN",
+      reason: "Promoter shareholding disclosure is missing or unavailable from regulatory filing.",
+      interpretation: "Unavailable from disclosure: promoter holding data not reported.",
+    };
+  }
+
+  const promoterHolding = hasPromoterPct ? inputs.promoterHoldingPct! : inputs.promoterSharesHeld!;
+  if (promoterHolding <= 0) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NOT_APPLICABLE",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: 0,
+      riskTier: "NOT_APPLICABLE",
+      reason: "Disclosed promoter group holding is zero (100% public or non-promoter shareholding).",
+      interpretation: "Not applicable: disclosed promoter holding is zero.",
+    };
+  }
+
+  // 3. Resolve pledge ratio
+  let pledgeRatio: number;
+  if (inputs.pledgedPctOfPromoterHolding !== undefined && inputs.pledgedPctOfPromoterHolding !== null) {
+    pledgeRatio = inputs.pledgedPctOfPromoterHolding;
+  } else if (
+    inputs.promoterSharesPledged !== undefined &&
+    inputs.promoterSharesPledged !== null &&
+    inputs.promoterSharesHeld !== undefined &&
+    inputs.promoterSharesHeld !== null
+  ) {
+    if (inputs.promoterSharesHeld === 0) {
+      return {
+        value: null,
+        isComputable: false,
+        status: "ZERO_DENOMINATOR",
+        formula,
+        pledgedPctOfPromoter: null,
+        pledgedPctOfTotalCapital: null,
+        promoterHoldingPct: 0,
+        riskTier: "NOT_APPLICABLE",
+        reason: "Promoter shares held is zero; cannot compute pledge percentage.",
+      };
+    }
+    pledgeRatio = Number(((inputs.promoterSharesPledged / inputs.promoterSharesHeld) * 100).toFixed(2));
+  } else {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: hasPromoterPct ? inputs.promoterHoldingPct! : null,
+      riskTier: "UNKNOWN",
+      reason: "Pledged shares data is missing or not disclosed in the shareholding pattern.",
+      interpretation: "Unavailable from disclosure: pledged shares figure missing.",
+    };
+  }
+
+  // 4. Validate sanity bounds (cannot pledge more than 100% or negative)
+  if (pledgeRatio < 0 || pledgeRatio > 100) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NEGATIVE_BASE",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: hasPromoterPct ? inputs.promoterHoldingPct! : null,
+      riskTier: "UNKNOWN",
+      reason: `Invalid pledge ratio (${pledgeRatio}%): pledged shares cannot be negative or exceed shares held.`,
+    };
+  }
+
+  if (
+    inputs.promoterSharesPledged !== undefined &&
+    inputs.promoterSharesPledged !== null &&
+    inputs.promoterSharesHeld !== undefined &&
+    inputs.promoterSharesHeld !== null &&
+    inputs.promoterSharesPledged > inputs.promoterSharesHeld
+  ) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NEGATIVE_BASE",
+      formula,
+      pledgedPctOfPromoter: null,
+      pledgedPctOfTotalCapital: null,
+      promoterHoldingPct: hasPromoterPct ? inputs.promoterHoldingPct! : null,
+      riskTier: "UNKNOWN",
+      reason: "Pledged shares count exceeds total promoter shares held.",
+    };
+  }
+
+  // Calculate pledged % of total capital if available
+  let pledgedTotalCapital: number | null = null;
+  if (inputs.pledgedPctOfTotalCapital !== undefined && inputs.pledgedPctOfTotalCapital !== null) {
+    pledgedTotalCapital = inputs.pledgedPctOfTotalCapital;
+  } else if (inputs.promoterHoldingPct !== undefined && inputs.promoterHoldingPct !== null) {
+    pledgedTotalCapital = Number(((pledgeRatio * inputs.promoterHoldingPct) / 100).toFixed(2));
+  } else if (
+    inputs.promoterSharesPledged !== undefined &&
+    inputs.promoterSharesPledged !== null &&
+    inputs.totalShares !== undefined &&
+    inputs.totalShares !== null &&
+    inputs.totalShares > 0
+  ) {
+    pledgedTotalCapital = Number(((inputs.promoterSharesPledged / inputs.totalShares) * 100).toFixed(2));
+  }
+
+  // 5. Determine risk tier based on illustrative reference levels
+  let riskTier: "LOW_RISK" | "MODERATE_RISK" | "ELEVATED_RISK";
+  if (pledgeRatio <= lowThresh) {
+    riskTier = "LOW_RISK";
+  } else if (pledgeRatio <= modThresh) {
+    riskTier = "MODERATE_RISK";
+  } else {
+    riskTier = "ELEVATED_RISK";
+  }
+
+  const roundedValue = Number(pledgeRatio.toFixed(2));
+  return {
+    value: roundedValue,
+    isComputable: true,
+    status: "VALID",
+    formula,
+    pledgedPctOfPromoter: roundedValue,
+    pledgedPctOfTotalCapital: pledgedTotalCapital,
+    promoterHoldingPct: hasPromoterPct ? Number(inputs.promoterHoldingPct!.toFixed(2)) : null,
+    riskTier,
+    zone: riskTier,
+    interpretation:
+      riskTier === "LOW_RISK"
+        ? `Promoter pledge is ${roundedValue}% (Illustrative reference: ≤ ${lowThresh}% low risk). Clean promoter collateral position.`
+        : riskTier === "MODERATE_RISK"
+        ? `Promoter pledge is ${roundedValue}% (Illustrative reference: ${lowThresh}% - ${modThresh}% moderate). Requires monitoring for stock price margin triggers.`
+        : `Promoter pledge is ${roundedValue}% (Illustrative reference: > ${modThresh}% elevated). Significant vulnerability to margin calls if share price declines.`,
+  };
+}
+
+// ============================================================================
+// WORKING CAPITAL: INDICATIVE DRAWING POWER
+// ============================================================================
+
+export interface DrawingPowerInputs {
+  inventory: number | null | undefined;
+  tradeCreditors: number | null | undefined;
+  eligibleReceivablesUnder90Days: number | null | undefined;
+  inventoryMarginPct?: number; // default 25
+  receivablesMarginPct?: number; // default 40
+  workingCapitalBorrowings?: number | null | undefined;
+  isBankOrFinancial?: boolean;
+}
+
+export interface DrawingPowerResult extends ComputableResult<number> {
+  unflooredPaidStock: number | null;
+  flooredPaidStock: number | null;
+  eligibleReceivables: number | null;
+  inventoryMarginPct: number;
+  receivablesMarginPct: number;
+  stockContribution: number | null;
+  receivablesContribution: number | null;
+  drawingPower: number | null;
+  workingCapitalBorrowings: number | null;
+  utilizationPct: number | null;
+}
+
+/**
+ * Indicative Drawing Power (DP):
+ * Annual-statement based indication of borrowing capacity against paid stock and trade receivables.
+ * 
+ * Note: Real drawing power is sanctioned by banks from monthly stock & debtor statements.
+ * This function provides an indicative reference level using balance-sheet date figures.
+ */
+export function calculateDrawingPower(inputs: DrawingPowerInputs): DrawingPowerResult {
+  const invMargin = inputs.inventoryMarginPct ?? 25;
+  const recMargin = inputs.receivablesMarginPct ?? 40;
+  const formula = "DP = [max(0, Inventory − Trade Creditors) × (1 − Margin_inv)] + [Eligible Receivables (<90d) × (1 − Margin_rec)]";
+
+  if (inputs.isBankOrFinancial) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NOT_APPLICABLE",
+      formula,
+      unflooredPaidStock: null,
+      flooredPaidStock: null,
+      eligibleReceivables: null,
+      inventoryMarginPct: invMargin,
+      receivablesMarginPct: recMargin,
+      stockContribution: null,
+      receivablesContribution: null,
+      drawingPower: null,
+      workingCapitalBorrowings: null,
+      utilizationPct: null,
+      reason: "Not applicable to banking, NBFC, or financial institutions where physical inventory drawing power does not apply.",
+      interpretation: "Not applicable: entity is a financial institution.",
+    };
+  }
+
+  // Margin range check (0% - 100%)
+  if (invMargin < 0 || invMargin > 100 || recMargin < 0 || recMargin > 100) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      unflooredPaidStock: null,
+      flooredPaidStock: null,
+      eligibleReceivables: null,
+      inventoryMarginPct: invMargin,
+      receivablesMarginPct: recMargin,
+      stockContribution: null,
+      receivablesContribution: null,
+      drawingPower: null,
+      workingCapitalBorrowings: null,
+      utilizationPct: null,
+      reason: "Bank margins must be set between 0% and 100%.",
+    };
+  }
+
+  // Check inventory and trade creditors
+  if (
+    inputs.inventory === null ||
+    inputs.inventory === undefined ||
+    inputs.tradeCreditors === null ||
+    inputs.tradeCreditors === undefined
+  ) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      unflooredPaidStock: null,
+      flooredPaidStock: null,
+      eligibleReceivables: null,
+      inventoryMarginPct: invMargin,
+      receivablesMarginPct: recMargin,
+      stockContribution: null,
+      receivablesContribution: null,
+      drawingPower: null,
+      workingCapitalBorrowings: null,
+      utilizationPct: null,
+      reason: "Inventory or trade creditors figure is unavailable from primary disclosure.",
+      interpretation: "Unavailable from disclosure: inventory or trade payables line missing.",
+    };
+  }
+
+  // Check receivables ageing (< 90 days)
+  if (inputs.eligibleReceivablesUnder90Days === null || inputs.eligibleReceivablesUnder90Days === undefined) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      unflooredPaidStock: Number((inputs.inventory - inputs.tradeCreditors).toFixed(2)),
+      flooredPaidStock: Math.max(0, Number((inputs.inventory - inputs.tradeCreditors).toFixed(2))),
+      eligibleReceivables: null,
+      inventoryMarginPct: invMargin,
+      receivablesMarginPct: recMargin,
+      stockContribution: null,
+      receivablesContribution: null,
+      drawingPower: null,
+      workingCapitalBorrowings: inputs.workingCapitalBorrowings ?? null,
+      utilizationPct: null,
+      reason: "Trade receivables ageing schedule (< 90 days) is unavailable from disclosure. Cannot assume 100% of receivables are bank-eligible.",
+      interpretation: "N/D: trade receivable ageing (< 90 days) is unavailable from disclosure.",
+    };
+  }
+
+  const unflooredPaidStock = Number((inputs.inventory - inputs.tradeCreditors).toFixed(2));
+  const flooredPaidStock = Math.max(0, unflooredPaidStock);
+  const eligibleReceivables = inputs.eligibleReceivablesUnder90Days;
+
+  const stockContribution = Number((flooredPaidStock * (1 - invMargin / 100)).toFixed(2));
+  const receivablesContribution = Number((eligibleReceivables * (1 - recMargin / 100)).toFixed(2));
+  const drawingPower = Number((stockContribution + receivablesContribution).toFixed(2));
+
+  let utilizationPct: number | null = null;
+  if (
+    inputs.workingCapitalBorrowings !== undefined &&
+    inputs.workingCapitalBorrowings !== null &&
+    drawingPower > 0
+  ) {
+    utilizationPct = Number(((inputs.workingCapitalBorrowings / drawingPower) * 100).toFixed(1));
+  }
+
+  return {
+    value: drawingPower,
+    isComputable: true,
+    status: "VALID",
+    formula,
+    unflooredPaidStock,
+    flooredPaidStock,
+    eligibleReceivables,
+    inventoryMarginPct: invMargin,
+    receivablesMarginPct: recMargin,
+    stockContribution,
+    receivablesContribution,
+    drawingPower,
+    workingCapitalBorrowings: inputs.workingCapitalBorrowings ?? null,
+    utilizationPct,
+    interpretation: `Indicative Drawing Power: ${drawingPower} (Paid Stock: ${flooredPaidStock} @ ${invMargin}% margin; Eligible Receivables: ${eligibleReceivables} @ ${recMargin}% margin). Indicative, annual-statement basis, not a bank-sanctioned DP.`,
+  };
+}
+
+// ============================================================================
+// CONTINGENT LIABILITIES TO TANGIBLE NET WORTH
+// ============================================================================
+
+export interface ContingentLiabilitiesInputs {
+  totalContingentLiabilities: number | null | undefined;
+  tangibleNetWorth: number | null | undefined;
+  disclosedCategories?: { label: string; amount: number; source?: string }[] | null;
+  lowThreshold?: number; // default 30%
+  elevatedThreshold?: number; // default 50%
+}
+
+export interface ContingentLiabilitiesResult extends ComputableResult<number> {
+  totalContingentLiabilities: number | null;
+  tangibleNetWorth: number | null;
+  ratioPct: number | null;
+  categories: { label: string; amount: number; source?: string }[];
+  riskTier: "LOW_RISK" | "MODERATE_RISK" | "ELEVATED_RISK" | "UNKNOWN";
+}
+
+/**
+ * Contingent Liabilities to Tangible Net Worth:
+ * Evaluates off-balance-sheet commitments (disputed tax demands, guarantees given, civil claims)
+ * against shareholders' tangible equity buffer.
+ */
+export function calculateContingentLiabilitiesRatio(
+  inputs: ContingentLiabilitiesInputs
+): ContingentLiabilitiesResult {
+  const formula = "Contingent Liabilities Ratio (%) = (Total Disclosed Contingent Liabilities ÷ Tangible Net Worth) × 100";
+  const lowThresh = inputs.lowThreshold ?? 30.0;
+  const elevatedThresh = inputs.elevatedThreshold ?? 50.0;
+  const categories = inputs.disclosedCategories ?? [];
+
+  if (inputs.totalContingentLiabilities === null || inputs.totalContingentLiabilities === undefined) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      totalContingentLiabilities: null,
+      tangibleNetWorth: inputs.tangibleNetWorth ?? null,
+      ratioPct: null,
+      categories,
+      riskTier: "UNKNOWN",
+      reason: "Contingent liabilities note is not disclosed or unavailable in the statutory filing.",
+      interpretation: "Unavailable from disclosure: contingent liabilities note omitted.",
+    };
+  }
+
+  if (inputs.totalContingentLiabilities < 0) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NEGATIVE_BASE",
+      formula,
+      totalContingentLiabilities: inputs.totalContingentLiabilities,
+      tangibleNetWorth: inputs.tangibleNetWorth ?? null,
+      ratioPct: null,
+      categories,
+      riskTier: "UNKNOWN",
+      reason: "Total contingent liabilities cannot be negative.",
+    };
+  }
+
+  if (inputs.tangibleNetWorth === null || inputs.tangibleNetWorth === undefined) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "MISSING_INPUT",
+      formula,
+      totalContingentLiabilities: inputs.totalContingentLiabilities,
+      tangibleNetWorth: null,
+      ratioPct: null,
+      categories,
+      riskTier: "UNKNOWN",
+      reason: "Tangible net worth is unavailable from disclosure.",
+    };
+  }
+
+  if (inputs.tangibleNetWorth <= 0) {
+    return {
+      value: null,
+      isComputable: false,
+      status: "NEGATIVE_BASE",
+      formula,
+      totalContingentLiabilities: inputs.totalContingentLiabilities,
+      tangibleNetWorth: inputs.tangibleNetWorth,
+      ratioPct: null,
+      categories,
+      riskTier: "ELEVATED_RISK",
+      reason: "Tangible net worth is zero or negative (capital deficiency). Contingent claim coverage is absent.",
+      interpretation: "Capital deficient: tangible net worth is negative or zero.",
+    };
+  }
+
+  const ratio = Number(((inputs.totalContingentLiabilities / inputs.tangibleNetWorth) * 100).toFixed(2));
+
+  let riskTier: "LOW_RISK" | "MODERATE_RISK" | "ELEVATED_RISK";
+  if (ratio <= lowThresh) {
+    riskTier = "LOW_RISK";
+  } else if (ratio <= elevatedThresh) {
+    riskTier = "MODERATE_RISK";
+  } else {
+    riskTier = "ELEVATED_RISK";
+  }
+
+  return {
+    value: ratio,
+    isComputable: true,
+    status: "VALID",
+    formula,
+    totalContingentLiabilities: inputs.totalContingentLiabilities,
+    tangibleNetWorth: inputs.tangibleNetWorth,
+    ratioPct: ratio,
+    categories,
+    riskTier,
+    zone: riskTier,
+    interpretation: `Contingent Liabilities / Tangible Net Worth: ${ratio}% (Disclosed claims: ${inputs.totalContingentLiabilities} vs Net Worth: ${inputs.tangibleNetWorth}). Contingent liabilities are possible obligations. They may never crystallize, and the filing's estimate may be incomplete. Illustrative reference level, user-adjustable.`,
+  };
+}
+
+// ============================================================================
+// SOURCED DEBT INSTRUMENTS & RECONCILIATION
+// ============================================================================
+
+export interface DebtInstrumentRow {
+  id: string;
+  instrumentName: string;
+  coupon: number | string | null;
+  couponType: "FIXED" | "FLOATING" | "ZERO_COUPON" | "OTHER";
+  currency: string;
+  maturityYear: number | string | null;
+  principalAmount: number;
+  sourceForm: string;
+  filingDate: string;
+  sectionOrPage: string;
+  verificationFlag: "VERIFIED_BY_AGENT" | "SUPPLIED_BY_USER" | "NOT_INDEPENDENTLY_VERIFIED";
+}
+
+export interface DebtReconciliationResult {
+  isReconciled: boolean;
+  status: "RECONCILED" | "VARIANCE_EXPLAINED" | "MISSING_TOTAL" | "NO_INSTRUMENTS";
+  totalPrincipalSum: number;
+  disclosedTotalDebt: number | null;
+  difference: number | null;
+  differencePct: number | null;
+  explanation: string;
+}
+
+/**
+ * Reconciles the sum of itemized debt tranche principals against total debt reported on the balance sheet.
+ * Accounts for differences due to unamortized discounts, lease liabilities, or unitemized overdrafts.
+ */
+export function reconcileDebtStructure(
+  instruments: DebtInstrumentRow[],
+  disclosedTotalDebt: number | null | undefined,
+  tolerancePct: number = 0.5
+): DebtReconciliationResult {
+  if (instruments.length === 0) {
+    return {
+      isReconciled: false,
+      status: "NO_INSTRUMENTS",
+      totalPrincipalSum: 0,
+      disclosedTotalDebt: disclosedTotalDebt ?? null,
+      difference: null,
+      differencePct: null,
+      explanation: "No itemized debt tranche disclosures stored for this period.",
+    };
+  }
+
+  const sum = Number(instruments.reduce((acc, curr) => acc + (curr.principalAmount || 0), 0).toFixed(2));
+
+  if (disclosedTotalDebt === null || disclosedTotalDebt === undefined) {
+    return {
+      isReconciled: false,
+      status: "MISSING_TOTAL",
+      totalPrincipalSum: sum,
+      disclosedTotalDebt: null,
+      difference: null,
+      differencePct: null,
+      explanation: "Total debt disclosure is unavailable from primary balance sheet.",
+    };
+  }
+
+  const diff = Number((disclosedTotalDebt - sum).toFixed(2));
+  const diffPct = disclosedTotalDebt > 0 ? Number(((Math.abs(diff) / disclosedTotalDebt) * 100).toFixed(2)) : 0;
+  const isReconciled = diffPct <= tolerancePct;
+
+  return {
+    isReconciled,
+    status: isReconciled ? "RECONCILED" : "VARIANCE_EXPLAINED",
+    totalPrincipalSum: sum,
+    disclosedTotalDebt,
+    difference: diff,
+    differencePct: diffPct,
+    explanation: isReconciled
+      ? `Tranche principal sum (${sum}) matches reported balance sheet debt (${disclosedTotalDebt}) within ${tolerancePct}% tolerance.`
+      : `Variance of ${diff} (${diffPct}%) between tranche sum (${sum}) and reported total debt (${disclosedTotalDebt}). Variance typically reflects unamortized bond discounts, finance leases, or unitemized bank overdrafts.`,
+  };
+}
+

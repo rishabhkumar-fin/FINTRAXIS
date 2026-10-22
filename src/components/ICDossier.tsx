@@ -281,6 +281,10 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
       "CurrentRatio",
       "NetDebtToEBITDA",
       "InterestCoverage",
+      "TOL_TNW",
+      "PromoterPledgePct",
+      "IndicativeDrawingPower",
+      "ContingentLiabilitiesPct",
     ];
     const rows = periods.map((p) => {
       const netDebt = (p.totalDebt ?? 0) - ((p.cashAndEquivalents ?? 0) + (p.marketableSecurities ?? 0));
@@ -289,6 +293,24 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
       const cr =
         p.totalCurrentAssets && p.totalCurrentLiabilities
           ? (p.totalCurrentAssets / p.totalCurrentLiabilities).toFixed(2)
+          : "N/D";
+      const tolTnw =
+        p.totalLiabilities !== null && p.totalShareholdersEquity && p.totalShareholdersEquity > 0
+          ? (p.totalLiabilities / p.totalShareholdersEquity).toFixed(2)
+          : "N/D";
+      const pledge =
+        company.hasPromoterGroup === 0
+          ? "N/A"
+          : company.promoterPledgedPct !== null && company.promoterPledgedPct !== undefined
+          ? `${company.promoterPledgedPct}%`
+          : "N/D";
+      const dp =
+        p.inventories !== null && p.accountsPayable !== null && p.receivablesAgeingUnder90Days !== null && p.receivablesAgeingUnder90Days !== undefined
+          ? (Math.max(0, p.inventories - p.accountsPayable) * 0.75 + p.receivablesAgeingUnder90Days * 0.60).toFixed(2)
+          : "N/D";
+      const cl =
+        p.contingentLiabilitiesTotal !== null && p.contingentLiabilitiesTotal !== undefined && p.totalShareholdersEquity && p.totalShareholdersEquity > 0
+          ? ((p.contingentLiabilitiesTotal / p.totalShareholdersEquity) * 100).toFixed(2)
           : "N/D";
       return [
         `"${company.name}"`,
@@ -307,6 +329,10 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
         cr,
         lev,
         cov,
+        tolTnw,
+        `"${pledge}"`,
+        dp,
+        cl,
       ];
     });
     const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
@@ -356,6 +382,10 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
     <Cell><Data ss:Type="String">Current Ratio</Data></Cell>
     <Cell><Data ss:Type="String">Net Debt / EBITDA</Data></Cell>
     <Cell><Data ss:Type="String">Interest Coverage</Data></Cell>
+    <Cell><Data ss:Type="String">TOL / TNW</Data></Cell>
+    <Cell><Data ss:Type="String">Promoter Pledge %</Data></Cell>
+    <Cell><Data ss:Type="String">Indicative Drawing Power</Data></Cell>
+    <Cell><Data ss:Type="String">Contingent Liabilities %</Data></Cell>
    </Row>
    ${periods
      .map((p) => {
@@ -366,6 +396,24 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
        const cr =
          p.totalCurrentAssets && p.totalCurrentLiabilities
            ? (p.totalCurrentAssets / p.totalCurrentLiabilities).toFixed(2)
+           : "N/D";
+       const tolTnw =
+         p.totalLiabilities !== null && p.totalShareholdersEquity && p.totalShareholdersEquity > 0
+           ? (p.totalLiabilities / p.totalShareholdersEquity).toFixed(2)
+           : "N/D";
+       const pledge =
+         company.hasPromoterGroup === 0
+           ? "N/A"
+           : company.promoterPledgedPct !== null && company.promoterPledgedPct !== undefined
+           ? `${company.promoterPledgedPct}%`
+           : "N/D";
+       const dp =
+         p.inventories !== null && p.accountsPayable !== null && p.receivablesAgeingUnder90Days !== null && p.receivablesAgeingUnder90Days !== undefined
+           ? (Math.max(0, p.inventories - p.accountsPayable) * 0.75 + p.receivablesAgeingUnder90Days * 0.60).toFixed(2)
+           : "N/D";
+       const cl =
+         p.contingentLiabilitiesTotal !== null && p.contingentLiabilitiesTotal !== undefined && p.totalShareholdersEquity && p.totalShareholdersEquity > 0
+           ? ((p.contingentLiabilitiesTotal / p.totalShareholdersEquity) * 100).toFixed(2)
            : "N/D";
 
        const numCell = (v?: number | null) =>
@@ -389,6 +437,10 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
     <Cell><Data ss:Type="String">${cr}</Data></Cell>
     <Cell><Data ss:Type="String">${lev}</Data></Cell>
     <Cell><Data ss:Type="String">${cov}</Data></Cell>
+    <Cell><Data ss:Type="String">${tolTnw}</Data></Cell>
+    <Cell><Data ss:Type="String">${pledge}</Data></Cell>
+    <Cell><Data ss:Type="String">${dp}</Data></Cell>
+    <Cell><Data ss:Type="String">${cl}</Data></Cell>
    </Row>`;
      })
      .join("")}
