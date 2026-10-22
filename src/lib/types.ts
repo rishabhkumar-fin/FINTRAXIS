@@ -116,6 +116,12 @@ export interface RatioAnalysis {
   netMarginPct: number | null;
   roePct: number | null;
   roaPct: number | null;
+  tolToTnw?: number | null;
+  altmanZDoublePrime?: number | null;
+  altmanZZone?: string | null;
+  beneishMScore?: number | null;
+  beneishMZone?: string | null;
+  debtServiceProxy?: number | null;
 }
 
 export interface EarlyWarningFlag {
@@ -133,6 +139,7 @@ export interface StressSimulationInputs {
   revenueShockPct: number; // e.g. -15 (-30 to +30)
   cogsInflationPct: number; // e.g. 5 (-15 to +15)
   rateShockBps: number; // e.g. 200 (+100 to +500)
+  floatingRateDebtSharePct?: number; // e.g. 40 (0 to 100)
 }
 
 export interface StressSimulationResult {
@@ -145,6 +152,8 @@ export interface StressSimulationResult {
   simulatedEbit: number;
   simulatedInterestExpense: number;
   incrementalInterestExpense: number;
+  floatingRateDebtSharePct: number;
+  stressedFloatingDebtAmount: number;
   simulatedEbitda: number;
   simulatedNetIncome: number;
   simulatedInterestCoverage: number | null;

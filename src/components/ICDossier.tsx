@@ -263,6 +263,143 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
     URL.revokeObjectURL(url);
   };
 
+  const handleExportCsv = () => {
+    const headers = [
+      "Company",
+      "Symbol",
+      "Period",
+      "Currency",
+      "Scale",
+      "Revenue",
+      "GrossProfit",
+      "EBIT",
+      "NetIncome",
+      "TotalDebt",
+      "CashAndEquivalents",
+      "OperatingCashFlow",
+      "FreeCashFlow",
+      "CurrentRatio",
+      "NetDebtToEBITDA",
+      "InterestCoverage",
+    ];
+    const rows = periods.map((p) => {
+      const netDebt = (p.totalDebt ?? 0) - ((p.cashAndEquivalents ?? 0) + (p.marketableSecurities ?? 0));
+      const lev = p.ebitda && p.ebitda > 0 ? (netDebt / p.ebitda).toFixed(2) : "N/D";
+      const cov = p.interestExpense && p.interestExpense > 0 && p.ebit ? (p.ebit / p.interestExpense).toFixed(2) : "N/D";
+      const cr =
+        p.totalCurrentAssets && p.totalCurrentLiabilities
+          ? (p.totalCurrentAssets / p.totalCurrentLiabilities).toFixed(2)
+          : "N/D";
+      return [
+        `"${company.name}"`,
+        `"${company.symbol}"`,
+        `"${p.period}"`,
+        `"${p.currency}"`,
+        `"${p.scaleUnit}"`,
+        p.revenue ?? "",
+        p.grossProfit ?? "",
+        p.ebit ?? "",
+        p.netIncome ?? "",
+        p.totalDebt ?? "",
+        p.cashAndEquivalents ?? "",
+        p.operatingCashFlow ?? "",
+        p.freeCashFlow ?? "",
+        cr,
+        lev,
+        cov,
+      ];
+    });
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${company.symbol}_credit_ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportExcel = () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Worksheet ss:Name="${company.symbol} Credit Ledger">
+  <Table>
+   <Row>
+    <Cell><Data ss:Type="String">FINTRAXIS INSTITUTIONAL FINANCIAL LEDGER &amp; RATIOS</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Entity: ${company.name} (${company.symbol})</Data></Cell>
+    <Cell><Data ss:Type="String">Jurisdiction: ${company.country} (${company.accountingStandard})</Data></Cell>
+    <Cell><Data ss:Type="String">Currency: ${company.currency} (${company.scaleUnit})</Data></Cell>
+    <Cell><Data ss:Type="String">Generated: ${new Date().toISOString()}</Data></Cell>
+   </Row>
+   <Row><Cell><Data ss:Type="String"></Data></Cell></Row>
+   <Row>
+    <Cell><Data ss:Type="String">Period</Data></Cell>
+    <Cell><Data ss:Type="String">Filing Form</Data></Cell>
+    <Cell><Data ss:Type="String">Filing Date</Data></Cell>
+    <Cell><Data ss:Type="String">Revenue</Data></Cell>
+    <Cell><Data ss:Type="String">Gross Profit</Data></Cell>
+    <Cell><Data ss:Type="String">EBIT</Data></Cell>
+    <Cell><Data ss:Type="String">Net Income</Data></Cell>
+    <Cell><Data ss:Type="String">Total Debt</Data></Cell>
+    <Cell><Data ss:Type="String">Cash &amp; Equivalents</Data></Cell>
+    <Cell><Data ss:Type="String">Operating Cash Flow</Data></Cell>
+    <Cell><Data ss:Type="String">Free Cash Flow</Data></Cell>
+    <Cell><Data ss:Type="String">Current Ratio</Data></Cell>
+    <Cell><Data ss:Type="String">Net Debt / EBITDA</Data></Cell>
+    <Cell><Data ss:Type="String">Interest Coverage</Data></Cell>
+   </Row>
+   ${periods
+     .map((p) => {
+       const netDebt = (p.totalDebt ?? 0) - ((p.cashAndEquivalents ?? 0) + (p.marketableSecurities ?? 0));
+       const lev = p.ebitda && p.ebitda > 0 ? (netDebt / p.ebitda).toFixed(2) : "N/D";
+       const cov =
+         p.interestExpense && p.interestExpense > 0 && p.ebit ? (p.ebit / p.interestExpense).toFixed(2) : "N/D";
+       const cr =
+         p.totalCurrentAssets && p.totalCurrentLiabilities
+           ? (p.totalCurrentAssets / p.totalCurrentLiabilities).toFixed(2)
+           : "N/D";
+       return `
+   <Row>
+    <Cell><Data ss:Type="String">${p.period}</Data></Cell>
+    <Cell><Data ss:Type="String">${p.filingForm}</Data></Cell>
+    <Cell><Data ss:Type="String">${p.filingDate}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.revenue ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.grossProfit ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.ebit ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.netIncome ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.totalDebt ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.cashAndEquivalents ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.operatingCashFlow ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="Number">${p.freeCashFlow ?? 0}</Data></Cell>
+    <Cell><Data ss:Type="String">${cr}</Data></Cell>
+    <Cell><Data ss:Type="String">${lev}</Data></Cell>
+    <Cell><Data ss:Type="String">${cov}</Data></Cell>
+   </Row>`;
+     })
+     .join("")}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+    const blob = new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${company.symbol}_financial_model_${new Date().toISOString().slice(0, 10)}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleShareSummary = () => {
     const summary = `🏛️ FINTRAXIS BOARDROOM CREDIT DOSSIER: ${company.name} (${company.symbol})
 • Solvency Rating: ${ratingLabel} (Health Score: ${riskScore}/100)
@@ -383,6 +520,24 @@ Synchronized live on FINTRAXIS Terminal.`;
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5 text-[#38BDF8]" />}
             <span>{copied ? "COPIED" : "COPY MD"}</span>
+          </button>
+
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#38BDF8]/40 text-[#38BDF8] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            title="Download RFC 4180 CSV with statement lines and credit ratios"
+          >
+            <Download className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <span>EXPORT CSV</span>
+          </button>
+
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#10B981]/40 text-[#10B981] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
+            title="Download structured multi-period spreadsheet model (.xls)"
+          >
+            <Download className="w-3.5 h-3.5 text-[#10B981]" />
+            <span>EXPORT EXCEL</span>
           </button>
 
           <button

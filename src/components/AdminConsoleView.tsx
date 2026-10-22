@@ -1274,7 +1274,7 @@ export function AdminConsoleView({ session, onNavigateToTab }: AdminConsoleViewP
               </div>
               <p className="text-[#94A3B8] leading-relaxed text-[11px]">
                 {stats?.database.isVercel
-                  ? "Runtime operations (admin edits, user provisioning, custom hurdle calibration) execute against high-performance SQLite WAL in /tmp. Note: Vercel serverless containers are ephemeral; permanent baseline company records remain versioned and immutable in repository seed files."
+                  ? "Demonstration environment: Runtime operations (admin edits, user provisioning, custom hurdle calibration) execute against SQLite WAL in /tmp. Note: Vercel serverless containers are ephemeral; changes may reset when the service restarts. Permanent baseline company records remain versioned and immutable in repository files."
                   : "Database is running on localhost with Write-Ahead Logging (WAL) enabled on data/fintraxis.db. All mutations, company enrollments, and operator clearings persist directly to disk."}
               </p>
             </div>

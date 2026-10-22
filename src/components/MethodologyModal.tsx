@@ -156,6 +156,57 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
                   <strong>Source Line Items:</strong> Cash Flows Statement operating activities line item less additions to property, plant, and equipment.
                 </p>
               </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  5. ALTMAN Z-SCORE DISTRESS DIAGNOSTIC (Z&apos;&apos; 1995 &amp; 1968 VARIANTS)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5 space-y-1">
+                  <div>Non-Mfg / Emerging (Z&apos;&apos;) = 6.56*X1 + 3.26*X2 + 6.72*X3 + 1.05*X4</div>
+                  <div className="text-[10px] text-[#94A3B8]">X1=WC/TA, X2=RE/TA, X3=EBIT/TA, X4=Book Equity/Total Liabilities</div>
+                  <div className="text-[10px] text-[#10B981]">Thresholds: &gt; 2.60 Safe Zone | 1.10 – 2.60 Grey Zone | &lt; 1.10 Distress Zone</div>
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Strict Standards:</strong> Marked Not Applicable for banks/financial firms. When Retained Earnings is not segregated on the face of the balance sheet, returns N/D rather than an approximation.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  6. BENEISH M-SCORE (EARNINGS QUALITY &amp; ACCRUAL SCREENING)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[10.5px] text-[#38BDF8] my-1.5 leading-relaxed">
+                  M = -4.84 + 0.920*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.037*TATA + 0.0327*LVGI
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Interpretation:</strong> Screening threshold: M &gt; -1.78 indicates elevated accruals / potential earnings overstatement risk; M &le; -1.78 indicates normal quality. Requires two consecutive comparable fiscal years. Screening signal only; not proof of manipulation.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  7. CERTIFIED DSCR VS DEBT SERVICE PROXY
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5 space-y-1">
+                  <div>Certified DSCR = (PAT + Deprec + Term Interest) / (Term Interest + Scheduled Principal Due)</div>
+                  <div>Debt Service Proxy = Consolidated EBITDA / (Interest Expense + Short-Term Debt)</div>
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Disclosure Rule:</strong> Scheduled principal debt repayments are rarely disclosed on the face of financial statements. FINTRAXIS never labels a proxy as statutory DSCR and explicitly discloses proxy status.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+                <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
+                  8. TOTAL OUTSIDE LIABILITIES TO TANGIBLE NET WORTH (TOL / TNW)
+                </span>
+                <div className="p-2 bg-[#070A0F] border border-[#182337] rounded font-mono text-[11px] text-[#38BDF8] my-1.5">
+                  TOL / TNW = Total Liabilities / (Total Shareholders&apos; Equity - Intangible Assets)
+                </div>
+                <p className="text-[11px] text-[#94A3B8]">
+                  <strong>Indian Banking Standard:</strong> Established RBI and Indian Bank Association benchmark for consortium credit appraisal. Manufacturing and infrastructure exposure threshold is typically &lt; 3.00x.
+                </p>
+              </div>
             </div>
           )}
 
@@ -244,34 +295,41 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
           {/* TAB 4: HEALTH SCORE & TIERS */}
           {activeTab === "SCORING" && (
             <div className="space-y-4">
-              <div className="p-4 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl">
+              <div className="p-4 bg-[#0E1626] border border-[#2563EB]/30 rounded-xl space-y-2">
                 <span className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-wider block mb-1">
-                  ALADDIN COMPOSITE HEALTH SCORE ENGINE (0 – 100)
+                  DETERMINISTIC COMPOSITE HEALTH SCORE ENGINE (0 – 100)
                 </span>
-                <p className="text-[11px] text-[#94A3B8]">
-                  Derived from four objective, auditable credit pillars benchmarked against Basel III capital adequacy guidelines:
+                <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                  Evaluated as an auditable deductive penalty model starting from a baseline score of <strong>100</strong>, with deterministic point deductions triggered upon breach of credit early-warning thresholds:
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3 text-[10.5px]">
-                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded">
-                    <span className="text-[#38BDF8] font-bold block">35% Weight</span>
-                    <span className="text-white">Solvency & Debt Service</span>
-                    <span className="text-[9px] text-[#64748B] block mt-0.5">Net Debt/EBITDA & Interest Coverage</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 my-2 text-[10.5px]">
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Gross Margin Decay: -20 pts</span>
+                    <span className="text-slate-300">Triggered if Gross Margin contracts &gt; 300 bps year-over-year.</span>
                   </div>
-                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded">
-                    <span className="text-[#38BDF8] font-bold block">25% Weight</span>
-                    <span className="text-white">Liquidity & Runway</span>
-                    <span className="text-[9px] text-[#64748B] block mt-0.5">Current Ratio & Cash Buffer</span>
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Accrual Divergence: -15 to -25 pts</span>
+                    <span className="text-slate-300">Triggered if CFO / Net Income conversion falls below 0.70x.</span>
                   </div>
-                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded">
-                    <span className="text-[#38BDF8] font-bold block">20% Weight</span>
-                    <span className="text-white">Operating Margins</span>
-                    <span className="text-[9px] text-[#64748B] block mt-0.5">EBIT & Gross Margin Durability</span>
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Cash-Burn Runway: -15 to -35 pts</span>
+                    <span className="text-slate-300">Triggered if available liquidity sustains &lt; 12.0 Mo (-15) or &lt; 6.0 Mo (-35).</span>
                   </div>
-                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded">
-                    <span className="text-[#38BDF8] font-bold block">20% Weight</span>
-                    <span className="text-white">Cash Conversion</span>
-                    <span className="text-[9px] text-[#64748B] block mt-0.5">Free Cash Flow Generation</span>
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Interest Coverage: -15 to -30 pts</span>
+                    <span className="text-slate-300">Triggered if EBIT Interest Coverage falls below 3.00x (-15) or &lt; 1.50x (-30).</span>
                   </div>
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Excessive Gearing: -10 to -25 pts</span>
+                    <span className="text-slate-300">Triggered if Net Debt / EBITDA exceeds 3.00x (-10) or &gt; 4.50x (-25).</span>
+                  </div>
+                  <div className="p-2.5 bg-[#070A0F] border border-[#182337] rounded space-y-0.5">
+                    <span className="text-[#EF4444] font-bold block">Working Capital Deficit: -15 pts</span>
+                    <span className="text-slate-300">Triggered if Current Ratio compresses below 1.00x (inverted working capital).</span>
+                  </div>
+                </div>
+                <div className="text-[10px] text-[#64748B] pt-1">
+                  Final score is bounded between [10, 100]. Tiers represent internal screening categories, not credit ratings.
                 </div>
               </div>
 
@@ -298,7 +356,7 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
 
                 <div className="p-3 bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-[#EF4444]">TIER 3 // DISTRESS & RESTRUCTURING (Score: &lt; 50)</span>
+                    <span className="text-xs font-bold text-[#EF4444]">TIER 3 // DISTRESS &amp; RESTRUCTURING (Score: &lt; 50)</span>
                     <p className="text-[10px] text-[#94A3B8] mt-0.5">
                       Debt service coverage breached, severe operating cash burn, or impending debt maturity rollover wall.
                     </p>
@@ -359,7 +417,7 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
               </p>
               <div className="p-3 bg-[#080B10] border border-[#EF4444]/30 rounded text-[10.5px] text-[#94A3B8] space-y-1.5">
                 <p>
-                  <strong>1. Not an Official Credit Rating:</strong> The risk tiers (Tier 1 Prime, Tier 2 Watchlist, Tier 3 Distress) and Aladdin composite score are rule-based mathematical screenings. They do not constitute an official credit rating from registered rating organizations such as CRISIL, ICRA, CARE, S&P Global, Moody&apos;s, or Fitch.
+                  <strong>1. Not an Official Credit Rating:</strong> The risk tiers (Tier 1 Prime, Tier 2 Watchlist, Tier 3 Distress) and composite screening score are rule-based mathematical screening indicators. They do not constitute an official credit rating from registered rating organizations such as CRISIL, ICRA, CARE, S&P Global, Moody&apos;s, or Fitch.
                 </p>
                 <p>
                   <strong>2. Not Financial or Investment Advice:</strong> Financial calculations and scenario simulation outputs are provided for educational and institutional workflow demonstration. They should not be construed as investment advice, a solicitation to purchase securities, or an irrevocable underwriting commitment.

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, RotateCcw, BarChart3, Info } from "lucide-react";
+import { Cpu, RotateCcw, BarChart3, Info, Scale } from "lucide-react";
 import { CompanyRiskProfile, StressSimulationInputs } from "@/lib/types";
 import { runStressSimulation } from "@/lib/financialEngine";
+import { calculateCovenantHeadroom } from "@/lib/financialCalculations";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
 import { WorkstationHeader, WorkstationNextStep } from "./WorkstationNav";
@@ -21,12 +22,14 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     revenueShockPct: -10,
     cogsInflationPct: 5,
     rateShockBps: 200,
+    floatingRateDebtSharePct: 40,
   });
 
   const [committedInputs, setCommittedInputs] = useState<StressSimulationInputs>({
     revenueShockPct: -10,
     cogsInflationPct: 5,
     rateShockBps: 200,
+    floatingRateDebtSharePct: 40,
   });
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -41,8 +44,8 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     }, 150);
   };
 
-  const handlePreset = (rev: number, cogs: number, rate: number) => {
-    const next = { revenueShockPct: rev, cogsInflationPct: cogs, rateShockBps: rate };
+  const handlePreset = (rev: number, cogs: number, rate: number, floating: number = 40) => {
+    const next = { revenueShockPct: rev, cogsInflationPct: cogs, rateShockBps: rate, floatingRateDebtSharePct: floating };
     setInputs(next);
     setCommittedInputs(next);
     setHasPendingChanges(false);
@@ -233,7 +236,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
       </div>
 
       {/* Interactive Parameter Sliders with Exact Client Explanations */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-[#090D17] border border-[#182337] rounded-xl shadow-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-[#090D17] border border-[#182337] rounded-xl shadow-lg">
         {/* Slider 1: Revenue Shock */}
         <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
           <div className="flex justify-between items-center">
@@ -338,6 +341,39 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
           </div>
           <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
             <strong className="text-[#38BDF8]">Client Impact:</strong> {(latest?.totalDebt ?? 0) === 0 ? "Immune (zero funded debt)." : `Extra bank interest cost of ${formatCurr(extraInterestPaid)}.`}
+          </div>
+        </div>
+
+        {/* Slider 4: Floating-Rate Debt Share (Assumption Made Explicit) */}
+        <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-[#64748B] uppercase font-bold">FLOATING-RATE DEBT SHARE</span>
+            <span className="font-bold font-mono text-xs text-[#38BDF8]">
+              {inputs.floatingRateDebtSharePct ?? 40}%
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={inputs.floatingRateDebtSharePct ?? 40}
+            onChange={(e) => {
+              setInputs((prev) => ({
+                ...prev,
+                floatingRateDebtSharePct: parseFloat(e.target.value),
+              }));
+              setHasPendingChanges(true);
+            }}
+            className="w-full accent-[#2563EB] cursor-pointer"
+          />
+          <div className="flex justify-between text-[9px] text-[#64748B]">
+            <span>0% (All Fixed)</span>
+            <span>40% (Standard)</span>
+            <span>100% (All Float)</span>
+          </div>
+          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
+            <strong className="text-[#38BDF8]">Floating Base:</strong> {formatCurr(simulation.stressedFloatingDebtAmount)} exposed to rate hikes (40% default).
           </div>
         </div>
       </div>
@@ -529,6 +565,94 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* COVENANT HEADROOM & REVERSE STRESS ANALYSIS */}
+      <div className="p-4 bg-[#090E17] border border-[#1E293B] rounded-xl space-y-3 shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E293B] pb-2 gap-1">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+            <Scale className="w-4 h-4 text-[#38BDF8]" />
+            <span>COVENANT HEADROOM &amp; REVERSE STRESS ANALYSIS</span>
+          </div>
+          <span className="text-[10px] text-[#94A3B8]">
+            User-Defined Screening Thresholds (Not Actual Loan Indentures)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* 1. Leverage Headroom */}
+          {(() => {
+            const h = calculateCovenantHeadroom(
+              {
+                currentNetDebtToEbitda: profile.latestRatios.netDebtToEbitda,
+                netDebt: (latest?.totalDebt ?? 0) - ((latest?.cashAndEquivalents ?? 0) + (latest?.marketableSecurities ?? 0)),
+                ebitda: latest?.ebitda ?? 0,
+                hurdle: 3.5,
+              },
+              {
+                currentInterestCoverage: profile.latestRatios.interestCoverage,
+                ebit: latest?.ebit ?? 0,
+                interestExpense: latest?.interestExpense ?? 0,
+                hurdle: 2.5,
+              },
+              {
+                currentRatio: profile.latestRatios.currentRatio,
+                currentAssets: latest?.totalCurrentAssets ?? 0,
+                currentLiabilities: latest?.totalCurrentLiabilities ?? 0,
+                hurdle: 1.1,
+              }
+            );
+
+            return (
+              <>
+                <div className="p-3 bg-[#05070B] border border-[#182337] rounded-lg space-y-1.5">
+                  <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
+                    <span>LEVERAGE HEADROOM (&le; 3.50x)</span>
+                    <span className={h.leverageHeadroom.isBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
+                      {h.leverageHeadroom.isBreached ? "BREACHED" : `${h.leverageHeadroom.headroomPct}% BUFFER`}
+                    </span>
+                  </div>
+                  <div className="text-base font-bold text-white">
+                    {formatRatio(h.leverageHeadroom.currentValue)} <span className="text-xs text-[#64748B]">vs 3.50x hurdle</span>
+                  </div>
+                  <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
+                    {h.leverageHeadroom.explanation}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-[#05070B] border border-[#182337] rounded-lg space-y-1.5">
+                  <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
+                    <span>COVERAGE HEADROOM (&ge; 2.50x)</span>
+                    <span className={h.coverageHeadroom.isBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
+                      {h.coverageHeadroom.isBreached ? "BREACHED" : `${h.coverageHeadroom.headroomPct}% BUFFER`}
+                    </span>
+                  </div>
+                  <div className="text-base font-bold text-white">
+                    {formatRatio(h.coverageHeadroom.currentValue)} <span className="text-xs text-[#64748B]">vs 2.50x floor</span>
+                  </div>
+                  <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
+                    {h.coverageHeadroom.explanation}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-[#05070B] border border-[#182337] rounded-lg space-y-1.5">
+                  <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
+                    <span>LIQUIDITY HEADROOM (&ge; 1.10x)</span>
+                    <span className={h.liquidityHeadroom.isBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
+                      {h.liquidityHeadroom.isBreached ? "BREACHED" : `${h.liquidityHeadroom.headroomPct}% BUFFER`}
+                    </span>
+                  </div>
+                  <div className="text-base font-bold text-white">
+                    {formatRatio(h.liquidityHeadroom.currentValue)} <span className="text-xs text-[#64748B]">vs 1.10x floor</span>
+                  </div>
+                  <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
+                    {h.liquidityHeadroom.explanation}
+                  </p>
+                </div>
+              </>
+            );
+          })()}
+        </div>
       </div>
 
       {/* Sequential Next Step in Workflow */}

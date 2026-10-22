@@ -24,7 +24,7 @@ TARGET ENTITY: ${company.name} (${company.symbol})
 JURISDICTION: ${company.country} | REGIME: ${company.accountingStandard}
 OPERATOR CLEARANCE: VERIFIED
 TIMESTAMP: ${new Date().toISOString()}
-ALADDIN RISK TIER: ${riskTier} (Health Score: ${riskScore}/100)
+CREDIT SURVEILLANCE TIER: ${riskTier} (Health Score: ${riskScore}/100)
 
 1. EXECUTIVE SOLVENCY VERDICT
 ------------------------------------------------------

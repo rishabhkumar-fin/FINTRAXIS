@@ -492,7 +492,7 @@ export function CompanyHub({
                   </span>
                   <span
                     className="text-[9px] text-[#64748B] hover:text-[#38BDF8] cursor-help underline decoration-dotted"
-                    title="How Score is Calculated: Weighted composite of Net Debt/EBITDA (30%), Interest Coverage (25%), Current Ratio (20%), and Operating Margin (25%)."
+                    title="Deductive early-warning screening model starting at 100 with penalties for margin decay, cash burn, debt gearing, and coverage fragility."
                   >
                     [HOW CALCULATED]
                   </span>
@@ -566,6 +566,72 @@ export function CompanyHub({
                     {activeProfile.latestRatios.operatingMarginPct !== null ? `${activeProfile.latestRatios.operatingMarginPct.toFixed(1)}%` : "N/D"}
                   </div>
                   <div className="text-[9px] text-[#94A3B8]">Gross: {activeProfile.latestRatios.grossMarginPct !== null ? `${activeProfile.latestRatios.grossMarginPct.toFixed(1)}%` : "N/D"}</div>
+                </div>
+              </div>
+
+              {/* DATA COVERAGE & AUDIT GAP MATRIX (Phase 2 Standard) */}
+              <div className="p-3 bg-[#080B10] border border-[#1E2536] rounded-lg space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white uppercase">
+                    <Database className="w-3.5 h-3.5 text-[#38BDF8]" />
+                    <span>AUDITED DISCLOSURE &amp; STATEMENT COVERAGE MATRIX</span>
+                  </div>
+                  <span className="text-[10px] text-[#94A3B8]">
+                    As-Of: {activeProfile.periods[0]?.period} ({activeProfile.periods[0]?.filingForm} &bull; {activeProfile.periods[0]?.filingDate})
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[10px] font-mono">
+                    <thead>
+                      <tr className="border-b border-[#1E2536] text-[#64748B]">
+                        <th className="py-1 px-2 text-left">STATEMENT / METRIC SECTION</th>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <th key={p.period} className="py-1 px-2 text-right">
+                            {p.period} ({p.filingForm})
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#182337] text-slate-300">
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Consolidated Revenue &amp; Sales</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right text-[#10B981]">
+                            {p.revenue !== null ? `✓ ${p.currency} ${p.revenue.toLocaleString()}` : "N/D (Missing)"}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Operating EBIT &amp; EBITDA</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right text-[#10B981]">
+                            {p.ebit !== null ? `✓ Disclosed` : "N/D"}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Total Funded Indebtedness</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => (
+                          <td key={p.period} className="py-1.5 px-2 text-right text-[#10B981]">
+                            {p.totalDebt !== null ? `✓ Disclosed` : "N/D"}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 px-2 text-left font-semibold text-white">Balance Sheet Identity (A &equiv; L + E)</td>
+                        {activeProfile.periods.slice(0, 3).map((p) => {
+                          const sum = (p.totalLiabilities ?? 0) + (p.totalShareholdersEquity ?? 0);
+                          const isBal = p.totalAssets ? Math.abs((p.totalAssets - sum) / p.totalAssets) <= 0.0001 : false;
+                          return (
+                            <td key={p.period} className={`py-1.5 px-2 text-right font-bold ${isBal ? "text-[#10B981]" : "text-[#EF4444]"}`}>
+                              {isBal ? "✓ BALANCED (±0.00%)" : "⚠ IMBALANCE"}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

@@ -68,10 +68,10 @@ export const WALL_STREET_BADGES = [
   },
   {
     id: "ALADDIN_CORE",
-    name: "Aladdin Fixed Income Specialist",
-    firm: "BlackRock Aladdin",
+    name: "Fixed Income Risk Specialist",
+    firm: "Institutional Syndicate Desk",
     icon: "💼",
-    desc: "Institutional multi-asset portfolio risk & duration analytics",
+    desc: "Multi-asset debt portfolio risk & duration analytics clearance",
   },
   {
     id: "GS_MARQUEE",
@@ -907,8 +907,8 @@ export function SettingsModal({
 
           {/* Modal Footer Actions */}
           <div className="pt-3 border-t border-[#1E2536] flex items-center justify-between shrink-0">
-            <div className="text-[10px] text-[#64748B] hidden sm:block">
-              CHANGES PERSIST DIRECTLY TO SQLITE MASTER
+            <div className="text-[10px] text-[#F59E0B] hidden sm:block">
+              Demonstration environment: changes may reset when the service restarts.
             </div>
 
             <div className="flex items-center gap-2 ml-auto">

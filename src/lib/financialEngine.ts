@@ -6,12 +6,22 @@ import {
   StressSimulationInputs,
   StressSimulationResult,
 } from "./types";
+import {
+  calculateTolToTnw,
+  calculateDebtServiceProxy,
+  calculateAltmanZScore,
+  calculateBeneishMScore,
+} from "./financialCalculations";
 
 /**
  * Deterministic Institutional Financial Health Engine & Formula DAG
  */
 
-export function calculateRatios(period: FinancialPeriodData): RatioAnalysis {
+export function calculateRatios(
+  period: FinancialPeriodData,
+  priorPeriod?: FinancialPeriodData | null,
+  isFinancialInstitution: boolean = false
+): RatioAnalysis {
   const currentRatio =
     period.totalCurrentAssets && period.totalCurrentLiabilities && period.totalCurrentLiabilities > 0
       ? period.totalCurrentAssets / period.totalCurrentLiabilities
@@ -108,6 +118,51 @@ export function calculateRatios(period: FinancialPeriodData): RatioAnalysis {
       ? (period.netIncome / period.totalAssets) * 100
       : null;
 
+  // Indian appraisal TOL / TNW
+  const tolTnwResult = calculateTolToTnw(period.totalLiabilities, period.totalShareholdersEquity);
+  const tolToTnw = tolTnwResult.isComputable ? tolTnwResult.value : null;
+
+  // Analytical Debt Service Proxy
+  const dspResult = calculateDebtServiceProxy(period.ebitda, period.interestExpense, period.shortTermDebt);
+  const debtServiceProxy = dspResult.isComputable ? dspResult.value : null;
+
+  // Altman Z Diagnostic
+  const workingCapital =
+    period.totalCurrentAssets !== null &&
+    period.totalCurrentAssets !== undefined &&
+    period.totalCurrentLiabilities !== null &&
+    period.totalCurrentLiabilities !== undefined
+      ? period.totalCurrentAssets - period.totalCurrentLiabilities
+      : null;
+
+  const altmanResult = calculateAltmanZScore({
+    workingCapital,
+    retainedEarnings: null, // Zero fabrication: not segregated in primary face disclosure
+    ebit: period.ebit,
+    totalAssets: period.totalAssets,
+    totalLiabilities: period.totalLiabilities,
+    bookValueOfEquity: period.totalShareholdersEquity,
+    isFinancialInstitution,
+    variant: "Z_DOUBLE_PRIME",
+  });
+  const altmanZDoublePrime = altmanResult.isComputable ? altmanResult.value : null;
+  const altmanZZone = altmanResult.zone ?? null;
+
+  // Beneish M Diagnostic
+  let beneishMScore: number | null = null;
+  let beneishMZone: string | null = null;
+  if (priorPeriod) {
+    const mRes = calculateBeneishMScore({
+      currentPeriod: period,
+      priorPeriod: priorPeriod,
+      isFinancialInstitution,
+    });
+    if (mRes.isComputable) {
+      beneishMScore = mRes.value;
+      beneishMZone = mRes.zone ?? null;
+    }
+  }
+
   return {
     currentRatio,
     quickRatio,
@@ -121,6 +176,12 @@ export function calculateRatios(period: FinancialPeriodData): RatioAnalysis {
     netMarginPct,
     roePct,
     roaPct,
+    tolToTnw,
+    debtServiceProxy,
+    altmanZDoublePrime,
+    altmanZZone,
+    beneishMScore,
+    beneishMZone,
   };
 }
 
@@ -254,7 +315,7 @@ export function evaluateEarlyWarnings(
         condition: `Leverage multiple is ${ratios.netDebtToEbitda.toFixed(2)}x (Excessive gearing)`,
         severity: "CRITICAL",
         title: "Excessive Balance Sheet Gearing",
-        description: "Net indebtedness relative to cash generation exceeds Aladdin Tier 1 threshold limits.",
+        description: "Net indebtedness relative to cash generation exceeds Tier 1 screening threshold limits.",
         currentValue: `${ratios.netDebtToEbitda.toFixed(2)}x`,
         threshold: "> 4.50x",
       });
@@ -320,10 +381,12 @@ export function runStressSimulation(
   const baseEbitda = latestPeriod.ebitda ?? (latestPeriod.ebit ? latestPeriod.ebit * 1.15 : baseRev * 0.25);
   const baseDeprec = Math.max(0, baseEbitda - (latestPeriod.ebit ?? baseRev * 0.2));
 
-  // 1. Shocks
+  // 1. Shocks & Assumptions
   const revShockFactor = 1 + inputs.revenueShockPct / 100;
   const cogsShockFactor = 1 + inputs.cogsInflationPct / 100;
   const rateShockDecimal = inputs.rateShockBps / 10000; // e.g. 200 bps = 0.02
+  const floatingRateDebtSharePct = inputs.floatingRateDebtSharePct ?? 40; // Default 40% floating-rate facility share
+  const stressedFloatingDebtAmount = baseTotalDebt * (floatingRateDebtSharePct / 100);
 
   // 2. Recalculations
   const simulatedRevenue = baseRev * revShockFactor;
@@ -332,7 +395,8 @@ export function runStressSimulation(
   const simulatedGrossMarginPct = simulatedRevenue > 0 ? (simulatedGrossProfit / simulatedRevenue) * 100 : 0;
   const simulatedEbit = simulatedGrossProfit - baseOpex;
 
-  const incrementalInterestExpense = baseTotalDebt * rateShockDecimal;
+  // Stressed interest: applies rate shock strictly to floating-rate debt portion
+  const incrementalInterestExpense = stressedFloatingDebtAmount * rateShockDecimal;
   const simulatedInterestExpense = baseInterest + incrementalInterestExpense;
 
   const simulatedEbitda = simulatedEbit + baseDeprec;
@@ -384,6 +448,8 @@ export function runStressSimulation(
     simulatedEbit,
     simulatedInterestExpense,
     incrementalInterestExpense,
+    floatingRateDebtSharePct,
+    stressedFloatingDebtAmount: Number(stressedFloatingDebtAmount.toFixed(2)),
     simulatedEbitda,
     simulatedNetIncome,
     simulatedInterestCoverage,

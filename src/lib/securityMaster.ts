@@ -228,9 +228,10 @@ export async function getCompanyDetails(
     }
   }
 
+  const isFinancial = company.sector === "Financial Services" || company.sector === "Banking";
   const latestPeriod = periods[0] ?? null;
   const latestRatios = latestPeriod
-    ? calculateRatios(latestPeriod)
+    ? calculateRatios(latestPeriod, periods[1] ?? null, isFinancial)
     : {
         currentRatio: null,
         quickRatio: null,
@@ -244,6 +245,12 @@ export async function getCompanyDetails(
         netMarginPct: null,
         roePct: null,
         roaPct: null,
+        tolToTnw: null,
+        debtServiceProxy: null,
+        altmanZDoublePrime: null,
+        altmanZZone: null,
+        beneishMScore: null,
+        beneishMZone: null,
       };
 
   const { flags, score, tier } = evaluateEarlyWarnings(periods, latestRatios);
@@ -260,6 +267,8 @@ export async function getCompanyDetails(
         simulatedEbit: 0,
         simulatedInterestExpense: 0,
         incrementalInterestExpense: 0,
+        floatingRateDebtSharePct: 40,
+        stressedFloatingDebtAmount: 0,
         simulatedEbitda: 0,
         simulatedNetIncome: 0,
         simulatedInterestCoverage: null,

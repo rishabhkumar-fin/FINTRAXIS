@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Layers, BarChart3, LayoutGrid, Info, ArrowRight } from "lucide-react";
+import { Layers, BarChart3, LayoutGrid, Info, ArrowRight, Scale } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
 import { formatRatio, formatPct, formatFinancialValue } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
@@ -544,7 +544,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             <Info className="w-4 h-4 text-[#38BDF8]" />
             <span>EXECUTIVE SYNTHESIS: WHAT THESE RATIOS MEAN IN BUSINESS REALITY</span>
           </div>
-          <span className="text-[10px] text-[#64748B]">BLACKROCK ALADDIN BENCHMARKS</span>
+          <span className="text-[10px] text-[#64748B]">INSTITUTIONAL SCREENING ACCORD</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -606,7 +606,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
                 <span>POWER BI COMPARATIVE BENCHMARK MATRIX (COMPANY VS PEERS VS HURDLE)</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] mt-0.5">
-                Evaluated against Global Industry Medians &amp; Investment Grade Syndicate Floors
+                Evaluated against Illustrative Screening Benchmarks &amp; Investment Grade Syndicate Floors
               </div>
             </div>
 
@@ -617,11 +617,11 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded bg-[#3B82F6]"></span>
-                <span className="text-[#94A3B8]">Industry Median</span>
+                <span className="text-[#94A3B8]">Illustrative Reference Level</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded bg-[#F43F5E]"></span>
-                <span className="text-[#94A3B8]">Risk Hurdle</span>
+                <span className="text-[#94A3B8]">Screening Hurdle</span>
               </span>
             </div>
           </div>
@@ -759,6 +759,91 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           ))}
         </div>
       )}
+
+      {/* INDIAN BANKING APPRAISAL & ADVANCED DIAGNOSTIC FRAMEWORK */}
+      <div className="p-4 bg-[#0A0E17] border border-[#1E2536] rounded-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E2536] pb-2 gap-1">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+            <Scale className="w-4 h-4 text-[#38BDF8]" />
+            <span>INDIAN BANKING APPRAISAL &amp; MULTIVARIATE DIAGNOSTIC ACCORD</span>
+          </div>
+          <span className="text-[10px] text-[#94A3B8]">
+            RBI / Ind-AS / US-GAAP Technical Appraisal Standards
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          {/* Metric 1: TOL / TNW */}
+          <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] uppercase font-bold">
+              <span>TOL / TNW (Gearing)</span>
+              <span className="text-[#38BDF8]">RBI &lt; 3.00x</span>
+            </div>
+            <div className="text-xl font-bold font-mono text-white">
+              {latestRatios.tolToTnw !== null && latestRatios.tolToTnw !== undefined
+                ? `${latestRatios.tolToTnw.toFixed(2)}x`
+                : "N/D"}
+            </div>
+            <p className="text-[10px] text-[#94A3B8] leading-tight">
+              Total Outside Liabilities to Tangible Net Worth. Core Indian consortium debt hurdle.
+            </p>
+          </div>
+
+          {/* Metric 2: Debt Service Rollover Proxy */}
+          <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] uppercase font-bold">
+              <span>Debt Service Proxy</span>
+              <span className="text-[#10B981]">&ge; 1.50x</span>
+            </div>
+            <div className="text-xl font-bold font-mono text-white">
+              {latestRatios.debtServiceProxy !== null && latestRatios.debtServiceProxy !== undefined
+                ? `${latestRatios.debtServiceProxy.toFixed(2)}x`
+                : "N/D"}
+            </div>
+            <p className="text-[10px] text-[#94A3B8] leading-tight">
+              EBITDA / (Interest + ST Debt). Rollover buffer proxy (not certified statutory DSCR).
+            </p>
+          </div>
+
+          {/* Metric 3: Statutory DSCR Status */}
+          <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] uppercase font-bold">
+              <span>Certified DSCR</span>
+              <span className="text-[#F59E0B]">Footnote Audit</span>
+            </div>
+            <div className="text-base font-bold font-mono text-[#F59E0B]">
+              N/D (Footnote Note)
+            </div>
+            <p className="text-[10px] text-[#94A3B8] leading-tight">
+              Requires scheduled principal repayments from debt maturity footnotes; zero estimated fabrication.
+            </p>
+          </div>
+
+          {/* Metric 4: Altman Z'' Diagnostic */}
+          <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] uppercase font-bold">
+              <span>Altman Z&apos;&apos; Diagnostic</span>
+              <span className="text-[#94A3B8]">&gt; 2.60 Safe</span>
+            </div>
+            <div className="text-base font-bold font-mono text-[#94A3B8]">
+              {latestRatios.altmanZDoublePrime !== null && latestRatios.altmanZDoublePrime !== undefined
+                ? `${latestRatios.altmanZDoublePrime.toFixed(2)} (${latestRatios.altmanZZone})`
+                : "N/D (Unsegregated)"}
+            </div>
+            <p className="text-[10px] text-[#94A3B8] leading-tight">
+              Requires retained earnings breakout from balance sheet. Returns N/D rather than approximation.
+            </p>
+          </div>
+        </div>
+
+        {/* Screening Indicator Disclaimer */}
+        <div className="p-2.5 bg-[#080B10] border border-[#1E2536] rounded text-[10px] text-[#64748B] flex items-center justify-between">
+          <span>
+            <strong>Screening Notice:</strong> Health scores ({riskScore}/100) and screening tiers ({riskTier}) are deterministic internal indicators and do not represent credit ratings from CRISIL, ICRA, S&amp;P, or Moody&apos;s.
+          </span>
+          <span className="text-[#38BDF8] ml-2 shrink-0">Standard Accord</span>
+        </div>
+      </div>
     </div>
   );
 }
