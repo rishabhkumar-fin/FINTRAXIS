@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
 import { SEED_COMPANIES } from "@/lib/seedData";
+import { INSTITUTIONAL_COMPANIES } from "@/lib/institutionalDatabase";
+import { resolveMarketQuote } from "@/lib/finance/quoteResolver";
+import type { StandardMarketQuote } from "@/lib/finance/types";
+import type { CompanyEntity } from "@/lib/types";
 
-export interface NormalizedMarketQuote {
-  symbol: string;
+export interface NormalizedMarketQuote extends StandardMarketQuote {
   regularMarketPrice: number;
-  chartPreviousClose: number;
-  change: number;
-  changePercent: number;
-  dayHigh: number;
-  dayLow: number;
-  fiftyTwoWeekHigh: number;
-  fiftyTwoWeekLow: number;
-  currency: string;
-  currencySymbol: string;
-  exchangeName: string;
   timestamp: string;
 }
 
@@ -24,6 +17,30 @@ export async function GET(
   try {
     const { ticker } = await params;
     const cleanTicker = decodeURIComponent(ticker).trim().toUpperCase();
+
+    // Find known company metadata
+    const seed =
+      INSTITUTIONAL_COMPANIES[cleanTicker]?.company ||
+      SEED_COMPANIES.find((c) => c.symbol === cleanTicker || c.id === cleanTicker);
+
+    const companyPlaceholder: CompanyEntity = seed || {
+      id: cleanTicker,
+      symbol: cleanTicker,
+      name: cleanTicker,
+      exchange: cleanTicker.endsWith(".NS") || cleanTicker.endsWith(".BO") ? "NSE / BSE" : "NASDAQ",
+      country: cleanTicker.endsWith(".NS") || cleanTicker.endsWith(".BO") ? "IND" : "USA",
+      currency: cleanTicker.endsWith(".NS") || cleanTicker.endsWith(".BO") ? "INR" : "USD",
+      scaleUnit: cleanTicker.endsWith(".NS") || cleanTicker.endsWith(".BO") ? "Crores" : "Millions",
+      sector: "General",
+      industry: "General",
+      fiscalYearEnd: "March",
+      accountingStandard: cleanTicker.endsWith(".NS") ? "Ind AS" : "US-GAAP",
+      fxRateToUsd: cleanTicker.endsWith(".NS") ? 0.0119 : 1.0,
+      fxTimestamp: "Anchor USD",
+      sharePrice: 100,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
       cleanTicker
@@ -43,72 +60,44 @@ export async function GET(
         const json = await response.json();
         const meta = json.chart?.result?.[0]?.meta;
 
-        if (meta && typeof meta.regularMarketPrice === "number") {
-          const price = meta.regularMarketPrice;
-          const prevClose = meta.chartPreviousClose || price;
-          const change = price - prevClose;
-          const changePercent = prevClose ? (change / prevClose) * 100 : 0;
-          const dayHigh = meta.regularMarketDayHigh || price * 1.01;
-          const dayLow = meta.regularMarketDayLow || price * 0.99;
-          const fiftyTwoWeekHigh = meta.fiftyTwoWeekHigh || price * 1.25;
-          const fiftyTwoWeekLow = meta.fiftyTwoWeekLow || price * 0.75;
-          const currency = meta.currency || "USD";
-
-          const symbolMap: Record<string, string> = {
-            USD: "$",
-            INR: "₹",
-            JPY: "¥",
-            EUR: "€",
-            GBP: "£",
-          };
+        if (meta && typeof meta.regularMarketPrice === "number" && meta.regularMarketPrice > 0) {
+          const resolved = resolveMarketQuote(companyPlaceholder, {
+            regularMarketPrice: meta.regularMarketPrice,
+            fulldayChange: meta.fulldayChange,
+            fulldayChangePercent: meta.fulldayChangePercent,
+            previousClose: meta.previousClose,
+            regularMarketDayLow: meta.regularMarketDayLow,
+            regularMarketDayHigh: meta.regularMarketDayHigh,
+            fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
+            fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
+            exchangeName: meta.fullExchangeName || meta.exchangeName,
+            currency: meta.currency,
+            timestamp: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : new Date().toISOString(),
+            isLiveFeed: false, // Honest labeling: 15m delayed exchange quote
+          });
 
           const payload: NormalizedMarketQuote = {
-            symbol: cleanTicker,
-            regularMarketPrice: Number(price.toFixed(2)),
-            chartPreviousClose: Number(prevClose.toFixed(2)),
-            change: Number(change.toFixed(2)),
-            changePercent: Number(changePercent.toFixed(2)),
-            dayHigh: Number(dayHigh.toFixed(2)),
-            dayLow: Number(dayLow.toFixed(2)),
-            fiftyTwoWeekHigh: Number(fiftyTwoWeekHigh.toFixed(2)),
-            fiftyTwoWeekLow: Number(fiftyTwoWeekLow.toFixed(2)),
-            currency,
-            currencySymbol: symbolMap[currency] || currency,
-            exchangeName: meta.exchangeName || "GLOBAL",
-            timestamp: new Date().toISOString(),
+            ...resolved,
+            regularMarketPrice: resolved.price,
+            timestamp: resolved.asOf,
           };
 
           return NextResponse.json({ success: true, data: payload });
         }
       }
     } catch (fetchErr) {
-      console.warn(`Upstream quote fetch for ${cleanTicker} failed:`, fetchErr);
+      console.warn(`Upstream quote fetch for ${cleanTicker} failed, using reference quote:`, fetchErr);
     }
 
-    // Fallback to static seed company quote
-    const seed = SEED_COMPANIES.find((c) => c.symbol === cleanTicker || c.id === cleanTicker);
-    const basePrice = seed?.sharePrice || 100;
-    const prevClose = basePrice * 0.995;
-    const change = basePrice - prevClose;
-    const changePercent = (change / prevClose) * 100;
-
-    const fallbackQuote: NormalizedMarketQuote = {
-      symbol: cleanTicker,
-      regularMarketPrice: basePrice,
-      chartPreviousClose: prevClose,
-      change: Number(change.toFixed(2)),
-      changePercent: Number(changePercent.toFixed(2)),
-      dayHigh: basePrice * 1.015,
-      dayLow: basePrice * 0.985,
-      fiftyTwoWeekHigh: basePrice * 1.3,
-      fiftyTwoWeekLow: basePrice * 0.7,
-      currency: seed?.currency || "USD",
-      currencySymbol: seed?.currency === "INR" ? "₹" : seed?.currency === "JPY" ? "¥" : "$",
-      exchangeName: seed?.exchange || "NASDAQ",
+    // Fallback: Honest Reference Quote
+    const referenceQuote = resolveMarketQuote(companyPlaceholder, null);
+    const fallbackPayload: NormalizedMarketQuote = {
+      ...referenceQuote,
+      regularMarketPrice: referenceQuote.price,
       timestamp: new Date().toISOString(),
     };
 
-    return NextResponse.json({ success: true, data: fallbackQuote });
+    return NextResponse.json({ success: true, data: fallbackPayload });
   } catch (error) {
     console.error("GET /api/market/quote/[ticker] error:", error);
     return NextResponse.json(

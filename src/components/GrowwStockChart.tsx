@@ -76,10 +76,16 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
         month: "short",
         day: "numeric",
       });
-      const monthStr = ptDate.toLocaleDateString("en-US", {
-        month: "short",
-        year: activeTimeframe === "1D" || activeTimeframe === "1W" ? undefined : "2-digit",
-      });
+      let monthStr: string;
+      if (activeTimeframe === "1D") {
+        monthStr = ptDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+      } else if (activeTimeframe === "1W" || activeTimeframe === "1M" || activeTimeframe === "3M") {
+        monthStr = ptDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      } else if (activeTimeframe === "1Y") {
+        monthStr = ptDate.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+      } else {
+        monthStr = ptDate.toLocaleDateString("en-US", { year: "numeric" });
+      }
       const fullDate = ptDate.toLocaleDateString("en-US", {
         weekday: "short",
         month: "short",
@@ -175,10 +181,10 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-[#64748B] uppercase font-bold tracking-wider">
-              {companyName} &bull; GROWW-STYLE LIVE CHART
+              {companyName} &bull; HISTORICAL PRICE CHART
             </span>
             <span className="px-1.5 py-0.2 bg-[#0F1626] border border-[#2563EB]/40 text-[#38BDF8] text-[9.5px] rounded">
-              SCRUB TO INSPECT ANY MONTH
+              SCRUB TO INSPECT ANY DATE
             </span>
           </div>
 
@@ -333,9 +339,10 @@ export function GrowwStockChart({ quote, companyName }: GrowwStockChartProps) {
             </g>
           )}
 
-          {/* Bottom Time Axis Labels (Every ~5-6 points) */}
+          {/* Bottom Time Axis Labels (Deduplicated, Unique Labels per Timeframe) */}
           {points
             .filter((_, idx) => idx % Math.max(1, Math.floor(points.length / 6)) === 0 || idx === points.length - 1)
+            .filter((pt, i, arr) => i === 0 || pt.monthStr !== arr[i - 1].monthStr)
             .map((pt, i) => (
               <text
                 key={i}

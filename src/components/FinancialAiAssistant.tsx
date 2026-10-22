@@ -1,5 +1,135 @@
 "use client";
 
+// Lightweight Institutional Markdown Parser
+function FormattedAiResponse({ content }: { content: string }) {
+  if (!content) return null;
+
+  // Split content by lines
+  const lines = content.split("\n");
+  const renderedElements: React.ReactNode[] = [];
+  let currentList: React.ReactNode[] = [];
+  let inCodeBlock = false;
+  let codeBlockLines: string[] = [];
+
+  const parseInlineMarkdown = (line: string): React.ReactNode[] => {
+    // Regex for bold **text** and inline code `code`
+    const tokens = line.split(/(\*\*.*?\*\*|`.*?`)/g);
+    return tokens.map((token, i) => {
+      if (token.startsWith("**") && token.endsWith("**")) {
+        return <strong key={i} className="font-bold text-white">{token.slice(2, -2)}</strong>;
+      }
+      if (token.startsWith("`") && token.endsWith("`")) {
+        return (
+          <code key={i} className="px-1 py-0.5 bg-[#05070B] border border-[#1E293B] rounded text-[#38BDF8] font-mono text-[11px]">
+            {token.slice(1, -1)}
+          </code>
+        );
+      }
+      return token;
+    });
+  };
+
+  const flushList = () => {
+    if (currentList.length > 0) {
+      renderedElements.push(
+        <ul key={`ul_${renderedElements.length}`} className="space-y-1 my-1.5 ml-3">
+          {currentList}
+        </ul>
+      );
+      currentList = [];
+    }
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+
+    // Code block fences
+    if (trimmed.startsWith("```")) {
+      if (inCodeBlock) {
+        renderedElements.push(
+          <pre key={`code_${idx}`} className="p-2.5 my-2 bg-[#05070B] border border-[#1E293B] rounded-lg text-[11px] text-[#10B981] font-mono overflow-x-auto">
+            {codeBlockLines.join("\n")}
+          </pre>
+        );
+        codeBlockLines = [];
+        inCodeBlock = false;
+      } else {
+        flushList();
+        inCodeBlock = true;
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeBlockLines.push(line);
+      return;
+    }
+
+    // Headers
+    if (trimmed.startsWith("### ")) {
+      flushList();
+      renderedElements.push(
+        <h3 key={`h3_${idx}`} className="text-xs sm:text-sm font-bold text-white mt-2 mb-1 flex items-center gap-1.5">
+          {parseInlineMarkdown(trimmed.replace("### ", ""))}
+        </h3>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      flushList();
+      renderedElements.push(
+        <h2 key={`h2_${idx}`} className="text-sm font-bold text-[#38BDF8] mt-2.5 mb-1 flex items-center gap-1.5">
+          {parseInlineMarkdown(trimmed.replace("## ", ""))}
+        </h2>
+      );
+      return;
+    }
+
+    // Bullet points
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ") || trimmed.startsWith("• ")) {
+      const cleanBullet = trimmed.replace(/^[-*•]s+/, "");
+      currentList.push(
+        <li key={`li_${idx}`} className="text-xs sm:text-[12.5px] text-[#CBD5E1] flex items-start gap-1.5">
+          <span className="text-[#38BDF8] mt-1 text-[8px]">&bull;</span>
+          <span className="flex-1">{parseInlineMarkdown(cleanBullet)}</span>
+        </li>
+      );
+      return;
+    }
+
+    // Blockquote
+    if (trimmed.startsWith("> ")) {
+      flushList();
+      renderedElements.push(
+        <blockquote key={`quote_${idx}`} className="border-l-2 border-[#38BDF8] pl-2.5 my-1.5 text-xs text-[#94A3B8] italic">
+          {parseInlineMarkdown(trimmed.replace("> ", ""))}
+        </blockquote>
+      );
+      return;
+    }
+
+    // Empty lines
+    if (!trimmed) {
+      flushList();
+      return;
+    }
+
+    // Normal paragraph
+    flushList();
+    renderedElements.push(
+      <p key={`p_${idx}`} className="text-xs sm:text-[12.5px] text-[#CBD5E1] leading-relaxed my-1">
+        {parseInlineMarkdown(trimmed)}
+      </p>
+    );
+  });
+
+  flushList();
+
+  return <div className="space-y-1">{renderedElements}</div>;
+}
+
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Sparkles,
@@ -76,7 +206,7 @@ export function FinancialAiAssistant({
       id: "intro",
       sender: "ai",
       text: activeProfile
-        ? `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nActive surveillance loaded for **${company?.name} (${company?.symbol})**:\n\n• **Country & Regime:** ${company?.country} (${company?.currency} ${company?.scaleUnit}) &bull; ${company?.accountingStandard}\n• **Credit Solvency Tier:** **${activeProfile.riskTier}** (Score: \`${activeProfile.riskScore}/100\`)\n• **Net Debt / EBITDA:** \`${activeProfile.latestRatios?.netDebtToEbitda !== null ? `${activeProfile.latestRatios?.netDebtToEbitda?.toFixed(2)}x` : "0.00x (Net Cash Surplus)"}\`\n• **Interest Coverage:** \`${activeProfile.latestRatios?.interestCoverage !== null ? `${activeProfile.latestRatios?.interestCoverage?.toFixed(2)}x` : "N/D"}\`\n\nAll figures are grounded directly in the **SQLite WAL Ledger** and audited XBRL filings. Ask any question about this company's credit health, simulate adverse shocks, or explore financial concepts below.`
+        ? `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nActive surveillance loaded for **${company?.name} (${company?.symbol})**:\n\n• **Country & Regime:** ${company?.country} (${company?.currency} ${company?.scaleUnit}) &bull; ${company?.accountingStandard}\n• **Credit Solvency Tier:** **${activeProfile.riskTier}** (Score: \`${activeProfile.riskScore}/100\`)\n• **Net Debt / EBITDA:** \`${activeProfile.latestRatios?.netDebtToEbitda !== null ? (activeProfile.latestRatios.netDebtToEbitda <= 0 ? `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x (Net Cash)` : `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x`) : "N/D"}\`\n• **Interest Coverage:** \`${activeProfile.latestRatios?.interestCoverage !== null ? `${activeProfile.latestRatios?.interestCoverage?.toFixed(2)}x` : "N/D"}\`\n\nAll figures are grounded directly in the **SQLite WAL Ledger** and audited XBRL filings. Ask any question about this company's credit health, simulate adverse shocks, or explore financial concepts below.`
         : `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nWelcome to **FINTRAXIS Institutional Intelligence**. I provide grounded financial analysis, credit underwriting memos, forensic accounting diagnostics, and macro interest rate stress tests.\n\nAll company data is queried in real time from our local **SQLite Financial Database** with zero invented metrics. What would you like to explore?`,
       timestamp: "Just now",
       sources: company
@@ -301,8 +431,12 @@ export function FinancialAiAssistant({
                 }`}
               >
                 {/* Render formatted content */}
-                <div className="space-y-2 whitespace-pre-wrap font-sans text-xs sm:text-[13px]">
-                  {msg.text}
+                <div className="space-y-2 font-sans text-xs sm:text-[13px]">
+                  {isUser ? (
+                    <div className="whitespace-pre-wrap">{msg.text}</div>
+                  ) : (
+                    <FormattedAiResponse content={msg.text} />
+                  )}
                 </div>
 
                 {/* Grounded Source References */}
@@ -432,7 +566,7 @@ export function FinancialAiAssistant({
         </form>
 
         <div className="flex items-center justify-between text-[9.5px] text-[#64748B] mt-2 px-1">
-          <span>Grounded against SQLite WAL &bull; Zero Hallucination Policy</span>
+          <span>Grounded against SQLite WAL &bull; Deterministic Financial Engine Policy</span>
           <span>Press Enter to send</span>
         </div>
       </div>

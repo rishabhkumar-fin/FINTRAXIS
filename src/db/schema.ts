@@ -10,6 +10,7 @@ export const companies = sqliteTable("companies", {
   scaleUnit: text("scale_unit").notNull(), // Millions, Crores, Billions
   isin: text("isin"),
   cik: text("cik"),
+  cin: text("cin"),
   sector: text("sector").notNull(),
   industry: text("industry").notNull(),
   fiscalYearEnd: text("fiscal_year_end").notNull(),
@@ -154,6 +155,7 @@ export const users = sqliteTable("users", {
   currentRatioHurdle: real("current_ratio_hurdle").default(1.10),
   role: text("role").notNull().default("ANALYST"),
   status: text("status").notNull().default("ACTIVE"),
+  mustChangePassword: real("must_change_password").default(0),
   lastLoginAt: text("last_login_at"),
   createdAt: text("created_at").notNull(),
 });

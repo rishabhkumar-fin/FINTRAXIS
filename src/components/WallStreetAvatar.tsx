@@ -26,7 +26,7 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
   },
   {
     id: "bull",
-    name: "Wall Street Charging Bull",
+    name: "Capital Markets Bull",
     subtitle: "Bowling Green Bronze Hall",
     tag: "ALPHA DESK",
   },
@@ -110,7 +110,7 @@ export function WallStreetAvatar({
 
   if (avatarId === "bull") {
     return (
-      <div className={containerClass} title="Wall Street Charging Bull">
+      <div className={containerClass} title="Capital Markets Bull">
         <svg
           viewBox="0 0 48 48"
           fill="none"

@@ -11,6 +11,7 @@ import {
 import { SEED_COMPANIES, SEED_PERIODS, SEED_AUDIT_ITEMS } from "./seedData";
 import { INSTITUTIONAL_COMPANIES } from "./institutionalDatabase";
 import { calculateRatios, evaluateEarlyWarnings, runStressSimulation } from "./financialEngine";
+import { computeCompanyFinanceSummary } from "./finance/financeMaster";
 import { autoIngestCompany } from "./autoIngest";
 
 /**
@@ -256,7 +257,10 @@ export async function getCompanyDetails(
         contingentLiabilitiesRatio: null,
       };
 
-  const { flags, score, tier } = evaluateEarlyWarnings(periods, latestRatios);
+  const financeSummary = computeCompanyFinanceSummary(company, periods);
+  const { flags } = evaluateEarlyWarnings(periods, latestRatios);
+  const score = financeSummary ? financeSummary.healthScore.score : 85;
+  const tier = financeSummary ? financeSummary.healthScore.tier : "TIER_1_STABLE";
 
   const simulation = latestPeriod
     ? runStressSimulation(latestPeriod, simInputs)
@@ -289,6 +293,7 @@ export async function getCompanyDetails(
     riskScore: score,
     earlyWarningFlags: flags,
     simulation,
+    financeSummary,
   };
 }
 

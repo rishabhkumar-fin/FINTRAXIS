@@ -15,6 +15,7 @@ import {
   calculatePromoterPledgeRisk,
   calculateDrawingPower,
   calculateContingentLiabilitiesRatio,
+  calculateStressScenario,
 } from "./financialCalculations";
 
 /**
@@ -402,63 +403,59 @@ export function evaluateEarlyWarnings(
 /**
  * Deterministic Stress Simulator
  */
+export function getSectorDefaultVariableCostShare(sector?: string): number {
+  if (!sector) return 50;
+  const s = sector.toLowerCase();
+  if (s.includes("tech") || s.includes("software") || s.includes("information") || s.includes("service")) return 35;
+  if (s.includes("manufactur") || s.includes("autom") || s.includes("industri") || s.includes("aerospace")) return 65;
+  if (s.includes("retail") || s.includes("consumer")) return 75;
+  if (s.includes("telecom") || s.includes("utility") || s.includes("infrastructure")) return 30;
+  if (s.includes("energy") || s.includes("oil") || s.includes("gas") || s.includes("refin")) return 70;
+  return 50;
+}
+
 export function runStressSimulation(
   latestPeriod: FinancialPeriodData,
-  inputs: StressSimulationInputs
+  inputs: StressSimulationInputs,
+  sector?: string
 ): StressSimulationResult {
   const baseRev = latestPeriod.revenue ?? 0;
-  const baseCogs = latestPeriod.cogs ?? 0;
-  const baseOpex =
-    latestPeriod.operatingExpenses ??
-    (latestPeriod.grossProfit !== null && latestPeriod.ebit !== null
-      ? latestPeriod.grossProfit - latestPeriod.ebit
-      : baseRev * 0.15);
+  const baseEbit = latestPeriod.ebit ?? (latestPeriod.grossProfit !== null && latestPeriod.operatingExpenses !== null ? latestPeriod.grossProfit - latestPeriod.operatingExpenses : baseRev * 0.2);
+  const baseEbitda = latestPeriod.ebitda ?? (baseEbit * 1.15);
   const baseInterest = latestPeriod.interestExpense ?? 0;
   const baseTotalDebt = latestPeriod.totalDebt ?? 0;
   const baseCash = (latestPeriod.cashAndEquivalents ?? 0) + (latestPeriod.marketableSecurities ?? 0);
-  const baseEbitda = latestPeriod.ebitda ?? (latestPeriod.ebit ? latestPeriod.ebit * 1.15 : baseRev * 0.25);
-  const baseDeprec = Math.max(0, baseEbitda - (latestPeriod.ebit ?? baseRev * 0.2));
+  const baseDeprec = Math.max(0, baseEbitda - baseEbit);
 
-  // 1. Shocks & Assumptions
-  const revShockFactor = 1 + inputs.revenueShockPct / 100;
-  const cogsShockFactor = 1 + inputs.cogsInflationPct / 100;
-  const rateShockDecimal = inputs.rateShockBps / 10000; // e.g. 200 bps = 0.02
-  const floatingRateDebtSharePct = inputs.floatingRateDebtSharePct ?? 40; // Default 40% floating-rate facility share
-  const stressedFloatingDebtAmount = baseTotalDebt * (floatingRateDebtSharePct / 100);
+  const variableCostSharePct = inputs.variableCostSharePct ?? getSectorDefaultVariableCostShare(sector);
 
-  // 2. Recalculations
-  const simulatedRevenue = baseRev * revShockFactor;
-  const simulatedCogs = baseCogs * cogsShockFactor;
-  const simulatedGrossProfit = simulatedRevenue - simulatedCogs;
-  const simulatedGrossMarginPct = simulatedRevenue > 0 ? (simulatedGrossProfit / simulatedRevenue) * 100 : 0;
-  const simulatedEbit = simulatedGrossProfit - baseOpex;
+  const pureResult = calculateStressScenario({
+    revenue: baseRev,
+    ebit: baseEbit,
+    ebitda: baseEbitda,
+    depreciation: baseDeprec,
+    interestExpense: baseInterest,
+    totalDebt: baseTotalDebt,
+    cash: baseCash,
+    revenueShockPct: inputs.revenueShockPct,
+    cogsInflationPct: inputs.cogsInflationPct,
+    rateShockBps: inputs.rateShockBps,
+    variableCostSharePct,
+    floatingRateDebtSharePct: inputs.floatingRateDebtSharePct ?? 40,
+  });
 
-  // Stressed interest: applies rate shock strictly to floating-rate debt portion
-  const incrementalInterestExpense = stressedFloatingDebtAmount * rateShockDecimal;
-  const simulatedInterestExpense = baseInterest + incrementalInterestExpense;
-
-  const simulatedEbitda = simulatedEbit + baseDeprec;
-
-  // Effective tax rate assumption (21% base corporate tax floor)
+  // Effective tax rate calculation
   const effectiveTaxRate =
-    latestPeriod.taxExpense && latestPeriod.ebit && latestPeriod.ebit > 0
-      ? Math.min(0.35, Math.max(0.15, latestPeriod.taxExpense / latestPeriod.ebit))
+    latestPeriod.taxExpense && baseEbit > 0
+      ? Math.min(0.35, Math.max(0.15, latestPeriod.taxExpense / baseEbit))
       : 0.21;
 
-  const preTaxEarnings = simulatedEbit - simulatedInterestExpense;
+  const preTaxEarnings = pureResult.simulatedEbit - pureResult.simulatedInterestExpense;
   const simulatedNetIncome = preTaxEarnings > 0 ? preTaxEarnings * (1 - effectiveTaxRate) : preTaxEarnings;
 
-  const simulatedInterestCoverage =
-    simulatedInterestExpense > 0 ? simulatedEbit / simulatedInterestExpense : null;
-
-  const simulatedNetDebt = baseTotalDebt - baseCash;
-  const simulatedNetDebtToEbitda =
-    simulatedEbitda > 0 ? simulatedNetDebt / simulatedEbitda : null;
-
   // Stressed Cash-Burn Runway
-  // Approximate Stressed Operating Cash Flow delta
-  const ebitDelta = simulatedEbit - (latestPeriod.ebit ?? 0);
-  const interestDelta = simulatedInterestExpense - baseInterest;
+  const ebitDelta = pureResult.simulatedEbit - baseEbit;
+  const interestDelta = pureResult.simulatedInterestExpense - baseInterest;
   const baseFcf = latestPeriod.freeCashFlow ?? (latestPeriod.operatingCashFlow ?? simulatedNetIncome * 0.9);
   const simulatedFcf = baseFcf + ebitDelta - interestDelta;
 
@@ -476,24 +473,37 @@ export function runStressSimulation(
     }
   }
 
+  const simulatedGrossProfit = pureResult.simulatedRevenue - pureResult.stressedVariableCosts;
+  const simulatedGrossMarginPct = pureResult.simulatedRevenue > 0 ? (simulatedGrossProfit / pureResult.simulatedRevenue) * 100 : 0;
+
   return {
     basePeriod: latestPeriod.period,
-    simulatedRevenue,
+    simulatedRevenue: pureResult.simulatedRevenue,
     revenueDeltaPct: inputs.revenueShockPct,
-    simulatedCogs,
+    simulatedCogs: pureResult.stressedVariableCosts,
     simulatedGrossProfit,
     simulatedGrossMarginPct,
-    simulatedEbit,
-    simulatedInterestExpense,
-    incrementalInterestExpense,
-    floatingRateDebtSharePct,
-    stressedFloatingDebtAmount: Number(stressedFloatingDebtAmount.toFixed(2)),
-    simulatedEbitda,
+    simulatedEbit: pureResult.simulatedEbit,
+    simulatedInterestExpense: pureResult.simulatedInterestExpense,
+    incrementalInterestExpense: pureResult.incrementalInterestExpense,
+    floatingRateDebtSharePct: inputs.floatingRateDebtSharePct ?? 40,
+    stressedFloatingDebtAmount: pureResult.stressedFloatingDebtAmount,
+    simulatedEbitda: pureResult.simulatedEbitda,
     simulatedNetIncome,
-    simulatedInterestCoverage,
-    simulatedNetDebtToEbitda,
+    simulatedInterestCoverage: pureResult.simulatedInterestCoverage,
+    simulatedNetDebtToEbitda: pureResult.simulatedNetDebtToEbitda,
     projectedMonthlyBurn,
     cashBurnRunwayMonths,
     runwayStatus,
+    variableCostSharePct,
+    baselineOperatingCosts: pureResult.baselineOperatingCosts,
+    baselineVariableCosts: pureResult.baselineVariableCosts,
+    baselineFixedCosts: pureResult.baselineFixedCosts,
+    stressedVariableCosts: pureResult.stressedVariableCosts,
+    stressedFixedCosts: pureResult.stressedFixedCosts,
+    ebitBridge: pureResult.ebitBridge,
+    interestCoverageStatus: pureResult.interestCoverageStatus,
+    thresholdBreached: pureResult.thresholdBreached,
+    thresholdBreachSummary: pureResult.thresholdBreachSummary,
   };
 }

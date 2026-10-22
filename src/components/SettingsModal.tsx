@@ -119,7 +119,7 @@ export function SettingsModal({
   const [name, setName] = useState(settings.name);
   const [email, setEmail] = useState(settings.email);
   const [title, setTitle] = useState(settings.title || "Senior Credit Underwriter");
-  const [phone, setPhone] = useState(settings.phone || "+1 (212) 555-0199 x44");
+  const [phone, setPhone] = useState(settings.phone || "");
   const [desk, setDesk] = useState(settings.desk || DESK_OPTIONS[0]);
   const [avatar, setAvatar] = useState<string>(settings.avatar || "crest");
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string>(settings.avatarCustomUrl || "");

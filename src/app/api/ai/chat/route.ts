@@ -247,7 +247,7 @@ Business HHI Index: ${concentration?.herfindahlIndexBusiness || "N/A"}`;
 #### 2. Solvency & Balance Sheet Health
 • **Cash & Marketable Securities:** **${((latestPeriod.cashAndEquivalents ?? 0) + (latestPeriod.marketableSecurities ?? 0)).toLocaleString()} ${latestPeriod.currency}**
 • **Total Financial Debt:** **${latestPeriod.totalDebt?.toLocaleString()} ${latestPeriod.currency}**
-• **Net Debt / EBITDA:** **${ratios.netDebtToEbitda !== null ? `${ratios.netDebtToEbitda.toFixed(2)}x` : "0.00x (Net Cash Surplus)"}**
+• **Net Debt / EBITDA:** **${ratios.netDebtToEbitda !== null ? (ratios.netDebtToEbitda <= 0 ? `${ratios.netDebtToEbitda.toFixed(2)}x (Net Cash position)` : `${ratios.netDebtToEbitda.toFixed(2)}x`) : "N/D"}**
 • **Interest Coverage (EBIT / Interest):** **${ratios.interestCoverage !== null ? `${ratios.interestCoverage.toFixed(2)}x` : "N/D (Zero Debt)"}**
 • **Current Ratio (Liquidity):** **${ratios.currentRatio?.toFixed(2)}x** (Benchmark: \`> 1.10x\`)
 • **Credit Solvency Tier:** **${profile?.riskTier || "TIER_1_STABLE"}** (Risk Score: \`${profile?.riskScore}/100\`)

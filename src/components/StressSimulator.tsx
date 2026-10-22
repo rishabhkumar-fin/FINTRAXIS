@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Cpu, RotateCcw, BarChart3, Info, Scale } from "lucide-react";
 import { CompanyRiskProfile, StressSimulationInputs } from "@/lib/types";
-import { runStressSimulation } from "@/lib/financialEngine";
+import { runStressSimulation, getSectorDefaultVariableCostShare } from "@/lib/financialEngine";
 import { calculateCovenantHeadroom } from "@/lib/financialCalculations";
 import { formatFinancialValue, formatRatio } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
@@ -18,11 +18,13 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
   const { company, periods } = profile;
   const latest = periods[0];
 
+  const sectorDefaultVariable = getSectorDefaultVariableCostShare(company.sector);
   const [inputs, setInputs] = useState<StressSimulationInputs>({
     revenueShockPct: -10,
     cogsInflationPct: 5,
     rateShockBps: 200,
     floatingRateDebtSharePct: 40,
+    variableCostSharePct: sectorDefaultVariable,
   });
 
   const [committedInputs, setCommittedInputs] = useState<StressSimulationInputs>({
@@ -30,6 +32,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     cogsInflationPct: 5,
     rateShockBps: 200,
     floatingRateDebtSharePct: 40,
+    variableCostSharePct: sectorDefaultVariable,
   });
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -44,27 +47,27 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     }, 150);
   };
 
-  const handlePreset = (rev: number, cogs: number, rate: number, floating: number = 40) => {
-    const next = { revenueShockPct: rev, cogsInflationPct: cogs, rateShockBps: rate, floatingRateDebtSharePct: floating };
+  const handlePreset = (rev: number, cogs: number, rate: number, floating: number = 40, variable: number = sectorDefaultVariable) => {
+    const next = { revenueShockPct: rev, cogsInflationPct: cogs, rateShockBps: rate, floatingRateDebtSharePct: floating, variableCostSharePct: variable };
     setInputs(next);
     setCommittedInputs(next);
     setHasPendingChanges(false);
   };
 
-  const simulation = latest ? runStressSimulation(latest, committedInputs) : profile.simulation;
+  const simulation = latest ? runStressSimulation(latest, committedInputs, company.sector) : profile.simulation;
 
   const formatCurr = (val: number | null | undefined) =>
     formatFinancialValue(val, company.currency, company.scaleUnit);
 
   const isSolventUnderStress = (simulation.simulatedInterestCoverage ?? 0) >= 2.0 && simulation.runwayStatus !== "CRITICAL_BURN";
-  const isCovenantBreached = (simulation.simulatedInterestCoverage ?? 0) < 2.0;
+  const isThresholdBreached = simulation.thresholdBreached ?? ((simulation.simulatedInterestCoverage ?? 0) < 2.0);
 
   // Exact Client Money Impacts
   const revenueLoss = latest?.revenue ? Math.abs((latest.revenue * inputs.revenueShockPct) / 100) : 0;
   const cogsExtraCost = latest?.cogs ? Math.abs((latest.cogs * inputs.cogsInflationPct) / 100) : 0;
   const extraInterestPaid = simulation.incrementalInterestExpense;
 
-  // Power BI Bar Comparisons
+  // Visual Bar Comparisons
   const stressBars = [
     {
       metric: "Consolidated Revenue",
@@ -113,10 +116,10 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         company={company}
         period={latest?.period}
         filingForm={latest?.filingForm}
-        question="Under severe macroeconomic stress or revenue decline, will the company breach debt covenants or exhaust operating liquidity?"
+        question="Under severe macroeconomic stress or revenue decline, will the company breach reference risk thresholds or exhaust operating liquidity?"
       >
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] text-[#38BDF8] uppercase font-bold tracking-wider">WALL ST PRESETS:</span>
+          <span className="text-[10px] text-[#38BDF8] uppercase font-bold tracking-wider">INSTITUTIONAL SCENARIO PRESETS:</span>
           <button
             onClick={() => handlePreset(0, 0, 0)}
             className={`px-2.5 py-1 text-[10px] font-bold rounded transition-colors border cursor-pointer ${
@@ -135,7 +138,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
                 : "bg-[#05070B] hover:bg-[#101A2E] border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC]"
             }`}
           >
-            Basel III Adverse (-10% / +200bps)
+            Adverse Macro Shock (-10% / +200bps)
           </button>
           <button
             onClick={() => handlePreset(-25, 10, 350)}
@@ -145,7 +148,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
                 : "bg-[#180A0E] hover:bg-[#250E14] border-[#EF4444]/40 text-[#EF4444]"
             }`}
           >
-            2008 GFC Freeze (-25% / +350bps)
+            Severe Credit Contraction (-25% / +350bps)
           </button>
           <button
             onClick={() => handlePreset(-15, 12, 250)}
@@ -221,13 +224,13 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
           {/* Question 3: Debt Covenants */}
           <div className="p-3 bg-[#070A0F] border border-[#182337] rounded-lg space-y-1.5">
             <div className="text-[10px] text-[#64748B] uppercase font-bold flex items-center justify-between">
-              <span>3. DO BANK COVENANTS BREAK?</span>
-              <span className={isCovenantBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
-                {isCovenantBreached ? "COVENANT BREACH" : "COVENANTS SAFE"}
+              <span>3. ARE RISK THRESHOLDS MAINTAINED?</span>
+              <span className={isThresholdBreached ? "text-[#EF4444] font-bold" : "text-[#10B981] font-bold"}>
+                {isThresholdBreached ? "THRESHOLD BREACHED" : "THRESHOLDS MAINTAINED"}
               </span>
             </div>
             <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
-              {isCovenantBreached
+              {isThresholdBreached
                 ? `Stressed interest coverage drops to ${formatRatio(simulation.simulatedInterestCoverage)}, falling below the 2.0x bank covenant floor. Syndicates can freeze revolving lines!`
                 : `Stressed interest coverage holds at ${formatRatio(simulation.simulatedInterestCoverage)}, well above the required 2.5x covenant floor.`}
             </p>
@@ -236,7 +239,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
       </div>
 
       {/* Interactive Parameter Sliders with Exact Client Explanations */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-[#090D17] border border-[#182337] rounded-xl shadow-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 p-4 bg-[#090D17] border border-[#182337] rounded-xl shadow-lg">
         {/* Slider 1: Revenue Shock */}
         <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
           <div className="flex justify-between items-center">
@@ -376,6 +379,38 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
             <strong className="text-[#38BDF8]">Floating Base:</strong> {formatCurr(simulation.stressedFloatingDebtAmount)} exposed to rate hikes (40% default).
           </div>
         </div>
+        {/* Slider 5: Variable Cost Share (v) */}
+        <div className="space-y-2 p-3 bg-[#070A0F] border border-[#182337] rounded-lg">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-[#64748B] uppercase font-bold">VARIABLE COST SHARE (v)</span>
+            <span className="font-bold font-mono text-xs text-[#38BDF8]">
+              {inputs.variableCostSharePct ?? sectorDefaultVariable}%
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={inputs.variableCostSharePct ?? sectorDefaultVariable}
+            onChange={(e) => {
+              setInputs((prev) => ({
+                ...prev,
+                variableCostSharePct: parseFloat(e.target.value),
+              }));
+              setHasPendingChanges(true);
+            }}
+            className="w-full accent-[#2563EB] cursor-pointer"
+          />
+          <div className="flex justify-between text-[9px] text-[#64748B]">
+            <span>0% (All Fixed)</span>
+            <span>{sectorDefaultVariable}% (Sector)</span>
+            <span>100% (All Var)</span>
+          </div>
+          <div className="text-[10px] text-[#94A3B8] pt-1 border-t border-[#182337]">
+            <strong className="text-[#38BDF8]">Flexibility:</strong> {inputs.variableCostSharePct ?? sectorDefaultVariable}% costs shrink with volume; remainder is fixed overhead.
+          </div>
+        </div>
       </div>
 
       {/* Explicit Run Simulation Trigger (Section 11 Requirement) */}
@@ -423,7 +458,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
           <div className="flex items-center gap-2 text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
             <BarChart3 className="w-4 h-4 text-[#38BDF8]" />
-            <span>POWER BI STRESS IMPACT VISUALIZER (BASELINE VS PRO-FORMA)</span>
+            <span>SCENARIO STRESS IMPACT VISUALIZER (BASELINE VS PRO-FORMA)</span>
           </div>
           <div className="flex items-center gap-3 text-[10px]">
             <span className="flex items-center gap-1.5">
@@ -485,6 +520,76 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         </div>
       </div>
 
+      
+      {/* VISUAL EBIT WATERFALL / BRIDGE */}
+      {simulation.ebitBridge && (
+        <div className="p-4 bg-[#090E17] border border-[#182337] rounded-xl space-y-3 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1E293B] pb-2 gap-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
+              <BarChart3 className="w-4 h-4 text-[#38BDF8]" />
+              <span>VISUAL EBIT WATERFALL BRIDGE (OPERATING LEVERAGE &amp; COST PASS-THROUGH)</span>
+            </div>
+            <span className="text-[10px] text-[#10B981] font-mono">
+              Reconciliation Check: Sum of bridge steps = Stressed EBIT (&plusmn;0.00 exact)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
+            {/* Step 1: Baseline EBIT */}
+            <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1">
+              <span className="text-[9px] text-[#64748B] uppercase font-bold block">1. Baseline EBIT</span>
+              <span className="text-xs font-bold text-white block">{formatCurr(simulation.ebitBridge.baselineEbit)}</span>
+              <span className="text-[9px] text-[#94A3B8] block">Reported operating profit</span>
+            </div>
+
+            {/* Step 2: Revenue Shock Impact */}
+            <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1">
+              <span className="text-[9px] text-[#64748B] uppercase font-bold block">2. Revenue Shock</span>
+              <span className={`text-xs font-bold block ${simulation.ebitBridge.revenueShockImpact < 0 ? "text-[#EF4444]" : "text-[#10B981]"}`}>
+                {simulation.ebitBridge.revenueShockImpact >= 0 ? "+" : ""}{formatCurr(simulation.ebitBridge.revenueShockImpact)}
+              </span>
+              <span className="text-[9px] text-[#94A3B8] block">Top-line contraction ({inputs.revenueShockPct}%)</span>
+            </div>
+
+            {/* Step 3: Variable Cost Volume Relief */}
+            <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1">
+              <span className="text-[9px] text-[#64748B] uppercase font-bold block">3. Cost Relief</span>
+              <span className={`text-xs font-bold block ${simulation.ebitBridge.variableCostRelief >= 0 ? "text-[#10B981]" : "text-[#EF4444]"}`}>
+                {simulation.ebitBridge.variableCostRelief >= 0 ? "+" : ""}{formatCurr(simulation.ebitBridge.variableCostRelief)}
+              </span>
+              <span className="text-[9px] text-[#94A3B8] block">Lower volume reduces spend ({inputs.variableCostSharePct ?? sectorDefaultVariable}%)</span>
+            </div>
+
+            {/* Step 4: Variable Cost Inflation */}
+            <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1">
+              <span className="text-[9px] text-[#64748B] uppercase font-bold block">4. Var Cost Inflation</span>
+              <span className={`text-xs font-bold block ${simulation.ebitBridge.variableCostInflationImpact < 0 ? "text-[#EF4444]" : "text-[#94A3B8]"}`}>
+                {formatCurr(simulation.ebitBridge.variableCostInflationImpact)}
+              </span>
+              <span className="text-[9px] text-[#94A3B8] block">Input inflation on surviving volume</span>
+            </div>
+
+            {/* Step 5: Fixed Cost Inflation */}
+            <div className="p-2.5 bg-[#05070B] border border-[#1E293B] rounded-lg space-y-1">
+              <span className="text-[9px] text-[#64748B] uppercase font-bold block">5. Fixed Cost Inflation</span>
+              <span className={`text-xs font-bold block ${simulation.ebitBridge.fixedCostInflationImpact < 0 ? "text-[#EF4444]" : "text-[#94A3B8]"}`}>
+                {formatCurr(simulation.ebitBridge.fixedCostInflationImpact)}
+              </span>
+              <span className="text-[9px] text-[#94A3B8] block">Overhead inflation ({100 - (inputs.variableCostSharePct ?? sectorDefaultVariable)}%)</span>
+            </div>
+
+            {/* Step 6: Stressed EBIT */}
+            <div className="p-2.5 bg-[#0B1220] border border-[#2563EB]/40 rounded-lg space-y-1">
+              <span className="text-[9px] text-[#38BDF8] uppercase font-bold block">6. Stressed EBIT</span>
+              <span className={`text-xs font-bold block ${simulation.ebitBridge.stressedEbit < 0 ? "text-[#EF4444]" : "text-[#38BDF8]"}`}>
+                {formatCurr(simulation.ebitBridge.stressedEbit)}
+              </span>
+              <span className="text-[9px] text-[#94A3B8] block">Net stressed operating profit</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* FULL FINANCIAL STATEMENT RECONCILIATION TABLE */}
       <div className="border border-[#1E293B] bg-[#05070B] rounded-xl overflow-x-auto shadow-lg">
         <table className="w-full text-xs font-mono">
@@ -494,7 +599,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
               <th className="py-2.5 px-3 text-right">BASELINE AS-REPORTED</th>
               <th className="py-2.5 px-3 text-right text-[#EF4444] font-bold">PRO-FORMA STRESSED</th>
               <th className="py-2.5 px-3 text-right">DELTA</th>
-              <th className="py-2.5 px-3 text-right">COVENANT STATUS</th>
+              <th className="py-2.5 px-3 text-right">THRESHOLD STATUS</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1E293B]/40">
@@ -544,8 +649,8 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
                   : "N/A"}
               </td>
               <td className="py-2.5 px-3 text-right">
-                <span className={`px-2 py-0.5 text-[9px] font-bold border rounded ${isCovenantBreached ? "bg-[#EF4444]/15 text-[#EF4444] border-[#EF4444]" : "bg-[#10B981]/15 text-[#10B981] border-[#10B981]"}`}>
-                  {isCovenantBreached ? "Reference threshold breached in this scenario (< 2.50x)" : "Complies with analytical benchmark"}
+                <span className={`px-2 py-0.5 text-[9px] font-bold border rounded ${isThresholdBreached ? "bg-[#EF4444]/15 text-[#EF4444] border-[#EF4444]" : "bg-[#10B981]/15 text-[#10B981] border-[#10B981]"}`}>
+                  {isThresholdBreached ? "Reference threshold breached in this scenario (< 2.50x)" : "Complies with analytical benchmark"}
                 </span>
               </td>
             </tr>

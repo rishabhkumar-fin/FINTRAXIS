@@ -83,7 +83,7 @@ export function CompanyChartModal({
         <div className="px-4 py-2.5 bg-[#080B10] border-b border-[#1E2536] flex flex-wrap items-center justify-between gap-3 text-xs">
           {/* Visual Type Slicer */}
           <div className="flex items-center gap-1 bg-[#111622] border border-[#1E2536] p-1 rounded">
-            <span className="text-[9.5px] text-[#64748B] uppercase px-1.5 font-bold">POWER BI VISUAL:</span>
+            <span className="text-[9.5px] text-[#64748B] uppercase px-1.5 font-bold">CHART VISUAL:</span>
             <button
               onClick={() => setActiveVisual("WATERFALL")}
               className={`px-2.5 py-1 text-[10.5px] font-bold rounded transition-all ${
@@ -193,7 +193,7 @@ export function CompanyChartModal({
             </div>
           </div>
 
-          {/* VIEW 1: POWER BI INCOME STATEMENT WATERFALL */}
+          {/* VIEW 1: INTERACTIVE INCOME STATEMENT WATERFALL */}
           {activeVisual === "WATERFALL" && (
             <div className="p-4 bg-[#080B10] border border-[#1E2536] rounded-lg space-y-4">
               <div className="flex items-center justify-between">
@@ -466,7 +466,7 @@ export function CompanyChartModal({
         <div className="p-3.5 bg-[#0E131E] border-t border-[#1E2536] flex items-center justify-between text-[10.5px] text-[#64748B]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-            <span>POWER BI COMPLIANT ANALYTIC ENGINE</span>
+            <span>INTERACTIVE FINANCIAL VISUALIZER</span>
           </div>
           <button
             onClick={onClose}

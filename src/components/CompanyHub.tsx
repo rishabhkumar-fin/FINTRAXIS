@@ -349,7 +349,7 @@ export function CompanyHub({
                 <span>&bull;</span>
                 <span>INDUSTRY: <span className="text-[#CBD5E1]">{selected.industry}</span></span>
                 <span>&bull;</span>
-                <span>CIK / CODE: <span className="text-[#38BDF8]">{selected.cik || selected.symbol}</span></span>
+                <span>{selected.country === "IND" ? "IDENTIFIER:" : "CIK / CODE:"} <span className="text-[#38BDF8]">{selected.cik || selected.symbol}</span></span>
                 <span>&bull;</span>
                 <span>ISIN: <span className="text-[#CBD5E1]">{selected.isin || "N/D"}</span></span>
               </div>
@@ -376,7 +376,7 @@ export function CompanyHub({
                 <button
                   onClick={() => setIsChartModalOpen(true)}
                   className="flex items-center gap-1.5 px-3.5 py-3 bg-[#0F1626] hover:bg-[#182337] border border-[#38BDF8]/50 text-[#38BDF8] font-mono font-bold text-xs transition-colors rounded shadow-sm cursor-pointer"
-                  title="Open Power BI Deep Interactive Chart Explorer"
+                  title="Open Deep Interactive Chart Explorer"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span>DEEP CHARTS</span>
@@ -400,7 +400,7 @@ export function CompanyHub({
                 {/* Live Ticking Price */}
                 <div className="space-y-1">
                   <span className="text-[9.5px] text-[#64748B] uppercase flex items-center gap-1.5">
-                    REAL-TIME MARKET PRICE
+                    MARKET PRICE QUOTE
                     {isQuoteLoading && <Loader2 className="w-2.5 h-2.5 animate-spin text-[#38BDF8]" />}
                   </span>
                   <div className="flex items-baseline gap-2">
@@ -460,12 +460,12 @@ export function CompanyHub({
 
                 {/* SQLite Cache Attestation */}
                 <div className="space-y-1 sm:text-right">
-                  <span className="text-[9.5px] text-[#5A687D] uppercase">SQLITE PERSISTENCE</span>
+                  <span className="text-[9.5px] text-[#5A687D] uppercase">DATA ORIGIN &amp; STATUS</span>
                   <div className="flex items-center sm:justify-end gap-1.5 pt-1 text-[#10B981] font-bold text-xs">
                     <Database className="w-3.5 h-3.5" />
-                    <span>COMMITTED TO WAL</span>
+                    <span>{quote.status === "delayed" ? "EXCHANGE DELAYED (15M)" : "REFERENCE DATA"}</span>
                   </div>
-                  <div className="text-[9px] text-[#5A687D]">TIMESTAMP: {quote.timestamp.substring(11, 19)} UTC</div>
+                  <div className="text-[9px] text-[#5A687D]">{quote.statusLabel}</div>
                 </div>
               </div>
 
@@ -841,7 +841,7 @@ export function CompanyHub({
                     </td>
                     <td className="py-3 px-3 text-left text-[#64748B]">
                       <div>ISIN: {c.isin || "N/D"}</div>
-                      <div>CIK: {c.cik || "N/D"}</div>
+                      <div>{c.country === "IND" ? (c.cik ? `CIK: ${c.cik}` : "CIK: N/A (Domestic)") : (c.cik ? `CIK: ${c.cik}` : "CIK: N/D")}</div>
                     </td>
                     <td className="py-3 px-3 text-right font-mono-numbers text-[#94A3B8]">
                       {c.fxRateToUsd.toFixed(5)}
@@ -855,7 +855,7 @@ export function CompanyHub({
                             setIsChartModalOpen(true);
                           }}
                           className="px-2 py-1 bg-[#101A2E] hover:bg-[#1E293B] border border-[#2563EB]/40 text-[10px] text-[#38BDF8] font-bold rounded transition-colors flex items-center gap-1 cursor-pointer"
-                          title="View Power BI interactive charts"
+                          title="View interactive charts"
                         >
                           <BarChart3 className="w-3 h-3" />
                           <span>CHART</span>

@@ -16,7 +16,6 @@ import {
   Activity,
   Sliders,
   TrendingUp,
-  Lock,
 } from "lucide-react";
 
 export interface SessionClearance {
@@ -60,19 +59,16 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Quick 1-Click Login (Analyst or Admin)
-  const handleQuickRoleLogin = async (roleType: "ANALYST" | "ADMIN") => {
+  // 1-Click Demo Analyst Access (Read-Only Demo Session)
+  const handleDemoAccess = async () => {
     setIsLoading(true);
     setErrorMessage(null);
-
-    const email = roleType === "ADMIN" ? "admin@fintraxis.local" : "analyst@fintraxis.local";
-    const password = roleType === "ADMIN" ? "admin123" : "analyst123";
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ isDemo: true }),
       });
 
       const json = await res.json();
@@ -83,10 +79,10 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
           userName: u.name,
           userEmail: u.email,
           analystId: u.name,
-          desk: u.desk || (roleType === "ADMIN" ? "Global Systems & Risk Governance" : "Credit Risk & Underwriting"),
-          role: u.role || (roleType === "ADMIN" ? "SUPER_ADMIN" : "ANALYST"),
-          isDemo: false,
-          avatarId: u.avatar || (roleType === "ADMIN" ? "security" : "crest"),
+          desk: u.desk || "Credit Risk & Surveillance (Demo)",
+          role: "DEMO_ANALYST",
+          isDemo: true,
+          avatarId: u.avatar || "crest",
           netDebtEbitdaHurdle: u.netDebtEbitdaHurdle ?? 3.5,
           interestCoverageHurdle: u.interestCoverageHurdle ?? 2.5,
           currentRatioHurdle: u.currentRatioHurdle ?? 1.1,
@@ -101,34 +97,14 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
         setIsLoading(false);
         onAuthenticated(session);
         return;
+      } else {
+        setErrorMessage(json.error || "Demo access is currently unavailable.");
       }
     } catch {
-      // Fallback local session if server route fails
+      setErrorMessage("Unable to connect to authentication server.");
+    } finally {
+      setIsLoading(false);
     }
-
-    // Direct local fallback session
-    const fallbackSession: SessionClearance = {
-      id: roleType === "ADMIN" ? "usr_admin_local" : "usr_analyst_local",
-      userName: roleType === "ADMIN" ? "Institutional Administrator" : "Sarah Jenkins",
-      userEmail: email,
-      analystId: roleType === "ADMIN" ? "Admin Operator" : "Credit Analyst",
-      desk: roleType === "ADMIN" ? "Global Systems & Risk Governance" : "Credit Risk & Underwriting",
-      role: roleType === "ADMIN" ? "SUPER_ADMIN" : "ANALYST",
-      isDemo: false,
-      avatarId: roleType === "ADMIN" ? "security" : "crest",
-      netDebtEbitdaHurdle: 3.5,
-      interestCoverageHurdle: 2.5,
-      currentRatioHurdle: 1.1,
-      sessionToken: `tok_local_${Date.now()}`,
-      authenticatedAt: new Date().toISOString(),
-    };
-
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("fintraxis_tab_confirmed", "true");
-    }
-    localStorage.setItem("fintraxis_session", JSON.stringify(fallbackSession));
-    setIsLoading(false);
-    onAuthenticated(fallbackSession);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -339,7 +315,7 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
                 <div>
                   <div className="text-xs font-semibold text-white">1-Click Underwriting Memo</div>
                   <div className="text-[11px] text-[#94A3B8] leading-normal">
-                    Printable 1-page executive tearsheet with cryptographic SHA-256 integrity stamp.
+                    Printable 1-page executive tearsheet with SHA-256 file-integrity digest.
                   </div>
                 </div>
               </div>
@@ -348,10 +324,10 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
 
           {/* Bottom Security Assurance Note */}
           <div className="mt-6 pt-4 border-t border-[#1E293B]/60 text-[11px] text-[#64748B] flex items-center justify-between font-mono">
-            <span>LOCAL DATABASE ACTIVE</span>
-            <span className="text-[#10B981] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              SQLITE &bull; WAL MODE
+            <span>SECURE TERMINAL ACCESS</span>
+            <span className="text-[#38BDF8] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+              STATUTORY DISCLOSURES
             </span>
           </div>
         </div>
@@ -367,56 +343,34 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
                 Terminal Access
               </h2>
               <p className="text-xs text-[#94A3B8] mt-1">
-                Choose a role for instant 1-click access or enter your operator credentials.
+                Explore with read-only demo access or sign in with operator credentials.
               </p>
             </div>
 
-            {/* Quick 1-Click Role Access Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLogin("ANALYST")}
-                disabled={isLoading}
-                className="p-3.5 bg-[#111827] hover:bg-[#1A2333] border border-[#2563EB]/40 hover:border-[#38BDF8] rounded-xl text-left transition-all group cursor-pointer shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-1.5">
+            {/* Explore with Demo Access (Switchable) */}
+            <button
+              type="button"
+              onClick={handleDemoAccess}
+              disabled={isLoading}
+              className="p-3.5 bg-[#111827] hover:bg-[#1A2333] border border-[#2563EB]/40 hover:border-[#38BDF8] rounded-xl text-left transition-all group cursor-pointer shadow-sm w-full"
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-[#2563EB]/20 flex items-center justify-center text-[#38BDF8]">
                     <TrendingUp className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#2563EB]/15 text-[#38BDF8] border border-[#2563EB]/30 rounded">
-                    ANALYST
+                  <span className="font-bold text-xs text-white group-hover:text-[#38BDF8] transition-colors">
+                    Explore with demo access
                   </span>
                 </div>
-                <div className="font-bold text-xs text-white group-hover:text-[#38BDF8] transition-colors">
-                  Login as Credit Analyst
-                </div>
-                <div className="text-[11px] text-[#94A3B8] mt-0.5 leading-snug">
-                  Research solvency, stress test &amp; export briefs
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLogin("ADMIN")}
-                disabled={isLoading}
-                className="p-3.5 bg-[#111827] hover:bg-[#1A2333] border border-[#8B5CF6]/40 hover:border-[#A78BFA] rounded-xl text-left transition-all group cursor-pointer shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center text-[#A78BFA]">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#8B5CF6]/15 text-[#A78BFA] border border-[#8B5CF6]/30 rounded">
-                    ADMIN
-                  </span>
-                </div>
-                <div className="font-bold text-xs text-white group-hover:text-[#A78BFA] transition-colors">
-                  Login as Admin
-                </div>
-                <div className="text-[11px] text-[#94A3B8] mt-0.5 leading-snug">
-                  Manage companies, hurdles &amp; audit trails
-                </div>
-              </button>
-            </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-[#2563EB]/15 text-[#38BDF8] border border-[#2563EB]/30 rounded font-bold">
+                  DEMO ANALYST
+                </span>
+              </div>
+              <div className="text-[11px] text-[#94A3B8] mt-0.5 leading-snug">
+                Read-only sandbox session &bull; Inspect solvency ratios, stress simulations &amp; IC memos
+              </div>
+            </button>
 
             {/* Divider */}
             <div className="relative my-1">
@@ -513,9 +467,6 @@ export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
                     <label htmlFor="signin-password" className="text-xs font-medium text-[#E2E8F0]">
                       Password
                     </label>
-                    <span className="text-[11px] text-[#38BDF8] font-mono">
-                      Default: analyst123 / admin123
-                    </span>
                   </div>
                   <div className="relative">
                     <input

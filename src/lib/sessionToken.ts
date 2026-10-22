@@ -11,6 +11,7 @@ export interface SessionUserPayload {
   netDebtEbitdaHurdle: number;
   interestCoverageHurdle: number;
   currentRatioHurdle: number;
+  mustChangePassword?: boolean;
   authenticatedAt: string;
   exp?: number;
 }

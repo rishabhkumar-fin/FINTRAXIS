@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Layers, BarChart3, LayoutGrid, Info, ArrowRight, Scale } from "lucide-react";
 import { CompanyRiskProfile } from "@/lib/types";
+import { INSTITUTIONAL_COMPANIES } from "@/lib/institutionalDatabase";
 import { formatRatio, formatPct, formatFinancialValue } from "@/lib/formatters";
 import { ModuleTab } from "./NavigationTabs";
 import { DrawingPowerCard } from "./DrawingPowerCard";
@@ -21,13 +22,63 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
   const isTier1 = riskTier === "TIER_1_STABLE";
   const isTier2 = riskTier === "TIER_2_WATCHLIST";
 
+  
+  // Dynamic Peer Median Calculation with explicit sample size n
+  const sectorPeers = Object.values(INSTITUTIONAL_COMPANIES).filter(
+    (c) => c.company.sector.toLowerCase() === company.sector.toLowerCase()
+  );
+  const activePeerGroup = sectorPeers.length >= 2 ? sectorPeers : Object.values(INSTITUTIONAL_COMPANIES);
+  const peerSampleSize = activePeerGroup.length;
+  const peerGroupLabel = sectorPeers.length >= 2 ? `${company.sector} (n=${peerSampleSize})` : `Universe (n=${peerSampleSize})`;
+
+  // Compute medians
+  const computeMedian = (getter: (p: (typeof activePeerGroup)[number]) => number | null): number => {
+    const vals = activePeerGroup.map(getter).filter((v): v is number => v !== null && !isNaN(v)).sort((a, b) => a - b);
+    if (vals.length === 0) return 0;
+    const mid = Math.floor(vals.length / 2);
+    return vals.length % 2 !== 0 ? vals[mid] : Number(((vals[mid - 1] + vals[mid]) / 2).toFixed(2));
+  };
+
+  const medianLeverage = computeMedian((p) => {
+    const latest = p.periods[0];
+    if (!latest || !latest.ebitda || latest.ebitda <= 0) return null;
+    const netDebt = (latest.totalDebt ?? 0) - (latest.cashAndEquivalents ?? 0);
+    return Number((netDebt / latest.ebitda).toFixed(2));
+  });
+
+  const medianCoverage = computeMedian((p) => {
+    const latest = p.periods[0];
+    if (!latest || !latest.interestExpense || latest.interestExpense <= 0) return 20.0;
+    return Number(((latest.ebit ?? 0) / latest.interestExpense).toFixed(2));
+  });
+
+  const medianCurrentRatio = computeMedian((p) => {
+    const latest = p.periods[0];
+    if (!latest || !latest.totalCurrentLiabilities || latest.totalCurrentLiabilities <= 0) return null;
+    return Number(((latest.totalCurrentAssets ?? 0) / latest.totalCurrentLiabilities).toFixed(2));
+  });
+
+  const medianOperatingMargin = computeMedian((p) => {
+    const latest = p.periods[0];
+    if (!latest || !latest.revenue || latest.revenue <= 0) return null;
+    return Number((((latest.ebit ?? 0) / latest.revenue) * 100).toFixed(1));
+  });
+
+  const medianCfoToNi = computeMedian((p) => {
+    const latest = p.periods[0];
+    if (!latest || !latest.netIncome || latest.netIncome <= 0) return null;
+    return Number(((latest.operatingCashFlow ?? 0) / latest.netIncome).toFixed(2));
+  });
+
   // Comparative Benchmarking Data (Target Entity vs Industry Median vs Hurdle)
   const comparisons = [
     {
       metric: "Net Debt / EBITDA",
       unit: "x",
       companyVal: latestRatios.netDebtToEbitda ?? 0,
-      industryMedian: 2.3,
+      industryMedian: medianLeverage || 2.3,
+      sampleSize: peerSampleSize,
+      peerLabel: peerGroupLabel,
       hurdle: 3.5,
       hurdleLabel: "Hurdle ≤ 3.50x",
       lowerIsBetter: true,
@@ -38,7 +89,9 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       metric: "EBIT Interest Coverage",
       unit: "x",
       companyVal: latestRatios.interestCoverage ?? 99,
-      industryMedian: 4.8,
+      industryMedian: medianCoverage || 4.8,
+      sampleSize: peerSampleSize,
+      peerLabel: peerGroupLabel,
       hurdle: 2.5,
       hurdleLabel: "Floor ≥ 2.50x",
       lowerIsBetter: false,
@@ -49,7 +102,9 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       metric: "Current Liquidity Ratio",
       unit: "x",
       companyVal: latestRatios.currentRatio ?? 1.0,
-      industryMedian: 1.45,
+      industryMedian: medianCurrentRatio || 1.45,
+      sampleSize: peerSampleSize,
+      peerLabel: peerGroupLabel,
       hurdle: 1.2,
       hurdleLabel: "Benchmark ≥ 1.20x",
       lowerIsBetter: false,
@@ -60,7 +115,9 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       metric: "Operating (EBIT) Margin",
       unit: "%",
       companyVal: latestRatios.operatingMarginPct ?? 15,
-      industryMedian: 16.5,
+      industryMedian: medianOperatingMargin || 16.5,
+      sampleSize: peerSampleSize,
+      peerLabel: peerGroupLabel,
       hurdle: 10.0,
       hurdleLabel: "Inv-Grade ≥ 10.0%",
       lowerIsBetter: false,
@@ -71,7 +128,9 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       metric: "Cash Conversion (CFO / NI)",
       unit: "x",
       companyVal: latestRatios.cfoToNetIncome ?? 1.0,
-      industryMedian: 0.95,
+      industryMedian: medianCfoToNi || 0.95,
+      sampleSize: peerSampleSize,
+      peerLabel: peerGroupLabel,
       hurdle: 0.85,
       hurdleLabel: "Quality Floor ≥ 0.85x",
       lowerIsBetter: false,
@@ -372,7 +431,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
         <div className="p-3.5 bg-[#0F1626] border-b border-[#1E293B] flex items-center justify-between">
           <span className="font-mono text-xs font-bold text-white tracking-wider uppercase flex items-center gap-2">
             <Layers className="w-4 h-4 text-[#38BDF8]" />
-            <span>Core 3-Statement Summary &bull; 3-Year Audited Ledger</span>
+            <span>Core 3-Statement Summary &bull; Audited Ledger ({periods.length} {periods.length === 1 ? "period" : "periods"} available)</span>
           </span>
           <span className="text-[10px] text-[#64748B] font-mono">
             Reporting: {company.currency} ({company.scaleUnit})
@@ -448,7 +507,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             </div>
             <div className="text-2xl font-black font-mono text-[#38BDF8] mt-1">
               {(latestRatios.netDebtToEbitda ?? 0) <= 0
-                ? "0.0x (Net Cash)"
+                ? `${latestRatios.netDebtToEbitda !== null ? `${latestRatios.netDebtToEbitda.toFixed(2)}x` : "N/D"} (Net Cash)`
                 : `${latestRatios.netDebtToEbitda?.toFixed(2)}x`}
             </div>
           </div>
@@ -486,13 +545,13 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
               Interest Coverage
             </div>
             <div className="text-2xl font-black font-mono text-[#10B981] mt-1">
-              {latestRatios.interestCoverage !== null ? `${latestRatios.interestCoverage.toFixed(1)}x` : "FORTRESS"}
+              {latestRatios.interestCoverage !== null ? `${latestRatios.interestCoverage.toFixed(1)}x` : "N/A: No debt interest cost"}
             </div>
           </div>
           <div className="pt-2 border-t border-[#1E293B]/70">
             <div className="text-[11px] text-[#94A3B8] leading-relaxed">
               <span className="text-white font-semibold">Can it afford annual interest?</span>{" "}
-              {latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
+              {(periods[0]?.totalDebt ?? 0) === 0 && (periods[0]?.interestExpense ?? 0) > 0 ? "No financial borrowings; finance cost relates to lease liabilities and other items." : latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
                 ? `Operating earnings cover loan interest ${latestRatios.interestCoverage.toFixed(1)}x over, insulating against rate shocks.`
                 : "Operating earnings comfortably exceed borrowing costs."}
             </div>
@@ -573,7 +632,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
               </span>
             </div>
             <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
-              {latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
+              {(periods[0]?.totalDebt ?? 0) === 0 && (periods[0]?.interestExpense ?? 0) > 0 ? "No financial borrowings; finance cost relates to lease liabilities and other items." : latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 4.0
                 ? `Operating earnings cover loan interest ${latestRatios.interestCoverage.toFixed(1)} times over, providing an immense cushion against central bank rate hikes.`
                 : latestRatios.interestCoverage !== null && latestRatios.interestCoverage >= 2.5
                 ? `Operating profits cover interest ${latestRatios.interestCoverage.toFixed(1)}x. Adequate, but sensitive to severe revenue contractions.`
@@ -604,7 +663,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             <div>
               <div className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-[#38BDF8]" />
-                <span>POWER BI COMPARATIVE BENCHMARK MATRIX (COMPANY VS PEERS VS HURDLE)</span>
+                <span>COMPARATIVE BENCHMARK MATRIX (COMPANY VS PEERS VS HURDLE)</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] mt-0.5">
                 Evaluated against Illustrative Screening Reference Levels &amp; Calibrated Hurdles
@@ -676,7 +735,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
 
                     {/* Industry Median Bar */}
                     <div className="flex items-center gap-3">
-                      <span className="w-24 text-[10px] text-[#94A3B8] truncate">Peer Median</span>
+                      <span className="w-24 text-[10px] text-[#94A3B8] truncate" title={`Median of ${item.peerLabel}`}>Peer (n={item.sampleSize})</span>
                       <div className="flex-1 bg-[#080B10] h-4 rounded overflow-hidden border border-[#1E2536] relative">
                         <div
                           style={{ width: `${medianWidth}%` }}

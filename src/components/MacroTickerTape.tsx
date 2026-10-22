@@ -5,7 +5,6 @@ import {
   Landmark,
   Search,
   Settings,
-  Database,
   Clock,
   TrendingUp,
   TrendingDown,
@@ -310,9 +309,9 @@ export function MacroTickerTape({
 
           {/* SQLite Status */}
           <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-[#0C1220] border border-[#182337] text-[10.5px] rounded">
-            <Database className="w-3 h-3 text-[#10B981]" />
-            <span className="text-[#64748B]">SQLITE:</span>
-            <span className="text-[#10B981] font-bold">WAL OK</span>
+            <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+            <span className="text-[#64748B]">STATUS:</span>
+            <span className="text-[#10B981] font-bold">READY</span>
           </div>
 
           {/* Interactive Clock with explicit Timezone */}
@@ -369,7 +368,7 @@ export function MacroTickerTape({
         {/* Left Sticky Label */}
         <div className="shrink-0 flex items-center gap-1.5 bg-[#0D1424] border border-[#2563EB]/40 px-2.5 py-0.5 rounded text-[10px] text-[#38BDF8] font-bold z-10 shadow-sm mr-2">
           <Landmark className="w-3 h-3 text-[#38BDF8]" />
-          <span className="tracking-wider">SOVEREIGN RATES &amp; MARQUEE TAPE:</span>
+          <span className="tracking-wider" title="Reference benchmark policy rates and yields (static as of October 2026)">REFERENCE BENCHMARKS (OCT 2026):</span>
         </div>
 
         {/* Continuous Gliding Ticker Container - User can slide manually or let glide */}

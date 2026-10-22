@@ -479,7 +479,7 @@ Synchronized live on FINTRAXIS Terminal.`;
   };
 
   const SLIDE_TITLES = [
-    { idx: 0, title: "Executive Title & Sovereign Clearance" },
+    { idx: 0, title: "Executive Title & Corporate Identification" },
     { idx: 1, title: "3-Year Audited Financial Ledger" },
     { idx: 2, title: "Vulnerabilities & Early Warnings" },
     { idx: 3, title: "Pro-Forma Adverse Stress Sensitivity" },
@@ -519,7 +519,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               </span>
             </div>
             <div className="text-[10px] text-[#94A3B8] mt-0.5">
-              Audited institutional tearsheet with 3-year financials, vulnerabilities breakdown, stress matrix &amp; CRO sign-off
+              Audited institutional tearsheet with 3-year financials, vulnerabilities breakdown, stress matrix &amp; Committee sign-off
             </div>
           </div>
         </div>
@@ -670,7 +670,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   CONFIDENTIAL // IC BOARDROOM COPY #04
                 </div>
                 <div className="text-[9px] text-[#38BDF8] print:text-slate-700 tracking-wider mt-0.5 font-bold">
-                  SOVEREIGN CLEARANCE: LEVEL 3 &bull; NODE MUM-01
+                  CLEARANCE: INSTITUTIONAL &bull; TERMINAL ACTIVE
                 </div>
               </div>
               <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold">

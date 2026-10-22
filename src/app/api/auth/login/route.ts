@@ -14,6 +14,12 @@ export async function POST(request: Request) {
 
     // If explicit demo access requested, issue isolated demo session
     if (isDemoRequest) {
+    if (process.env.DEMO_ACCESS_ENABLED === "false") {
+      return NextResponse.json(
+        { success: false, error: "Demo access is disabled on this deployment." },
+        { status: 403 }
+      );
+    }
       const demo = createDemoSession();
       const signedToken = createSignedSessionToken({
         id: demo.id,
@@ -108,6 +114,7 @@ export async function POST(request: Request) {
         currentRatioHurdle: 1.10,
         role: isAdmin ? "SUPER_ADMIN" : (isGuestIdent ? "DEMO_ANALYST" : "ANALYST"),
         status: "ACTIVE",
+        mustChangePassword: 0,
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
@@ -173,6 +180,7 @@ export async function POST(request: Request) {
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
       currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
       authenticatedAt: nowIso,
+      mustChangePassword: Boolean((user as { mustChangePassword?: number }).mustChangePassword),
     });
 
     logAuditEvent("AUTH_LOGIN", user.email, `Session established: ${user.name} [Role: ${userRole}]`, "INFO");

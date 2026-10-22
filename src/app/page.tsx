@@ -484,7 +484,7 @@ export default function FintraxisTerminalPage() {
         <PeacockLogo size="lg" showLockup={false} />
         <div className="flex items-center gap-2.5 text-xs tracking-widest text-[#38BDF8]">
           <Loader2 className="w-4 h-4 animate-spin text-[#38BDF8]" />
-          <span>VERIFYING TERMINAL CLEARANCE &bull; FINTRAXIS SOVEREIGN</span>
+          <span>VERIFYING TERMINAL CLEARANCE &bull; FINTRAXIS INSTITUTIONAL</span>
         </div>
       </div>
     );
@@ -758,12 +758,12 @@ export default function FintraxisTerminalPage() {
         {/* Floating AI Financial Risk Copilot Trigger */}
         <button
           onClick={() => setIsAiOpen(true)}
-          className="fixed bottom-20 lg:bottom-10 right-4 sm:right-6 z-40 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(37,99,235,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
+          className="fixed bottom-20 lg:bottom-10 right-4 sm:right-6 z-40 bg-[#38BDF8] hover:bg-[#0284C7] text-[#080B10] p-2.5 sm:px-3.5 sm:py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(56,189,248,0.35)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
           title="Open Financial AI Copilot (Ctrl + J)"
         >
-          <Sparkles className="w-4 h-4 text-[#080B10]" />
-          <span>AI Risk Copilot</span>
-          <span className="text-[9.5px] px-1.5 py-0.2 bg-[#080B10]/20 rounded font-normal">
+          <Sparkles className="w-4 h-4 text-[#080B10] shrink-0" />
+          <span className="hidden sm:inline">AI Risk Copilot</span>
+          <span className="hidden md:inline text-[9.5px] px-1.5 py-0.2 bg-[#080B10]/15 rounded font-normal">
             CTRL+J
           </span>
         </button>
@@ -852,7 +852,7 @@ export default function FintraxisTerminalPage() {
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-[#10B981]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
-              <span>PORT 3001 OK</span>
+              <span>SYSTEM OPERATIONAL</span>
             </span>
             <span>&bull;</span>
             <span>OPERATOR: {session.userName}</span>

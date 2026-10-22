@@ -1563,3 +1563,164 @@ export function reconcileDebtStructure(
   };
 }
 
+
+// ==========================================
+// STAGE 4: DETERMINISTIC STRESS SIMULATOR PURE ENGINE
+// ==========================================
+
+export interface StressScenarioParams {
+  revenue: number;
+  ebit: number;
+  ebitda?: number | null;
+  depreciation?: number | null;
+  interestExpense?: number | null;
+  totalDebt?: number | null;
+  cash?: number | null;
+  revenueShockPct: number; // e.g. -15 (-50 to +20)
+  cogsInflationPct: number; // e.g. 5 (0 to 30)
+  rateShockBps: number; // e.g. 200 (-200 to +800)
+  variableCostSharePct: number; // e.g. 35 (0 to 100)
+  floatingRateDebtSharePct: number; // e.g. 40 (0 to 100)
+  coverageHurdle?: number; // default 2.50
+  leverageHurdle?: number; // default 3.50
+}
+
+export interface StressScenarioResult {
+  simulatedRevenue: number;
+  baselineOperatingCosts: number;
+  baselineVariableCosts: number;
+  baselineFixedCosts: number;
+  stressedVariableCosts: number;
+  stressedFixedCosts: number;
+  simulatedEbit: number;
+  ebitDelta: number;
+  ebitBridge: {
+    baselineEbit: number;
+    revenueShockImpact: number;
+    variableCostRelief: number;
+    variableCostInflationImpact: number;
+    fixedCostInflationImpact: number;
+    stressedEbit: number;
+  };
+  simulatedInterestExpense: number;
+  incrementalInterestExpense: number;
+  stressedFloatingDebtAmount: number;
+  simulatedEbitda: number;
+  simulatedInterestCoverage: number | null;
+  interestCoverageStatus: "SOLVENT" | "EBIT_NEGATIVE" | "ZERO_INTEREST" | "THRESHOLD_BREACH";
+  simulatedNetDebt: number;
+  simulatedNetDebtToEbitda: number | null;
+  thresholdBreached: boolean;
+  thresholdBreachSummary: string;
+}
+
+export function calculateStressScenario(params: StressScenarioParams): StressScenarioResult {
+  const baseRev = params.revenue || 0;
+  const baseEbit = params.ebit || 0;
+  const baseOperatingCosts = Math.max(0, baseRev - baseEbit);
+
+  const v = Math.min(1, Math.max(0, (params.variableCostSharePct ?? 50) / 100));
+  const baseVariableCosts = Number((baseOperatingCosts * v).toFixed(2));
+  const baseFixedCosts = Number((baseOperatingCosts * (1 - v)).toFixed(2));
+
+  const s = params.revenueShockPct / 100;
+  const c = Math.max(0, params.cogsInflationPct / 100);
+  const deltaR = params.rateShockBps / 10000;
+  const f = Math.min(1, Math.max(0, (params.floatingRateDebtSharePct ?? 40) / 100));
+
+  // 1. Stressed Revenue
+  const simulatedRevenue = Number((baseRev * (1 + s)).toFixed(2));
+
+  // 2. Stressed Costs
+  const stressedVariableCosts = Number((baseVariableCosts * (1 + s) * (1 + c)).toFixed(2));
+  const stressedFixedCosts = Number((baseFixedCosts * (1 + c)).toFixed(2));
+
+  // 3. Stressed EBIT
+  const simulatedEbit = Number((simulatedRevenue - stressedVariableCosts - stressedFixedCosts).toFixed(2));
+  const ebitDelta = Number((simulatedEbit - baseEbit).toFixed(2));
+
+  // 4. EBIT Bridge Components (Sums exactly to simulatedEbit)
+  const revenueShockImpact = Number((baseRev * s).toFixed(2));
+  const variableCostRelief = Number((-baseVariableCosts * s).toFixed(2));
+  const variableCostInflationImpact = Number((-baseVariableCosts * (1 + s) * c).toFixed(2));
+  const fixedCostInflationImpact = Number((-baseFixedCosts * c).toFixed(2));
+
+  // 5. Interest & Coverage
+  const baseInterest = Math.max(0, params.interestExpense || 0);
+  const baseTotalDebt = Math.max(0, params.totalDebt || 0);
+  const baseCash = Math.max(0, params.cash || 0);
+  const stressedFloatingDebtAmount = Number((baseTotalDebt * f).toFixed(2));
+  const incrementalInterestExpense = Number((stressedFloatingDebtAmount * deltaR).toFixed(2));
+  const simulatedInterestExpense = Number(Math.max(0, baseInterest + incrementalInterestExpense).toFixed(2));
+
+  let simulatedInterestCoverage: number | null = null;
+  let interestCoverageStatus: "SOLVENT" | "EBIT_NEGATIVE" | "ZERO_INTEREST" | "THRESHOLD_BREACH" = "SOLVENT";
+  const covHurdle = params.coverageHurdle ?? 2.50;
+  const levHurdle = params.leverageHurdle ?? 3.50;
+
+  if (simulatedInterestExpense <= 0) {
+    simulatedInterestCoverage = null;
+    interestCoverageStatus = "ZERO_INTEREST";
+  } else if (simulatedEbit <= 0) {
+    simulatedInterestCoverage = Number((simulatedEbit / simulatedInterestExpense).toFixed(2));
+    interestCoverageStatus = "EBIT_NEGATIVE";
+  } else {
+    simulatedInterestCoverage = Number((simulatedEbit / simulatedInterestExpense).toFixed(2));
+    if (simulatedInterestCoverage < covHurdle) {
+      interestCoverageStatus = "THRESHOLD_BREACH";
+    } else {
+      interestCoverageStatus = "SOLVENT";
+    }
+  }
+
+  // 6. Stressed EBITDA & Leverage
+  const baseEbitda = params.ebitda ?? (baseEbit * 1.15);
+  const baseDeprec = params.depreciation ?? Math.max(0, baseEbitda - baseEbit);
+  const simulatedEbitda = Number((simulatedEbit + baseDeprec).toFixed(2));
+  const simulatedNetDebt = Number((baseTotalDebt - baseCash).toFixed(2));
+  const simulatedNetDebtToEbitda = simulatedEbitda > 0 ? Number((simulatedNetDebt / simulatedEbitda).toFixed(2)) : null;
+
+  // 7. Threshold Assessment (No "covenant breach" wording)
+  let thresholdBreached = false;
+  let thresholdBreachSummary = "Complies with analytical reference thresholds in this scenario.";
+
+  if (interestCoverageStatus === "EBIT_NEGATIVE") {
+    thresholdBreached = true;
+    thresholdBreachSummary = "Reference threshold breached in this scenario: Operating loss (EBIT <= 0). Operating income cannot service debt interest. This is a what-if calculation, not a prediction.";
+  } else if (interestCoverageStatus === "THRESHOLD_BREACH") {
+    thresholdBreached = true;
+    thresholdBreachSummary = `Reference threshold breached in this scenario: Interest coverage (${simulatedInterestCoverage}x) falls below reference floor (${covHurdle.toFixed(2)}x). This is a what-if calculation, not a prediction.`;
+  } else if (simulatedNetDebtToEbitda !== null && simulatedNetDebtToEbitda > levHurdle) {
+    thresholdBreached = true;
+    thresholdBreachSummary = `Reference threshold breached in this scenario: Net Debt / EBITDA (${simulatedNetDebtToEbitda}x) exceeds reference ceiling (${levHurdle.toFixed(2)}x). This is a what-if calculation, not a prediction.`;
+  }
+
+  return {
+    simulatedRevenue,
+    baselineOperatingCosts: baseOperatingCosts,
+    baselineVariableCosts: baseVariableCosts,
+    baselineFixedCosts: baseFixedCosts,
+    stressedVariableCosts,
+    stressedFixedCosts,
+    simulatedEbit,
+    ebitDelta,
+    ebitBridge: {
+      baselineEbit: baseEbit,
+      revenueShockImpact,
+      variableCostRelief,
+      variableCostInflationImpact,
+      fixedCostInflationImpact,
+      stressedEbit: simulatedEbit,
+    },
+    simulatedInterestExpense,
+    incrementalInterestExpense,
+    stressedFloatingDebtAmount,
+    simulatedEbitda,
+    simulatedInterestCoverage,
+    interestCoverageStatus,
+    simulatedNetDebt,
+    simulatedNetDebtToEbitda,
+    thresholdBreached,
+    thresholdBreachSummary,
+  };
+}

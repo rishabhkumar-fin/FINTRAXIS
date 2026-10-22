@@ -85,6 +85,12 @@ export function formatRatio(value: number | null | undefined): string {
   return `${value.toFixed(2)}x`;
 }
 
+export function formatNetDebtMultiple(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) return "N/D";
+  if (value <= 0) return `${value.toFixed(2)}x (Net Cash)`;
+  return `${value.toFixed(2)}x`;
+}
+
 export function formatPct(value: number | null | undefined): string {
   if (value === null || value === undefined || isNaN(value)) return "N/D";
   return `${value.toFixed(2)}%`;

@@ -150,8 +150,8 @@ export function OverviewWorkstation({
               <div className="text-xl font-bold text-[#F3F6FC] mt-1">
                 {typeof price === "number" ? `${curr} ${price.toFixed(2)}` : "Unavailable"}
               </div>
-              <div className="text-[10px] text-[#16A879] mt-0.5 flex items-center gap-1">
-                <span>Verified Provider Quote</span>
+              <div className="text-[10px] text-[#9AA8BC] mt-0.5 flex items-center gap-1">
+                <span>Reference data, as of March 2024 (unverified)</span>
               </div>
             </div>
 
@@ -242,7 +242,9 @@ export function OverviewWorkstation({
           <div className="my-2">
             <div className="text-2xl font-bold text-[#F3F6FC]">
               {netDebtToEbitda !== null
-                ? `${netDebtToEbitda.toFixed(2)}x`
+                ? netDebtToEbitda <= 0
+                  ? `${netDebtToEbitda.toFixed(2)}x (Net Cash)`
+                  : `${netDebtToEbitda.toFixed(2)}x`
                 : "Unavailable"}
             </div>
             <div className="text-[11px] text-[#9AA8BC] mt-0.5">
@@ -275,7 +277,9 @@ export function OverviewWorkstation({
                 : "Unavailable"}
             </div>
             <div className="text-[11px] text-[#9AA8BC] mt-0.5">
-              {interestCoverage !== null
+              {(latestPeriod?.totalDebt ?? 0) === 0 && (latestPeriod?.interestExpense ?? 0) > 0
+                ? "No financial borrowings; finance cost relates to lease liabilities and other items"
+                : interestCoverage !== null
                 ? interestCoverage >= 2.50
                   ? "✓ Ample operating cash to service interest"
                   : "⚠ Red alert: Debt service pressure"

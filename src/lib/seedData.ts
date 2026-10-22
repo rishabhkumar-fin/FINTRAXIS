@@ -31,7 +31,7 @@ export const SEED_COMPANIES: CompanyEntity[] = [
     currency: "INR",
     scaleUnit: "Crores",
     isin: "INE002A01018",
-    cik: "0001090872",
+    cik: null,
     sector: "Energy & Conglomerate",
     industry: "Oil, Petrochemicals, Telecom & Retail",
     fiscalYearEnd: "March",

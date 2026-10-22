@@ -34,7 +34,7 @@ export default function NotFound() {
         </div>
 
         <div className="text-[10px] text-[#64748B]">
-          FINTRAXIS INSTITUTIONAL SURVEILLANCE &bull; SOVEREIGN CLEARANCE
+          FINTRAXIS INSTITUTIONAL SURVEILLANCE &bull; SYSTEM DIRECTORY
         </div>
       </div>
     </div>

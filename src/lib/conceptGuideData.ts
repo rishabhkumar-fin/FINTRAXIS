@@ -21,9 +21,9 @@ export const GLOSSARY_CONCEPTS: GlossaryConcept[] = [
     term: "Net Debt",
     category: "RATIOS",
     formula: "Total Debt − Cash & Cash Equivalents − Marketable Securities",
-    plainMeaning: "The net indebtedness left if the enterprise utilized all immediate liquid balances to retire obligations. Negative net debt denotes a net-cash fortress.",
+    plainMeaning: "The net indebtedness left if the enterprise utilized all immediate liquid balances to retire obligations. Negative net debt denotes a net-cash surplus.",
     inputs: "Short-term debt, current portion of long-term debt, long-term debt, liquid cash, cash equivalents.",
-    thresholds: "Net Cash (fortress); Net Debt > 0 (normal leveraged structure).",
+    thresholds: "Net Cash (Surplus liquidity); Net Debt > 0 (normal leveraged structure).",
     doesNotTellYou: "Does NOT tell you which debt tranches are due immediately or refinance rollover cliff timing.",
   },
   {

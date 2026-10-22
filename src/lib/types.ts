@@ -162,6 +162,7 @@ export interface StressSimulationInputs {
   cogsInflationPct: number; // e.g. 5 (-15 to +15)
   rateShockBps: number; // e.g. 200 (+100 to +500)
   floatingRateDebtSharePct?: number; // e.g. 40 (0 to 100)
+  variableCostSharePct?: number; // e.g. 35 (0 to 100)
 }
 
 export interface StressSimulationResult {
@@ -183,6 +184,23 @@ export interface StressSimulationResult {
   projectedMonthlyBurn: number;
   cashBurnRunwayMonths: number | null; // Infinity or null if cash-flow positive
   runwayStatus: "SUFFICIENT" | "MONITOR" | "CRITICAL_BURN";
+  variableCostSharePct?: number;
+  baselineOperatingCosts?: number;
+  baselineVariableCosts?: number;
+  baselineFixedCosts?: number;
+  stressedVariableCosts?: number;
+  stressedFixedCosts?: number;
+  ebitBridge?: {
+    baselineEbit: number;
+    revenueShockImpact: number;
+    variableCostRelief: number;
+    variableCostInflationImpact: number;
+    fixedCostInflationImpact: number;
+    stressedEbit: number;
+  };
+  interestCoverageStatus?: "SOLVENT" | "EBIT_NEGATIVE" | "ZERO_INTEREST" | "THRESHOLD_BREACH";
+  thresholdBreached?: boolean;
+  thresholdBreachSummary?: string;
 }
 
 export interface CompanyRiskProfile {
@@ -193,6 +211,7 @@ export interface CompanyRiskProfile {
   riskScore: number; // 0 - 100
   earlyWarningFlags: EarlyWarningFlag[];
   simulation: StressSimulationResult;
+  financeSummary?: unknown;
 }
 
 // ==========================================

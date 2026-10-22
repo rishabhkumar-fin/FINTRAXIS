@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema.ts";
@@ -137,6 +138,7 @@ try {
   }
 
   const additiveCompanyCols = [
+    `ALTER TABLE companies ADD COLUMN cin TEXT;`,
     `ALTER TABLE companies ADD COLUMN has_promoter_group REAL DEFAULT 1;`,
     `ALTER TABLE companies ADD COLUMN promoter_holding_pct REAL;`,
     `ALTER TABLE companies ADD COLUMN promoter_pledged_pct REAL;`,
@@ -184,6 +186,22 @@ try {
   insertConfigOrIgnore.run("ORGANIZATION_NAME", "FINTRAXIS Institutional Risk Services", "Entity identifier for regulatory research exports", now, "SYSTEM");
   insertConfigOrIgnore.run("MAINTENANCE_MODE", "false", "Operational lockdown flag for schema re-indexing", now, "SYSTEM");
   insertConfigOrIgnore.run("RATE_LIMIT_ANALYST_RPM", "60", "Requests per minute allowed per terminal session", now, "SYSTEM");
+
+  // Handle ADMIN_BOOTSTRAP_PASSWORD if configured
+  if (process.env.ADMIN_BOOTSTRAP_PASSWORD) {
+    try {
+      // crypto imported at top level
+      const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+      const adminUser = sqlite.prepare("SELECT id, salt FROM users WHERE role = 'SUPER_ADMIN' OR email = 'admin@fintraxis.terminal'").get() as { id: string; salt: string } | undefined;
+      if (adminUser) {
+        const salt = adminUser.salt || crypto.randomBytes(16).toString("hex");
+        const passwordHash = crypto.pbkdf2Sync(bootstrapPassword, salt, 10000, 64, "sha512").toString("hex");
+        sqlite.prepare("UPDATE users SET password_hash = ?, salt = ?, must_change_password = 1 WHERE id = ?").run(passwordHash, salt, adminUser.id);
+      }
+    } catch (e) {
+      console.warn("Bootstrap admin password configuration warning:", e);
+    }
+  }
 
   // Seed default system_jobs if missing
   const insertJobOrIgnore = sqlite.prepare(`
