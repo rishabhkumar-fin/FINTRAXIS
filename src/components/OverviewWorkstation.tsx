@@ -240,7 +240,7 @@ export function OverviewWorkstation({
               <div className="text-[10px] text-[#9AA8BC]">ANNUAL REVENUE</div>
               <div className="text-xl font-bold text-[#F3F6FC] mt-1">
                 {latestPeriod?.revenue !== null && latestPeriod?.revenue !== undefined
-                  ? `${curr} ${formatFinancialValue(latestPeriod.revenue)} ${scale}`
+                  ? formatFinancialValue(latestPeriod.revenue, curr, scale)
                   : "Unavailable"}
               </div>
               <div className="text-[10px] text-[#9AA8BC] mt-0.5">Top-Line Scale</div>
@@ -250,7 +250,7 @@ export function OverviewWorkstation({
               <div className="text-[10px] text-[#9AA8BC]">OPERATING PROFIT (EBIT)</div>
               <div className="text-xl font-bold text-[#F3F6FC] mt-1">
                 {latestPeriod?.ebit !== null && latestPeriod?.ebit !== undefined
-                  ? `${curr} ${formatFinancialValue(latestPeriod.ebit)} ${scale}`
+                  ? formatFinancialValue(latestPeriod.ebit, curr, scale)
                   : "Unavailable"}
               </div>
               <div className="text-[10px] text-[#16A879] mt-0.5">Core Earnings Power</div>
@@ -261,11 +261,11 @@ export function OverviewWorkstation({
             <div>
               <span className="text-[#9AA8BC] text-[10px]">CASH VS DEBT POSITION:</span>
               <div className="text-[#F3F6FC] font-semibold">
-                Cash: {formatFinancialValue(latestPeriod?.cashAndEquivalents ?? 0)} &bull; Total Debt: {formatFinancialValue(latestPeriod?.totalDebt ?? 0)}
+                Cash: {formatFinancialValue(latestPeriod?.cashAndEquivalents, curr, scale)} &bull; Total Debt: {formatFinancialValue(latestPeriod?.totalDebt, curr, scale)}
               </div>
             </div>
             <button
-              onClick={() => onNavigateToTab("02_STATEMENTS")}
+              onClick={() => onNavigateToTab("02_HEALTH")}
               className="text-[#16A879] hover:text-white flex items-center gap-1 text-xs transition-colors"
             >
               <span>3-Statement Ledger</span>
@@ -298,7 +298,7 @@ export function OverviewWorkstation({
             </div>
           </div>
           <button
-            onClick={() => onNavigateToTab("03_HEALTH")}
+            onClick={() => onNavigateToTab("02_HEALTH")}
             className="text-xs text-[#38BDF8] hover:text-white flex items-center gap-1 mt-1 transition-colors"
           >
             <span>Analyze Debt Coverage</span>
@@ -327,7 +327,7 @@ export function OverviewWorkstation({
             </div>
           </div>
           <button
-            onClick={() => onNavigateToTab("05_SIMULATOR")}
+            onClick={() => onNavigateToTab("06_SIMULATOR")}
             className="text-xs text-[#38BDF8] hover:text-white flex items-center gap-1 mt-1 transition-colors"
           >
             <span>Test Rate Sensitivity</span>
@@ -356,7 +356,7 @@ export function OverviewWorkstation({
             </div>
           </div>
           <button
-            onClick={() => onNavigateToTab("04_VULNERABILITY")}
+            onClick={() => onNavigateToTab("03_VULNERABILITY")}
             className="text-xs text-[#38BDF8] hover:text-white flex items-center gap-1 mt-1 transition-colors"
           >
             <span>Inspect Risk Warnings ({earlyWarningFlags.length})</span>
@@ -380,11 +380,11 @@ export function OverviewWorkstation({
               <div className="text-xs font-bold text-[#38BDF8]">{p.period}</div>
               <div className="mt-2 text-xs text-[#9AA8BC]">Revenue:</div>
               <div className="text-sm font-bold text-[#F3F6FC]">
-                {p.revenue !== null ? `${formatFinancialValue(p.revenue)}` : "Unavailable"}
+                {p.revenue !== null ? formatFinancialValue(p.revenue, curr, scale) : "Unavailable"}
               </div>
               <div className="mt-1 text-xs text-[#9AA8BC]">Operating EBIT:</div>
               <div className="text-xs font-semibold text-[#16A879]">
-                {p.ebit !== null ? `${formatFinancialValue(p.ebit)}` : "Unavailable"}
+                {p.ebit !== null ? formatFinancialValue(p.ebit, curr, scale) : "Unavailable"}
               </div>
               <div className="mt-1 text-[10px] text-[#5A687D]">{p.filingForm} &bull; {p.filingDate}</div>
             </div>
@@ -410,7 +410,7 @@ export function OverviewWorkstation({
         </button>
 
         <button
-          onClick={() => onNavigateToTab("02_STATEMENTS")}
+          onClick={() => onNavigateToTab("02_HEALTH")}
           className="p-4 bg-[#101621] hover:bg-[#151E2D] border border-[#253247] hover:border-[#16A879] rounded-xl text-left transition-all flex flex-col justify-between group cursor-pointer"
         >
           <div>
@@ -425,7 +425,7 @@ export function OverviewWorkstation({
         </button>
 
         <button
-          onClick={() => onNavigateToTab("05_SIMULATOR")}
+          onClick={() => onNavigateToTab("06_SIMULATOR")}
           className="p-4 bg-[#101621] hover:bg-[#151E2D] border border-[#253247] hover:border-[#F5B942] rounded-xl text-left transition-all flex flex-col justify-between group cursor-pointer"
         >
           <div>
@@ -440,7 +440,7 @@ export function OverviewWorkstation({
         </button>
 
         <button
-          onClick={() => onNavigateToTab("06_MEMO")}
+          onClick={() => onNavigateToTab("07_REPORTS")}
           className="p-4 bg-[#101621] hover:bg-[#151E2D] border border-[#253247] hover:border-[#38BDF8] rounded-xl text-left transition-all flex flex-col justify-between group cursor-pointer"
         >
           <div>

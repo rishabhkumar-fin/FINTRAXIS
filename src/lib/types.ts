@@ -212,3 +212,12 @@ export interface ConcentrationAnalysis {
   disclosureNotes: string[];
 }
 
+export interface DataProvenance {
+  retrievedAt: string;
+  sourceProvider: string;
+  reportingPeriod: string;
+  status: "verified" | "stale" | "unavailable" | "seed/demo";
+  filingCitation?: string;
+  filingUrl?: string;
+}
+

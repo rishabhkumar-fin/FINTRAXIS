@@ -16,6 +16,8 @@ export function formatFinancialValue(
     USD: "$",
     INR: "₹",
     JPY: "¥",
+    GBP: "£",
+    EUR: "€",
   };
 
   const currSymbol = symbolMap[currency] || currency;

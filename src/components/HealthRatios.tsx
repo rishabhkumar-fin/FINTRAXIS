@@ -52,7 +52,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       hurdle: 1.2,
       hurdleLabel: "Benchmark ≥ 1.20x",
       lowerIsBetter: false,
-      meaning: "Dollars of short-term liquid assets available for every $1 of bills due within 1 year.",
+      meaning: "Liquid short-term assets available for every 1.00 unit of bills due within 1 year.",
       status: (latestRatios.currentRatio ?? 1.0) >= 1.3 ? "PRIME" : (latestRatios.currentRatio ?? 1.0) >= 1.1 ? "WATCH" : "BREACH",
     },
     {
@@ -88,7 +88,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           label: "Current Ratio",
           value: formatRatio(latestRatios.currentRatio),
           formula: "Total Current Assets / Total Current Liabilities",
-          explanation: "What it means: The company reports ₹" + (latestRatios.currentRatio?.toFixed(2) ?? "1.00") + " of current assets for every ₹1.00 of current liabilities.",
+          explanation: `What it means: The company reports ${latestRatios.currentRatio?.toFixed(2) ?? "1.00"} ${company.currency} of current assets for every 1.00 ${company.currency} of current liabilities.`,
           status:
             latestRatios.currentRatio !== null && latestRatios.currentRatio >= 1.2
               ? "TIER_1"
@@ -213,6 +213,56 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
               : "TIER_3",
           benchmark: "Quality: ≥ 0.85x",
           progressPct: Math.min(100, Math.max(10, ((latestRatios.cfoToNetIncome ?? 0.8) / 1.5) * 100)),
+        },
+      ],
+    },
+    {
+      group: "4. CAPITAL RETURNS & ASSET EFFICIENCY",
+      items: [
+        {
+          key: "roePct",
+          label: "Return on Equity (ROE)",
+          value: formatPct(latestRatios.roePct),
+          formula: "Net Income / Shareholders' Equity * 100",
+          explanation: "Return generated per unit of net shareholder equity invested in the corporate vehicle.",
+          status:
+            latestRatios.roePct !== null && latestRatios.roePct >= 15
+              ? "TIER_1"
+              : latestRatios.roePct !== null && latestRatios.roePct >= 8
+              ? "TIER_2"
+              : "TIER_3",
+          benchmark: "Prime: ≥ 15.0%",
+          progressPct: Math.min(100, Math.max(10, (latestRatios.roePct ?? 10) * 2.5)),
+        },
+        {
+          key: "roaPct",
+          label: "Return on Assets (ROA)",
+          value: formatPct(latestRatios.roaPct),
+          formula: "Net Income / Total Audited Assets * 100",
+          explanation: "Operating productivity: how efficiently management converts assets into net returns.",
+          status:
+            latestRatios.roaPct !== null && latestRatios.roaPct >= 7
+              ? "TIER_1"
+              : latestRatios.roaPct !== null && latestRatios.roaPct >= 3
+              ? "TIER_2"
+              : "TIER_3",
+          benchmark: "Solid: ≥ 5.0%",
+          progressPct: Math.min(100, Math.max(10, (latestRatios.roaPct ?? 5) * 5)),
+        },
+        {
+          key: "netMarginPct",
+          label: "Net Profit Margin",
+          value: formatPct(latestRatios.netMarginPct),
+          formula: "Net Income / Total Revenue * 100",
+          explanation: "Bottom-line profitability retained after accounting for all operating and financing costs.",
+          status:
+            latestRatios.netMarginPct !== null && latestRatios.netMarginPct >= 10
+              ? "TIER_1"
+              : latestRatios.netMarginPct !== null && latestRatios.netMarginPct >= 5
+              ? "TIER_2"
+              : "TIER_3",
+          benchmark: "Sound: ≥ 8.0%",
+          progressPct: Math.min(100, Math.max(10, (latestRatios.netMarginPct ?? 5) * 4)),
         },
       ],
     },
@@ -474,7 +524,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           <div className="pt-2 border-t border-[#1E293B]/70">
             <div className="text-[11px] text-[#94A3B8] leading-relaxed">
               <span className="text-white font-semibold">Can it pay bills over the next 12 months?</span>{" "}
-              Holds {latestRatios.currentRatio?.toFixed(2) || "1.00"} dollars of liquid short-term assets for every $1.00 of upcoming liabilities.
+              Holds {latestRatios.currentRatio?.toFixed(2) || "1.00"} in liquid short-term assets for every 1.00 in upcoming liabilities.
             </div>
             <div className="text-[10px] font-mono text-[#64748B] mt-1.5">
               Institutional Hurdle: &ge; 1.10x
