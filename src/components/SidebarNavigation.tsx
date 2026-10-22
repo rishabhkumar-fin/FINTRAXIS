@@ -255,8 +255,8 @@ export function SidebarNavigation({
 
           {/* 10-Item Primary Navigation List */}
           <nav className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-270px)]">
-            {/* Items 1 to 8: Workspace Views */}
-            {navItems.map((item, index) => {
+            {/* Workspace Views */}
+            {navItems.map((item) => {
               const isCurrent =
                 activeTab === item.id ||
                 (item.id === "02_HEALTH" && (activeTab === "02_STATEMENTS" || activeTab === "03_HEALTH")) ||
@@ -264,7 +264,6 @@ export function SidebarNavigation({
                 (item.id === "06_SIMULATOR" && activeTab === "05_SIMULATOR") ||
                 (item.id === "07_REPORTS" && activeTab === "06_MEMO");
               const IconComponent = item.icon;
-              const itemNumber = index + 1;
 
               return (
                 <button
@@ -304,7 +303,6 @@ export function SidebarNavigation({
                             {item.badge}
                           </span>
                         )}
-                        <span className="text-[9px] text-[#5A687D] font-mono">[{itemNumber}]</span>
                       </div>
                     </div>
                   )}
@@ -315,7 +313,7 @@ export function SidebarNavigation({
             {/* Separator */}
             <div className="pt-2 pb-1 border-t border-[#253247]/60 my-1" />
 
-            {/* Item 9: AI Copilot */}
+            {/* Item: AI Copilot */}
             {onOpenAi && (
               <button
                 onClick={() => {
@@ -332,13 +330,12 @@ export function SidebarNavigation({
                       <div className="text-xs font-semibold leading-tight text-[#F3F6FC]">AI Copilot</div>
                       <div className="text-[9.5px] text-[#9AA8BC]">Credit & Risk Assistant</div>
                     </div>
-                    <span className="text-[9px] text-[#5A687D] font-mono">[9]</span>
                   </div>
                 )}
               </button>
             )}
 
-            {/* Item 10: Settings */}
+            {/* Item: Settings */}
             {onOpenSettings && (
               <button
                 onClick={() => {
@@ -355,7 +352,6 @@ export function SidebarNavigation({
                       <div className="text-xs font-semibold leading-tight text-[#F3F6FC]">Settings</div>
                       <div className="text-[9.5px] text-[#9AA8BC]">Preferences & Hurdles</div>
                     </div>
-                    <span className="text-[9px] text-[#5A687D] font-mono">[0]</span>
                   </div>
                 )}
               </button>

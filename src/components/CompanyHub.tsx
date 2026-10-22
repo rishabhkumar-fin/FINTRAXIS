@@ -114,7 +114,7 @@ export function CompanyHub({
     <div className="space-y-4 font-mono text-xs">
       {/* Workstation Standard Institutional Header */}
       <WorkstationHeader
-        code="DESK 01"
+        code="SECURITIES DIRECTORY"
         title="Securities Directory & Intelligence Hub"
         company={selected}
         period={activeProfile?.periods[0]?.period}
@@ -763,7 +763,7 @@ export function CompanyHub({
         currentTab="01_HUB"
         nextTab="02_HEALTH"
         nextTitle="Financial Health & 3-Statement Solvency"
-        nextCode="DESK 02"
+        nextCode="FINANCIAL HEALTH"
         reason={`Review the 3-statement accounting ledger, XBRL line items, working capital, and credit solvency ratios for ${selected?.name || "the selected issuer"}.`}
         onNavigate={onNavigateToTab}
         relatedLinks={[

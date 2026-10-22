@@ -76,7 +76,7 @@ export function BusinessDependencies({
     <div className="space-y-6">
       {/* Workstation Standard Institutional Header */}
       <WorkstationHeader
-        code="DESK 04"
+        code="BUSINESS DEPENDENCIES"
         title="Business Dependency Intelligence & Supply Chain Architecture"
         company={company}
         period={profile.periods[0]?.period}
@@ -389,7 +389,7 @@ export function BusinessDependencies({
         currentTab="04_DEPENDENCIES"
         nextTab="05_CONCENTRATION"
         nextTitle="Concentration & Exposure Analysis"
-        nextCode="DESK 05"
+        nextCode="CONCENTRATION & EXPOSURE"
         reason="Quantify revenue and supplier Herfindahl-Hirschman (HHI) concentration metrics and geographic exposure."
         onNavigate={(tab) => onNavigateToTab?.(tab)}
         relatedLinks={[

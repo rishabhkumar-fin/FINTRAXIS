@@ -13,6 +13,7 @@ interface CommandPaletteProps {
   onExportMemo: () => void;
   onOpenMethodology?: () => void;
   onOpenTour?: () => void;
+  onOpenHelp?: () => void;
 }
 
 export function CommandPalette({
@@ -24,6 +25,7 @@ export function CommandPalette({
   onExportMemo,
   onOpenMethodology,
   onOpenTour,
+  onOpenHelp,
 }: CommandPaletteProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +111,12 @@ export function CommandPalette({
 
     if (raw === "LOCK" || raw === "LOGOUT" || raw === "TERMINATE") {
       onLockSession();
+      onClose();
+      return;
+    }
+
+    if (raw === "HELP" || raw === "GLOSSARY" || raw.includes("HELP") || raw.includes("GLOSSARY") || raw === "?") {
+      if (onOpenHelp) onOpenHelp();
       onClose();
       return;
     }
@@ -212,10 +220,21 @@ export function CommandPalette({
             </button>
 
             <button
+              onClick={() => handleExecute("HELP")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#2563EB]/40 text-left flex items-center justify-between transition-colors cursor-pointer"
+            >
+              <span className="text-[#38BDF8] font-bold flex items-center gap-1">
+                <BookOpen className="w-3 h-3 text-[#38BDF8]" />
+                <span>HELP &amp; GLOSSARY</span>
+              </span>
+              <span className="text-[10px] text-[#5A687D]">? / CONCEPT GUIDE</span>
+            </button>
+
+            <button
               onClick={() => handleExecute("1")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[1] COMPANY DIRECTORY</span>
+              <span className="text-[#E1E7EC] font-bold">COMPANY DIRECTORY</span>
               <span className="text-[10px] text-[#5A687D]">DIRECTORY</span>
             </button>
 
@@ -223,7 +242,7 @@ export function CommandPalette({
               onClick={() => handleExecute("2")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[2] FINANCIAL HEALTH</span>
+              <span className="text-[#E1E7EC] font-bold">FINANCIAL HEALTH</span>
               <span className="text-[10px] text-[#5A687D]">SOLVENCY</span>
             </button>
 
@@ -231,7 +250,7 @@ export function CommandPalette({
               onClick={() => handleExecute("3")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[3] VULNERABILITY MONITOR</span>
+              <span className="text-[#E1E7EC] font-bold">VULNERABILITY MONITOR</span>
               <span className="text-[10px] text-[#5A687D]">SURVEILLANCE</span>
             </button>
 
@@ -239,7 +258,7 @@ export function CommandPalette({
               onClick={() => handleExecute("4")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[4] BUSINESS DEPENDENCIES</span>
+              <span className="text-[#E1E7EC] font-bold">BUSINESS DEPENDENCIES</span>
               <span className="text-[10px] text-[#5A687D]">SUPPLY CHAIN</span>
             </button>
 
@@ -247,7 +266,7 @@ export function CommandPalette({
               onClick={() => handleExecute("5")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[5] CONCENTRATION &amp; EXPOSURE</span>
+              <span className="text-[#E1E7EC] font-bold">CONCENTRATION &amp; EXPOSURE</span>
               <span className="text-[10px] text-[#5A687D]">DIVERSIFICATION</span>
             </button>
 
@@ -255,7 +274,7 @@ export function CommandPalette({
               onClick={() => handleExecute("6")}
               className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#1E2638] text-left flex items-center justify-between transition-colors"
             >
-              <span className="text-[#E1E7EC] font-bold">[6] SCENARIO SIMULATOR</span>
+              <span className="text-[#E1E7EC] font-bold">SCENARIO SIMULATOR</span>
               <span className="text-[10px] text-[#5A687D]">STRESS TEST</span>
             </button>
 

@@ -108,7 +108,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
     <div className="space-y-4 font-mono text-xs select-none">
       {/* Workstation Standard Institutional Header */}
       <WorkstationHeader
-        code="DESK 06"
+        code="SCENARIO SIMULATOR"
         title="Scenario & Macro Resilience Simulator"
         company={company}
         period={latest?.period}
@@ -660,7 +660,7 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
         currentTab="06_SIMULATOR"
         nextTab="07_REPORTS"
         nextTitle="Investment Committee Research Brief & Memo"
-        nextCode="DESK 07"
+        nextCode="INVESTMENT COMMITTEE MEMO"
         reason="Assemble analytical conclusions from all core modules into a formal credit brief with audit trail and committee recommendation."
         onNavigate={(tab) => onNavigateToTab?.(tab)}
         relatedLinks={[

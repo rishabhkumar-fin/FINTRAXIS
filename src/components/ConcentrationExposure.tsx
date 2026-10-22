@@ -67,7 +67,7 @@ export function ConcentrationExposure({
     <div className="space-y-6">
       {/* Workstation Standard Institutional Header */}
       <WorkstationHeader
-        code="DESK 05"
+        code="CONCENTRATION & EXPOSURE"
         title="Concentration & Exposure Analysis"
         company={company}
         period={profile.periods[0]?.period}
@@ -278,7 +278,7 @@ export function ConcentrationExposure({
         currentTab="05_CONCENTRATION"
         nextTab="06_SIMULATOR"
         nextTitle="Scenario & Resilience Simulator"
-        nextCode="DESK 06"
+        nextCode="SCENARIO SIMULATOR"
         reason="Subject this entity's cash flows and debt covenants to modeled interest rate hikes, revenue contraction, and margin compression."
         onNavigate={(tab) => onNavigateToTab?.(tab)}
         relatedLinks={[

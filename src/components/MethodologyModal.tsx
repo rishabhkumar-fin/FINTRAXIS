@@ -204,7 +204,7 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
                   TOL / TNW = Total Liabilities / (Total Shareholders&apos; Equity - Intangible Assets)
                 </div>
                 <p className="text-[11px] text-[#94A3B8]">
-                  <strong>Indian Banking Standard:</strong> Established RBI and Indian Bank Association benchmark for consortium credit appraisal. Manufacturing and infrastructure exposure threshold is typically &lt; 3.00x.
+                  <strong>Indian Banking Benchmark:</strong> Commonly applied rule of thumb in Indian bank appraisal (IBA / consortium lending practice), typically &lt; 3.00x for manufacturing and infrastructure. Illustrative reference level, user-adjustable; not a statutory RBI limit.
                 </p>
               </div>
             </div>

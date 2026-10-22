@@ -137,7 +137,7 @@ export function calculateRatios(
 
   const altmanResult = calculateAltmanZScore({
     workingCapital,
-    retainedEarnings: null, // Zero fabrication: not segregated in primary face disclosure
+    retainedEarnings: null, // Not segregated in primary face disclosure (returns MISSING_INPUT)
     ebit: period.ebit,
     totalAssets: period.totalAssets,
     totalLiabilities: period.totalLiabilities,

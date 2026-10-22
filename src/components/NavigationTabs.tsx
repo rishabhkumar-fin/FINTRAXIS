@@ -97,7 +97,6 @@ export function NavigationTabs({
             >
               <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#38BDF8]" : "text-[#64748B]"}`} />
               <span>{tab.label}</span>
-              <span className="text-[9.5px] text-[#5A687D] font-mono">{tab.hotkey}</span>
               {tab.badge && (
                 <span
                   className={`text-[9px] px-1.5 py-0.2 border bg-[#07090E] ${

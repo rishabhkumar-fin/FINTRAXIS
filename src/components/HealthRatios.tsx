@@ -314,7 +314,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
                     : "border-[#EF4444] text-[#EF4444] bg-[#EF4444]/10"
                 }`}
               >
-                {riskScore >= 80 ? "SAFE // INVESTMENT GRADE" : riskScore >= 50 ? "WATCHLIST SURVEILLANCE" : "DISTRESSED CREDIT"}
+                {riskScore >= 80 ? "TIER 1 // LOW RISK" : riskScore >= 50 ? "TIER 2 // WATCHLIST" : "TIER 3 // ELEVATED RISK"}
               </span>
             </div>
             <div className="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
@@ -606,7 +606,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
                 <span>POWER BI COMPARATIVE BENCHMARK MATRIX (COMPANY VS PEERS VS HURDLE)</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] mt-0.5">
-                Evaluated against Illustrative Screening Benchmarks &amp; Investment Grade Syndicate Floors
+                Evaluated against Illustrative Screening Reference Levels &amp; Calibrated Hurdles
               </div>
             </div>
 
@@ -768,7 +768,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             <span>INDIAN BANKING APPRAISAL &amp; MULTIVARIATE DIAGNOSTIC ACCORD</span>
           </div>
           <span className="text-[10px] text-[#94A3B8]">
-            RBI / Ind-AS / US-GAAP Technical Appraisal Standards
+            Indian Banking Consortium / Ind-AS / US-GAAP Appraisal Standards
           </span>
         </div>
 
@@ -777,7 +777,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
           <div className="p-3 bg-[#0F1420] border border-[#1E2536] rounded-lg space-y-1.5">
             <div className="flex items-center justify-between text-[10px] text-[#64748B] uppercase font-bold">
               <span>TOL / TNW (Gearing)</span>
-              <span className="text-[#38BDF8]">RBI &lt; 3.00x</span>
+              <span className="text-[#38BDF8]">Ref Level: &lt; 3.00x</span>
             </div>
             <div className="text-xl font-bold font-mono text-white">
               {latestRatios.tolToTnw !== null && latestRatios.tolToTnw !== undefined
@@ -785,7 +785,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
                 : "N/D"}
             </div>
             <p className="text-[10px] text-[#94A3B8] leading-tight">
-              Total Outside Liabilities to Tangible Net Worth. Core Indian consortium debt hurdle.
+              Total Outside Liabilities to Tangible Net Worth. Illustrative reference level: &lt; 3.00x (user-adjustable, not a regulatory limit).
             </p>
           </div>
 
@@ -815,7 +815,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
               N/D (Footnote Note)
             </div>
             <p className="text-[10px] text-[#94A3B8] leading-tight">
-              Requires scheduled principal repayments from debt maturity footnotes; zero estimated fabrication.
+              Requires scheduled principal repayments from debt maturity footnotes; no estimated figures.
             </p>
           </div>
 

@@ -25,49 +25,49 @@ interface WalkthroughStep {
 
 const TOUR_STEPS: WalkthroughStep[] = [
   {
-    title: "1. Institutional Credit Terminal Architecture",
-    subtitle: "End-to-End Auditable Financial Intelligence",
+    title: "Login & Session Gate",
+    subtitle: "Identity Verification & Clearance",
     targetTab: "overview",
     icon: ShieldCheck,
     description:
-      "Welcome to FINTRAXIS. The terminal automates institutional credit underwriting across a disciplined 8-step linear workflow, replacing error-prone manual spreadsheets with deterministic financial ratios and regulatory audit trails.",
-    keyTakeaway: "Designed for banking credit officers, rating analysts, and academic examiners.",
+      "Access begins with secure authentication or Quick Demo Entry. Sessions auto-lock after 30 minutes of inactivity to protect analysis confidentiality.",
+    keyTakeaway: "Enforces role-based clearance before accessing corporate financial records.",
   },
   {
-    title: "2. Global Securities Master & Issuer Directory",
-    subtitle: "US-GAAP, Ind-AS & FSA Japan Coverage",
+    title: "Choose Corporate Issuer",
+    subtitle: "Securities Directory & Master",
     targetTab: "01_HUB",
     icon: Building2,
     description:
-      "Select pre-seeded issuers (e.g., Apple, Reliance Industries, TCS, Microsoft) or ingest global symbols. Indian entities report in INR Crores (₹ Cr) under Ind-AS; US entities report in USD Millions ($M) under US-GAAP.",
-    keyTakeaway: "Switching issuers carries the active entity across all 8 analytical workstations.",
+      "Search and resolve global entities (e.g. Apple, Reliance Industries, Microsoft, TCS, Toyota). Selecting an issuer synchronizes historical disclosures across all analytical modules.",
+    keyTakeaway: "Multi-exchange coverage across US-GAAP, Ind-AS, and global accounting regimes.",
   },
   {
-    title: "3. Solvency & 3-Statement Balance Identity",
-    subtitle: "Assets = Liabilities + Stockholders' Equity",
+    title: "Read As-Of Dates & Currencies",
+    subtitle: "Reporting Period Horizon",
     targetTab: "02_HEALTH",
     icon: Activity,
     description:
-      "Verify the 3-statement XBRL ledger. A real-time mathematical identity badge verifies that Total Assets equal Liabilities + Equity within a strict ±0.01% statutory rounding tolerance. Click any cell to open the audited disclosure sidecar.",
-    keyTakeaway: "Zero division and missing line items are handled with typed, transparent disclosures.",
+      "Financial statement numbers reflect audited fiscal period-end dates (e.g. 31-Mar-2025). Indian entities report in INR Crores (₹ Cr), US entities in USD Millions ($M). Real-time market prices carry distinct delayed timestamps.",
+    keyTakeaway: "Never confuse as-of fiscal filing dates with intraday trading quotes.",
   },
   {
-    title: "4. Deterministic Macro Stress Simulator",
-    subtitle: "Revenue Contraction & Central Bank Rate Shocks",
-    targetTab: "06_SIMULATOR",
+    title: "Inspect Figure Provenance",
+    subtitle: "Audit Sidecar & Lineage",
+    targetTab: "02_HEALTH",
     icon: SlidersHorizontal,
     description:
-      "Test how adverse macroeconomic scenarios impact debt covenants. Adjust sales contractions, COGS inflation, and policy rate hikes (+bps). The pro-forma engine calculates stressed Net Debt/EBITDA, interest coverage, and cash runway.",
-    keyTakeaway: "Pure deterministic sensitivity mathematics, not black-box machine learning.",
+      "Click or tap any financial figure marked with an audit badge to open the Audit Sidecar. Inspect the exact statutory filing form, filing date, XBRL tag, and deterministic calculation formula.",
+    keyTakeaway: "Missing disclosures are shown as N/D, never guessed or replaced with zero.",
   },
   {
-    title: "5. Investment Committee Dossier & Verification",
-    subtitle: "Cryptographic SHA-256 Provenance Stamp",
+    title: "Export Research & Credit Dossier",
+    subtitle: "Investment Committee Output",
     targetTab: "07_REPORTS",
     icon: FileText,
     description:
-      "Synthesize your analysis into an executive credit memo. Present via the interactive slide deck or review the complete dossier. Export directly to A4 PDF or download RFC 4180 CSV with immutable SHA-256 audit digests.",
-    keyTakeaway: "Ready for supervisory sign-off and university viva evaluation.",
+      "Synthesize findings into an institutional Investment Committee memo. Export to A4 PDF, RFC 4180 CSV, or Excel XML spreadsheet with cryptographic SHA-256 data transit digest.",
+    keyTakeaway: "Print-ready, auditable underwriting documentation.",
   },
 ];
 
@@ -92,7 +92,9 @@ export function TerminalWalkthroughTour({
 
   const handleNext = () => {
     if (isLast) {
-      localStorage.setItem("fintraxis_tour_completed", "true");
+      try {
+        localStorage.setItem("fintraxis_tour_completed", "true");
+      } catch {}
       onClose();
     } else {
       const nextIndex = currentStepIndex + 1;
@@ -112,7 +114,9 @@ export function TerminalWalkthroughTour({
   };
 
   const handleSkip = () => {
-    localStorage.setItem("fintraxis_tour_completed", "true");
+    try {
+      localStorage.setItem("fintraxis_tour_completed", "true");
+    } catch {}
     onClose();
   };
 

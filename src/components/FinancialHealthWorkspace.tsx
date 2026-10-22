@@ -51,7 +51,7 @@ export function FinancialHealthWorkspace({
     <div className="space-y-6">
       {/* Workstation Standard Institutional Header */}
       <WorkstationHeader
-        code="DESK 02"
+        code="FINANCIAL HEALTH"
         title="Financial Health & 3-Statement Solvency Workspace"
         company={company}
         period={profile.periods[0]?.period}
@@ -104,7 +104,7 @@ export function FinancialHealthWorkspace({
         currentTab="02_HEALTH"
         nextTab="03_VULNERABILITY"
         nextTitle="Financial Vulnerability Monitor"
-        nextCode="DESK 03"
+        nextCode="VULNERABILITY MONITOR"
         reason="Identify balance sheet deterioration, debt maturity walls, working capital leaks, and Basel III early warning flags."
         onNavigate={(tab) => onNavigateToTab?.(tab)}
         relatedLinks={[

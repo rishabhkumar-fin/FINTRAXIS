@@ -15,7 +15,8 @@ import { ConcentrationExposure } from "@/components/ConcentrationExposure";
 import { StressSimulator } from "@/components/StressSimulator";
 import { ICDossier } from "@/components/ICDossier";
 import { AuditSidecar } from "@/components/AuditSidecar";
-import { ModuleGuide } from "@/components/ModuleGuide";
+import { AboutModulePanel } from "@/components/AboutModulePanel";
+import { HelpGlossaryModal } from "@/components/HelpGlossaryModal";
 import { SettingsModal, OperatorSettings } from "@/components/SettingsModal";
 import { FinancialAiAssistant } from "@/components/FinancialAiAssistant";
 import { ModuleTab } from "@/components/NavigationTabs";
@@ -53,6 +54,8 @@ export default function FintraxisTerminalPage() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState<boolean>(false);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [helpConceptId, setHelpConceptId] = useState<string | null>(null);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [showIdleWarning, setShowIdleWarning] = useState<boolean>(false);
@@ -90,6 +93,11 @@ export default function FintraxisTerminalPage() {
       mainScrollRef.current.focus();
     }
   }, [selectedCompanyId, updateUrl]);
+
+  const handleOpenGlossary = useCallback((conceptId?: string) => {
+    setHelpConceptId(conceptId || null);
+    setIsHelpOpen(true);
+  }, []);
 
   const handleSelectCompany = useCallback((companyId: string) => {
     setSelectedCompanyId(companyId);
@@ -327,6 +335,11 @@ export default function FintraxisTerminalPage() {
         target.isContentEditable;
 
       if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === "?" || (e.shiftKey && e.key === "?")) {
+          e.preventDefault();
+          handleOpenGlossary();
+          return;
+        }
         if (e.key === "1") handleSelectTab("01_HUB");
         else if (e.key === "2") handleSelectTab("02_HEALTH");
         else if (e.key === "3") handleSelectTab("03_VULNERABILITY");
@@ -342,7 +355,7 @@ export default function FintraxisTerminalPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSelectTab, handleLockSession]);
+  }, [handleSelectTab, handleLockSession, handleOpenGlossary]);
 
   const handleUpdateSettings = (updated: OperatorSettings) => {
     if (!session) return;
@@ -591,8 +604,11 @@ export default function FintraxisTerminalPage() {
             </div>
           )}
 
-          {/* Contextual Institutional Field Guide for Active Module */}
-          <ModuleGuide moduleKey={activeTab} />
+          {/* Collapsed 3-Line About This Module Panel (Section 8.2) */}
+          <AboutModulePanel
+            moduleKey={activeTab}
+            onOpenGlossary={() => handleOpenGlossary()}
+          />
 
           {/* Module 01: Administrative Governance & Supervisory Console */}
           {activeTab === "00_ADMIN" && (
@@ -712,6 +728,9 @@ export default function FintraxisTerminalPage() {
             handleSelectTab("07_REPORTS");
             setTimeout(() => window.print(), 200);
           }}
+          onOpenMethodology={() => setIsMethodologyOpen(true)}
+          onOpenTour={() => setIsTourOpen(true)}
+          onOpenHelp={() => handleOpenGlossary()}
         />
 
         {/* Institutional Settings & Calibration Modal */}
@@ -764,6 +783,7 @@ export default function FintraxisTerminalPage() {
           session={session}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenMethodology={() => setIsMethodologyOpen(true)}
+          onOpenHelp={() => handleOpenGlossary()}
           onOpenAi={() => setIsAiOpen(true)}
           onLogout={handleLockSession}
           isMoreOpen={isMobileMoreOpen}
@@ -781,6 +801,14 @@ export default function FintraxisTerminalPage() {
           isOpen={isTourOpen}
           onClose={() => setIsTourOpen(false)}
           onNavigateToTab={handleSelectTab}
+        />
+
+        {/* Help, Financial Glossary & Concept Guide Modal (Section 8.2) */}
+        <HelpGlossaryModal
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+          initialConceptId={helpConceptId}
+          onOpenTour={() => setIsTourOpen(true)}
         />
 
         {/* Inactivity Idle Security Warning Modal */}
@@ -833,10 +861,17 @@ export default function FintraxisTerminalPage() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={() => handleOpenGlossary()}
+              className="text-[#38BDF8] hover:text-white underline transition-colors cursor-pointer font-bold"
+            >
+              HELP &amp; GLOSSARY (?)
+            </button>
+            <span>&bull;</span>
+            <button
               onClick={() => setIsMethodologyOpen(true)}
               className="text-[#94A3B8] hover:text-[#38BDF8] underline transition-colors cursor-pointer"
             >
-              METHODOLOGY &amp; FORMULAS (CTRL+M)
+              METHODOLOGY (CTRL+M)
             </button>
             <span>&bull;</span>
             <button
@@ -846,7 +881,7 @@ export default function FintraxisTerminalPage() {
               TAKE TOUR
             </button>
             <span>&bull;</span>
-            <span>HOTKEYS: [1-6] &bull; CTRL+K &bull; CTRL+J</span>
+            <span>SHORTCUTS: CTRL+K &bull; ? &bull; CTRL+J</span>
             <span>&bull;</span>
             <span className="text-[#38BDF8]">FINTRAXIS INSTITUTIONAL</span>
           </div>

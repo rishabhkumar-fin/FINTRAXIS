@@ -1,6 +1,6 @@
-# FINTRAXIS: Auditable Corporate Financial Intelligence
+# FINTRAXIS: Corporate Financial Intelligence & Credit Terminal
 
-An institutional-grade corporate financial intelligence and early-warning credit risk terminal engineered to the standards of BlackRock Aladdin, Goldman Sachs Marquee, and Wall Street debt syndicates.
+An auditable corporate financial intelligence and credit risk screening terminal built with Next.js, TypeScript, and SQLite, supporting US-GAAP, Ind-AS, and Japanese FSA accounting disclosures.
 
 ---
 
@@ -43,11 +43,12 @@ The terminal will be accessible at: `http://localhost:3000`.
 - **Styling & Design System:** Tailwind CSS 4 with custom `FINTRAXIS Sapphire` design tokens (`#080B12`, `#101621`, `#151E2D`, `#253247`, `#3867F5`, `#38BDF8`, `#16A879`, `#F05252`, `#F5B942`).
 - **Database & Persistence:** SQLite with `better-sqlite3` and `drizzle-orm` (stored in `./data/fintraxis.db`, with `/tmp` serverless fallback).
 - **Security Master:** Seeded with global coverage (`HAL.NS`, `RELIANCE.NS`, `TCS.NS`, `SBIN.NS`, `AAPL`, `MSFT`, `NVDA`, `7203.T`).
-- **Data Provider Layer:** Formal `DataProvider` interface with `YahooFinanceAdapter` and upcoming `SecEdgarAdapter`. Strict **Zero Fabrication** rule for missing financial data.
+- **Data Provider Layer:** Formal `DataProvider` interface with `YahooFinanceAdapter` and upcoming `SecEdgarAdapter`. Strict data integrity rule: missing financial items remain `N/D`, never 0 or estimated.
 - **Testing:** Node.js native test runner (`node --test`) covering authentication timing-safety, rate limiting, demo session isolation, and idempotent ingestion.
 
 ---
 
 ## 4. Key Documentation
+- [Concept Guide & Glossary](docs/CONCEPT_GUIDE.md)
 - [Data Sources & Coverage Evaluation](docs/data-sources.md)
 - [Environment Configuration Template](.env.example)

@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       })
       .run();
 
-    // 3. Process genuine statement periods (ZERO fabrication)
+    // 3. Process genuine statement periods (missing data remains null)
     const insertedPeriods: FinancialPeriodInsert[] = [];
 
     if (statements && statements.length > 0) {

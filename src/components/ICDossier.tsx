@@ -367,19 +367,25 @@ DIGITAL HASH: SHA256:${digitalHash.toUpperCase()}
          p.totalCurrentAssets && p.totalCurrentLiabilities
            ? (p.totalCurrentAssets / p.totalCurrentLiabilities).toFixed(2)
            : "N/D";
+
+       const numCell = (v?: number | null) =>
+         v !== undefined && v !== null
+           ? `<Cell><Data ss:Type="Number">${v}</Data></Cell>`
+           : `<Cell><Data ss:Type="String">N/D</Data></Cell>`;
+
        return `
    <Row>
     <Cell><Data ss:Type="String">${p.period}</Data></Cell>
     <Cell><Data ss:Type="String">${p.filingForm}</Data></Cell>
     <Cell><Data ss:Type="String">${p.filingDate}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.revenue ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.grossProfit ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.ebit ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.netIncome ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.totalDebt ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.cashAndEquivalents ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.operatingCashFlow ?? 0}</Data></Cell>
-    <Cell><Data ss:Type="Number">${p.freeCashFlow ?? 0}</Data></Cell>
+    ${numCell(p.revenue)}
+    ${numCell(p.grossProfit)}
+    ${numCell(p.ebit)}
+    ${numCell(p.netIncome)}
+    ${numCell(p.totalDebt)}
+    ${numCell(p.cashAndEquivalents)}
+    ${numCell(p.operatingCashFlow)}
+    ${numCell(p.freeCashFlow)}
     <Cell><Data ss:Type="String">${cr}</Data></Cell>
     <Cell><Data ss:Type="String">${lev}</Data></Cell>
     <Cell><Data ss:Type="String">${cov}</Data></Cell>
@@ -421,12 +427,12 @@ Synchronized live on FINTRAXIS Terminal.`;
   };
 
   const SLIDE_TITLES = [
-    { idx: 0, title: "01 // Executive Title & Sovereign Clearance" },
-    { idx: 1, title: "02 // 3-Year Audited Financial Ledger" },
-    { idx: 2, title: "03 // Vulnerabilities & Basel III Early Warnings" },
-    { idx: 3, title: "04 // Pro-Forma Adverse Stress Sensitivity" },
-    { idx: 4, title: "05 // Capital Structure & Covenant Audit" },
-    { idx: 5, title: "06 // Managing Director Thesis & Sign-Off" },
+    { idx: 0, title: "Executive Title & Sovereign Clearance" },
+    { idx: 1, title: "3-Year Audited Financial Ledger" },
+    { idx: 2, title: "Vulnerabilities & Early Warnings" },
+    { idx: 3, title: "Pro-Forma Adverse Stress Sensitivity" },
+    { idx: 4, title: "Capital Structure & Covenant Audit" },
+    { idx: 5, title: "Managing Director Thesis & Sign-Off" },
   ];
 
   return (
@@ -434,7 +440,7 @@ Synchronized live on FINTRAXIS Terminal.`;
       {/* Workstation Standard Institutional Header (Hidden on Print) */}
       <div className="no-print">
         <WorkstationHeader
-          code="DESK 07"
+          code="INVESTMENT COMMITTEE MEMO"
           title="Investment Committee Research Brief & Memo Export"
           company={company}
           period={latest?.period}
@@ -534,10 +540,10 @@ Synchronized live on FINTRAXIS Terminal.`;
           <button
             onClick={handleExportExcel}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F1626] hover:bg-[#182337] border border-[#182337] hover:border-[#10B981]/40 text-[#10B981] text-[11px] font-bold transition-colors rounded-lg cursor-pointer"
-            title="Download structured multi-period spreadsheet model (.xls)"
+            title="Download structured multi-period spreadsheet model in Excel XML (.xls) format"
           >
             <Download className="w-3.5 h-3.5 text-[#10B981]" />
-            <span>EXPORT EXCEL</span>
+            <span>EXPORT EXCEL XML (.XLS)</span>
           </button>
 
           <button
@@ -806,7 +812,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>
                 <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <FileSpreadsheet className="w-4 h-4 text-[#38BDF8]" />
-                  <span>SLIDE 02 // MULTI-PERIOD AUDITED FINANCIAL LEDGER (3-YEAR XBRL AUDIT)</span>
+                  <span>MULTI-PERIOD AUDITED FINANCIAL LEDGER (3-YEAR XBRL AUDIT)</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Consolidated Income Statement, Balance Sheet &amp; Cash Flow verified against SEC 10-K / BSE / FSA filings
@@ -1039,12 +1045,12 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide 2 Footer */}
             <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
               <div>VERIFIED AUDIT RECORD: FORM 10-K / ANNUAL RETURN</div>
-              <div>SLIDE 02 // FINANCIAL STATEMENT RECONCILIATION</div>
+              <div>FINANCIAL STATEMENT RECONCILIATION</div>
             </div>
           </div>
 
         {/* =======================================================================
-            SLIDE 03: CORPORATE VULNERABILITIES, DEPENDENCIES & BASEL III EARLY WARNINGS
+            CORPORATE VULNERABILITIES, DEPENDENCIES & BASEL III EARLY WARNINGS
            ======================================================================= */}
         <div className={`${viewMode === "DECK" && activeSlide !== 2 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
           {/* Slide Header */}
@@ -1052,7 +1058,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             <div>
               <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-[#38BDF8]" />
-                <span>SLIDE 03 // CORPORATE VULNERABILITIES, DEPENDENCIES &amp; BASEL III EARLY WARNINGS</span>
+                <span>CORPORATE VULNERABILITIES, DEPENDENCIES &amp; EARLY WARNINGS</span>
               </div>
               <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                 Institutional surveillance across debt service burden, covenant headroom, working capital &amp; structural dependencies
@@ -1128,8 +1134,13 @@ Synchronized live on FINTRAXIS Terminal.`;
 
           {/* Deep Insights 1: Debt Maturity Wall Schedule & Refinance Cliff */}
           <div className="space-y-2">
-            <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex items-center justify-between">
-              <span>DEBT MATURITY WALL &amp; REFINANCING EXPOSURE SCHEDULE</span>
+            <div className="text-[11px] font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider border-b border-[#1E2536] print:border-slate-300 pb-1 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span>DEBT MATURITY WALL &amp; REFINANCING EXPOSURE SCHEDULE</span>
+                <span className="px-1.5 py-0.5 text-[8.5px] bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-[#FBBF24] rounded font-bold uppercase">
+                  Demonstration / Illustrative
+                </span>
+              </div>
               <span className="text-[9.5px] text-[#64748B] print:text-slate-600">HOW CALCULATED: Contractual maturity buckets vs available liquidity</span>
             </div>
 
@@ -1291,12 +1302,12 @@ Synchronized live on FINTRAXIS Terminal.`;
           {/* Slide 3 Footer */}
           <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
             <div>BASEL III CREDIT RISK ACCORD // EARLY WARNING SURVEILLANCE &bull; HOW CALCULATED: COMPLIANCE CERTIFICATION</div>
-            <div>SLIDE 03 // CORPORATE VULNERABILITIES AUDIT</div>
+            <div>CORPORATE VULNERABILITIES AUDIT</div>
           </div>
         </div>
 
         {/* =======================================================================
-            SLIDE 04: DETERMINISTIC PRO-FORMA ADVERSE STRESS SIMULATION
+            DETERMINISTIC PRO-FORMA ADVERSE STRESS SIMULATION
            ======================================================================= */}
         <div className={`${viewMode === "DECK" && activeSlide !== 3 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
@@ -1304,7 +1315,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>
                 <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-[#F43F5E]" />
-                  <span>SLIDE 04 // PRO-FORMA ADVERSE MACROECONOMIC STRESS SENSITIVITY</span>
+                  <span>PRO-FORMA ADVERSE MACROECONOMIC STRESS SENSITIVITY</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Deterministic simulation under stagflationary shock: revenue contraction, COGS inflation &amp; +200 bps monetary rate shock
@@ -1474,12 +1485,12 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide 4 Footer */}
             <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
               <div>MONTE CARLO &amp; DETERMINISTIC RISK LABS // ENGINE v2.6</div>
-              <div>SLIDE 04 // STRESS TEST SIMULATION MATRIX</div>
+              <div>STRESS TEST SIMULATION MATRIX</div>
             </div>
           </div>
 
         {/* =======================================================================
-            SLIDE 05: CAPITAL STRUCTURE WATERFALL & COVENANT COMPLIANCE AUDIT
+            CAPITAL STRUCTURE WATERFALL & COVENANT COMPLIANCE AUDIT
            ======================================================================= */}
         <div className={`${viewMode === "DECK" && activeSlide !== 4 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
@@ -1487,7 +1498,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>
                 <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Layers className="w-4 h-4 text-[#38BDF8]" />
-                  <span>SLIDE 05 // CAPITAL STRUCTURE WATERFALL &amp; COVENANT COMPLIANCE AUDIT</span>
+                  <span>CAPITAL STRUCTURE WATERFALL &amp; COVENANT COMPLIANCE AUDIT</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Senior credit facility governance, subordination ranking, and contractual covenant compliance tests
@@ -1603,12 +1614,12 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide 5 Footer */}
             <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
               <div>SYNDICATED LOAN MARKET ASSOCIATION (LMA) STANDARD COMPLIANCE</div>
-              <div>SLIDE 05 // CAPITAL STRUCTURE &amp; COVENANTS</div>
+              <div>CAPITAL STRUCTURE &amp; COVENANTS</div>
             </div>
           </div>
 
         {/* =======================================================================
-            SLIDE 06: MANAGING DIRECTOR CREDIT THESIS & MULTI-PARTY EXECUTIVE SIGN-OFF
+            MANAGING DIRECTOR CREDIT THESIS & MULTI-PARTY EXECUTIVE SIGN-OFF
            ======================================================================= */}
         <div className={`${viewMode === "DECK" && activeSlide !== 5 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
             {/* Slide Header */}
@@ -1616,7 +1627,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <div>
                 <div className="text-xs font-bold text-[#38BDF8] print:text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Lock className="w-4 h-4 text-[#38BDF8]" />
-                  <span>SLIDE 06 // MANAGING DIRECTOR CREDIT THESIS &amp; EXECUTIVE SIGN-OFF</span>
+                  <span>MANAGING DIRECTOR CREDIT THESIS &amp; EXECUTIVE SIGN-OFF</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
                   Underwriting recommendation, syndicate terms, and sovereign multi-party supervisory clearance seals
@@ -1809,7 +1820,7 @@ Synchronized live on FINTRAXIS Terminal.`;
             {/* Slide 6 Footer */}
             <div className="pt-3 border-t border-[#1E2536] print:border-slate-300 flex items-center justify-between text-[10px] text-[#64748B] print:text-slate-600">
               <div>FINTRAXIS INSTITUTIONAL TERMINAL // BOARDROOM TEARSHEET COMPLETE</div>
-              <div>SLIDE 06 // FINAL EXECUTIVE ATTESTATION</div>
+              <div>FINAL EXECUTIVE ATTESTATION</div>
             </div>
           </div>
       </div>

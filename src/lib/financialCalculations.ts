@@ -794,7 +794,7 @@ export function calculateDebtServiceProxy(
 
 /**
  * Total Outside Liabilities to Tangible Net Worth (TOL / TNW):
- * Indian Banking Credit Appraisal Metric (RBI / IBA Standard).
+ * Indian Banking Credit Appraisal Metric (IBA / Consortium Practice).
  */
 export function calculateTolToTnw(
   totalLiabilities: number | null | undefined,
@@ -835,7 +835,7 @@ export function calculateTolToTnw(
     isComputable: true,
     status: "VALID",
     formula,
-    interpretation: `TOL/TNW: ${tolTnw}x. Indian banking credit threshold: < 3.00x acceptable for working capital consortium lines.`,
+    interpretation: `TOL/TNW: ${tolTnw}x. Illustrative reference level: < 3.00x commonly applied in Indian banking consortium appraisal (user-adjustable, not a regulatory limit).`,
   };
 }
 

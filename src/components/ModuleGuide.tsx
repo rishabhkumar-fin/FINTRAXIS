@@ -235,7 +235,7 @@ export function ModuleGuide({ moduleKey }: ModuleGuideProps) {
           <div className="p-3 bg-[#111622] border border-[#1E2536] rounded space-y-2">
             <div className="flex items-center gap-1.5 text-[#38BDF8] text-[10.5px] font-bold uppercase tracking-wider">
               <Target className="w-3.5 h-3.5 text-[#38BDF8]" />
-              <span>01. Operational Purpose</span>
+              <span>Operational Purpose</span>
             </div>
             <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
               {guide.purpose}
@@ -246,7 +246,7 @@ export function ModuleGuide({ moduleKey }: ModuleGuideProps) {
           <div className="p-3 bg-[#111622] border border-[#1E2536] rounded space-y-2">
             <div className="flex items-center gap-1.5 text-[#38BDF8] text-[10.5px] font-bold uppercase tracking-wider">
               <Zap className="w-3.5 h-3.5 text-[#38BDF8]" />
-              <span>02. Core Actions &amp; Controls</span>
+              <span>Core Actions &amp; Controls</span>
             </div>
             <ul className="space-y-1.5 text-[10.5px] text-[#94A3B8] leading-tight">
               {guide.actions.map((act, i) => (
@@ -262,7 +262,7 @@ export function ModuleGuide({ moduleKey }: ModuleGuideProps) {
           <div className="p-3 bg-[#111622] border border-[#1E2536] rounded space-y-2">
             <div className="flex items-center gap-1.5 text-[#10B981] text-[10.5px] font-bold uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-              <span>03. Institutional Decision Rule</span>
+              <span>Institutional Decision Rule</span>
             </div>
             <div className="p-2 bg-[#080B10] border border-[#1F293D] rounded text-[11px] text-[#E2E8F0] font-mono leading-relaxed">
               {guide.decisionRule}

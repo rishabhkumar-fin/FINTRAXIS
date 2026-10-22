@@ -176,7 +176,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         {/* Section 1: Executive Solvency & Capital Structure */}
         <div className="space-y-3">
           <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
-            01. EXECUTIVE SOLVENCY &amp; CAPITAL STRUCTURE
+            EXECUTIVE SOLVENCY &amp; CAPITAL STRUCTURE
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-2.5 bg-[#12161F] border border-[#232B3A]">
@@ -209,7 +209,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         {/* Section 2: Early Warning & Vulnerabilities */}
         <div className="space-y-3">
           <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
-            02. EARLY WARNING SURVEILLANCE &amp; COVENANT DIAGNOSIS
+            EARLY WARNING SURVEILLANCE &amp; COVENANT DIAGNOSIS
           </div>
           {earlyWarningFlags.length > 0 ? (
             <div className="space-y-2">
@@ -239,7 +239,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         {/* Section 3: Stressed Pro-Forma Sensitivity */}
         <div className="space-y-3">
           <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1 flex justify-between">
-            <span>03. DETERMINISTIC STRESS SENSITIVITY</span>
+            <span>DETERMINISTIC STRESS SENSITIVITY</span>
             <span className="text-[#EF4444] text-[10px]">[SIMULATED - HYPOTHETICAL]</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -267,7 +267,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
         {/* Section 4: Regulatory Chain of Custody */}
         <div className="space-y-3">
           <div className="text-xs font-bold text-[#2563EB] uppercase tracking-wider border-b border-[#1E2638] pb-1">
-            04. AUDIT PROVENANCE &amp; REGULATORY ATTESTATION
+            AUDIT PROVENANCE &amp; REGULATORY ATTESTATION
           </div>
           <div className="p-3 bg-[#12161F] border border-[#232B3A] space-y-1.5 text-[11px]">
             <div className="flex justify-between">

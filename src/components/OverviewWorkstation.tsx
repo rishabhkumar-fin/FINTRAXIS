@@ -416,7 +416,7 @@ export function OverviewWorkstation({
         currentTab="overview"
         nextTab="01_HUB"
         nextTitle="Company Intelligence Hub"
-        nextCode="DESK 01"
+        nextCode="SECURITIES DIRECTORY"
         reason="Examine interactive price charts, audited filing history, and cross-peer comparative fundamentals."
         onNavigate={onNavigateToTab}
         relatedLinks={[

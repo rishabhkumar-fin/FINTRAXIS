@@ -6,7 +6,7 @@ import { CompanyEntity } from "@/lib/types";
 import { ModuleTab } from "./NavigationTabs";
 
 interface WorkstationHeaderProps {
-  code: string;
+  code?: string;
   title: string;
   company?: CompanyEntity | null;
   period?: string | null;
@@ -26,15 +26,20 @@ export function WorkstationHeader({
   badgeText,
   children,
 }: WorkstationHeaderProps) {
+  // Strip any legacy visible module numbers like "DESK 01"
+  const cleanCode = code ? code.replace(/^DESK\s*\d+\s*:?\s*/i, "").trim() : "";
+
   return (
     <div className="bg-[#0B1220] border border-[#1E293B] rounded-xl p-4 sm:p-5 font-mono mb-6 shadow-sm">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           {/* Top meta tags */}
           <div className="flex flex-wrap items-center gap-2 mb-1.5 text-[10px]">
-            <span className="px-2 py-0.5 bg-[#2563EB]/15 border border-[#2563EB]/40 text-[#38BDF8] font-bold rounded">
-              {code}
-            </span>
+            {cleanCode && (
+              <span className="px-2 py-0.5 bg-[#2563EB]/15 border border-[#2563EB]/40 text-[#38BDF8] font-bold rounded">
+                {cleanCode}
+              </span>
+            )}
             {badgeText && (
               <span className="px-2 py-0.5 bg-[#151E2D] border border-[#253247] text-[#9AA8BC] rounded">
                 {badgeText}
@@ -83,7 +88,7 @@ interface WorkstationNextStepProps {
   currentTab: ModuleTab;
   nextTab: ModuleTab;
   nextTitle: string;
-  nextCode: string;
+  nextCode?: string;
   reason: string;
   onNavigate: (tab: ModuleTab) => void;
   relatedLinks?: Array<{
@@ -100,6 +105,8 @@ export function WorkstationNextStep({
   onNavigate,
   relatedLinks = [],
 }: WorkstationNextStepProps) {
+  const cleanNextCode = nextCode ? nextCode.replace(/^DESK\s*\d+\s*:?\s*/i, "").trim() : "";
+
   return (
     <div className="mt-8 pt-5 border-t border-[#182337] flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
       <div>
@@ -133,9 +140,11 @@ export function WorkstationNextStep({
         className="px-4 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-md hover:translate-x-0.5 shrink-0"
       >
         <span>Continue to {nextTitle}</span>
-        <span className="text-[10px] px-1.5 py-0.5 bg-black/20 rounded font-normal">
-          {nextCode}
-        </span>
+        {cleanNextCode && (
+          <span className="text-[10px] px-1.5 py-0.5 bg-black/20 rounded font-normal">
+            {cleanNextCode}
+          </span>
+        )}
         <ArrowRight className="w-3.5 h-3.5" />
       </button>
     </div>

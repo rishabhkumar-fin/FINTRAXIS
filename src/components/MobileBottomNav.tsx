@@ -28,6 +28,7 @@ interface MobileBottomNavProps {
   session: SessionClearance | null;
   onOpenSettings: () => void;
   onOpenMethodology: () => void;
+  onOpenHelp?: () => void;
   onOpenAi: () => void;
   onLogout: () => void;
   isMoreOpen: boolean;
@@ -41,6 +42,7 @@ export function MobileBottomNav({
   session,
   onOpenSettings,
   onOpenMethodology,
+  onOpenHelp,
   onOpenAi,
   onLogout,
   isMoreOpen,
@@ -209,7 +211,7 @@ export function MobileBottomNav({
                     <div className="text-[10px] text-[#94A3B8]">Single-source suppliers & counterparty ties</div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">04</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">SUPPLY</span>
               </button>
 
               {/* Desk 05: Concentration */}
@@ -229,7 +231,7 @@ export function MobileBottomNav({
                     <div className="text-[10px] text-[#94A3B8]">Herfindahl-Hirschman (HHI) segment risk</div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">05</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">EXPOSURE</span>
               </button>
 
               {/* Desk 06: Simulator */}
@@ -249,7 +251,7 @@ export function MobileBottomNav({
                     <div className="text-[10px] text-[#94A3B8]">Macro stress tests & covenant shock models</div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 bg-[#182337] rounded text-[#F5B942]">06</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#182337] rounded text-[#F5B942]">SIMULATOR</span>
               </button>
 
               {/* Desk 07: Research Credit Memo */}
@@ -269,7 +271,7 @@ export function MobileBottomNav({
                     <div className="text-[10px] text-[#94A3B8]">Underwriting tearsheet & PDF/CSV export</div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">07</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#182337] rounded text-[#38BDF8]">MEMO</span>
               </button>
 
               {/* Desk 00: Admin Panel (Clearance Gated) */}
@@ -294,7 +296,7 @@ export function MobileBottomNav({
                     <div className="text-[10px] text-[#94A3B8]">Users, audit log, data feeds & hurdles</div>
                   </div>
                 </div>
-                <span className="text-[10px] px-1.5 py-0.5 bg-[#182337] rounded text-[#10B981]">00</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#182337] rounded text-[#10B981]">CONTROL</span>
               </button>
             </div>
 
@@ -303,6 +305,24 @@ export function MobileBottomNav({
               <div className="text-[10px] text-[#64748B] uppercase font-bold tracking-wider mb-1">
                 KNOWLEDGE & TERMINAL CONTROLS
               </div>
+
+              {/* Help & Concept Glossary Trigger */}
+              {onOpenHelp && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMoreOpen(false);
+                    onOpenHelp();
+                  }}
+                  className="w-full min-h-[44px] flex items-center gap-2.5 p-3 rounded-xl bg-[#090D17] border border-[#2563EB]/40 hover:border-[#38BDF8] text-left transition-colors cursor-pointer text-slate-200"
+                >
+                  <BookOpen className="w-4 h-4 text-[#38BDF8]" />
+                  <div>
+                    <div className="font-bold text-xs text-white">Help &amp; Concept Glossary (?)</div>
+                    <div className="text-[10px] text-[#94A3B8]">Plain-language ratios, source badges &amp; limits</div>
+                  </div>
+                </button>
+              )}
 
               {/* Methodology Guide Trigger */}
               <button
