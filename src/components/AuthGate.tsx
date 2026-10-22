@@ -38,9 +38,10 @@ export interface SessionClearance {
 
 interface AuthGateProps {
   onAuthenticated: (session: SessionClearance) => void;
+  initialMessage?: string | null;
 }
 
-export function AuthGate({ onAuthenticated }: AuthGateProps) {
+export function AuthGate({ onAuthenticated, initialMessage }: AuthGateProps) {
   const [mode, setMode] = useState<"SIGN_IN" | "REGISTER">("SIGN_IN");
 
   // Sign In State
@@ -93,6 +94,9 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
           authenticatedAt: u.authenticatedAt,
         };
 
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("fintraxis_tab_confirmed", "true");
+        }
         localStorage.setItem("fintraxis_session", JSON.stringify(session));
         setIsLoading(false);
         onAuthenticated(session);
@@ -119,6 +123,9 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
       authenticatedAt: new Date().toISOString(),
     };
 
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("fintraxis_tab_confirmed", "true");
+    }
     localStorage.setItem("fintraxis_session", JSON.stringify(fallbackSession));
     setIsLoading(false);
     onAuthenticated(fallbackSession);
@@ -177,6 +184,9 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
         authenticatedAt: userData.authenticatedAt,
       };
 
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("fintraxis_tab_confirmed", "true");
+      }
       localStorage.setItem("fintraxis_session", JSON.stringify(session));
       setIsLoading(false);
       onAuthenticated(session);
@@ -453,6 +463,14 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
               </button>
             </div>
 
+            {/* Initial Session Notice (e.g. Inactivity Timeout or Session Expiry) */}
+            {initialMessage && !errorMessage && !successMessage && (
+              <div className="p-3.5 bg-[#38BDF8]/10 border border-[#38BDF8]/40 text-[#38BDF8] text-xs rounded-xl flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-[#38BDF8]" />
+                <span className="font-medium leading-relaxed">{initialMessage}</span>
+              </div>
+            )}
+
             {/* Error or Success Alert */}
             {errorMessage && (
               <div className="p-3 bg-[#EF4444]/10 border border-[#EF4444]/40 text-[#EF4444] text-xs rounded-xl flex items-start gap-2">
@@ -472,25 +490,27 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
             {mode === "SIGN_IN" ? (
               <form onSubmit={handleSignIn} className="flex flex-col gap-3.5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-[#E2E8F0]">
+                  <label htmlFor="signin-email" className="text-xs font-medium text-[#E2E8F0]">
                     Email or Username
                   </label>
                   <div className="relative">
                     <input
+                      id="signin-email"
                       type="text"
+                      inputMode="email"
                       value={signInIdentifier}
                       onChange={(e) => setSignInIdentifier(e.target.value)}
                       placeholder="analyst@fintraxis.local or admin@fintraxis.local"
-                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-base sm:text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors"
                       autoComplete="username"
                     />
-                    <Mail className="w-4 h-4 text-[#64748B] absolute right-3.5 top-3 pointer-events-none" />
+                    <Mail className="w-4 h-4 text-[#64748B] absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-[#E2E8F0]">
+                    <label htmlFor="signin-password" className="text-xs font-medium text-[#E2E8F0]">
                       Password
                     </label>
                     <span className="text-[11px] text-[#38BDF8] font-mono">
@@ -499,17 +519,18 @@ export function AuthGate({ onAuthenticated }: AuthGateProps) {
                   </div>
                   <div className="relative">
                     <input
+                      id="signin-password"
                       type={showSignInPassword ? "text" : "password"}
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors pr-10"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-[#111827] border border-[#1E293B] rounded-xl text-base sm:text-xs text-white placeholder:text-[#64748B] focus:outline-none focus:border-[#2563EB] transition-colors pr-10"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignInPassword(!showSignInPassword)}
-                      className="absolute right-3 top-2.5 text-[#64748B] hover:text-white p-0.5 transition-colors"
+                      className="absolute right-2 top-2 text-[#64748B] hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
                       aria-label={showSignInPassword ? "Hide password" : "Show password"}
                     >
                       {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

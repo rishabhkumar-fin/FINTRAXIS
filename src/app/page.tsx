@@ -54,6 +54,12 @@ export default function FintraxisTerminalPage() {
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState<boolean>(false);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState<boolean>(false);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [showIdleWarning, setShowIdleWarning] = useState<boolean>(false);
+
+  // Inactivity Idle Timer Refs
+  const idleWarningTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const idleLogoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Audit Sidecar State
   const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
@@ -81,14 +87,19 @@ export default function FintraxisTerminalPage() {
     updateUrl(tab, selectedCompanyId);
     if (mainScrollRef.current) {
       mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+      mainScrollRef.current.focus();
     }
   }, [selectedCompanyId, updateUrl]);
 
   const handleSelectCompany = useCallback((companyId: string) => {
     setSelectedCompanyId(companyId);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("fintraxis_last_company", companyId);
+    }
     updateUrl(activeTab, companyId);
     if (mainScrollRef.current) {
       mainScrollRef.current.scrollTo({ top: 0, behavior: "instant" });
+      mainScrollRef.current.focus();
     }
   }, [activeTab, updateUrl]);
 
@@ -126,6 +137,9 @@ export default function FintraxisTerminalPage() {
       let initialCompany = "AAPL";
 
       if (typeof window !== "undefined") {
+        const lastSaved = localStorage.getItem("fintraxis_last_company");
+        if (lastSaved) initialCompany = lastSaved;
+
         const searchParams = new URLSearchParams(window.location.search);
         const urlTab = searchParams.get("tab") as ModuleTab | null;
         const urlCompany = searchParams.get("company");
@@ -134,6 +148,21 @@ export default function FintraxisTerminalPage() {
       }
 
       setSelectedCompanyId(initialCompany);
+
+      // Check per-tab confirmation flag per Entry Contract
+      const isTabConfirmed =
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("fintraxis_tab_confirmed") === "true";
+
+      if (!isTabConfirmed) {
+        // Cold visit / new tab / new window / incognito: land on Login Page First!
+        if (!isCancelled) {
+          setSession(null);
+          setIsVerifyingAuth(false);
+          setMounted(true);
+        }
+        return;
+      }
 
       try {
         const res = await fetch("/api/auth/me");
@@ -168,32 +197,26 @@ export default function FintraxisTerminalPage() {
             setMounted(true);
             return;
           }
+        } else {
+          // Session expired or terminated on server
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("fintraxis_tab_confirmed");
+            localStorage.removeItem("fintraxis_session");
+          }
+          if (!isCancelled) {
+            setAuthNotice("Your session ended. Please sign in again.");
+            setSession(null);
+            setIsVerifyingAuth(false);
+            setMounted(true);
+          }
+          return;
         }
       } catch (e) {
-        console.warn("Server session check error, checking storage fallback:", e);
-      }
-
-      // Offline / LocalStorage fallback
-      const stored = localStorage.getItem("fintraxis_session");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (!isCancelled) {
-            setSession(parsed);
-            if (typeof window !== "undefined" && !new URLSearchParams(window.location.search).get("tab")) {
-              const isAdmin = parsed.role === "SUPER_ADMIN" || parsed.role === "ADMIN";
-              initialTab = isAdmin ? "00_ADMIN" : "overview";
-            }
-          }
-        } catch {
-          localStorage.removeItem("fintraxis_session");
-        }
-      } else {
-        if (!isCancelled) setSession(null);
+        console.warn("Server session check error:", e);
       }
 
       if (!isCancelled) {
-        setActiveTab(initialTab);
+        setSession(null);
         setIsVerifyingAuth(false);
         setMounted(true);
       }
@@ -205,6 +228,65 @@ export default function FintraxisTerminalPage() {
       isCancelled = true;
     };
   }, []);
+
+  const handleLockSession = useCallback(async (notice?: string) => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.warn("Logout notification error:", e);
+    }
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("fintraxis_tab_confirmed");
+      localStorage.removeItem("fintraxis_session");
+      window.history.replaceState({}, "", "/");
+    }
+    setSession(null);
+    setShowIdleWarning(false);
+    if (typeof notice === "string") {
+      setAuthNotice(notice);
+    } else {
+      setAuthNotice(null);
+    }
+  }, []);
+
+  // Inactivity Idle Timer (30 minutes total, warning modal at 29 minutes)
+  const resetIdleTimer = useCallback(() => {
+    if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
+    if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
+    setShowIdleWarning(false);
+
+    if (!session) return;
+
+    // 29 minutes: show warning modal
+    idleWarningTimerRef.current = setTimeout(() => {
+      setShowIdleWarning(true);
+    }, 29 * 60 * 1000);
+
+    // 30 minutes: auto logout
+    idleLogoutTimerRef.current = setTimeout(() => {
+      setShowIdleWarning(false);
+      handleLockSession("Your session ended due to inactivity. Please sign in again.");
+    }, 30 * 60 * 1000);
+  }, [session, handleLockSession]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    const handleActivity = () => {
+      if (!showIdleWarning) {
+        resetIdleTimer();
+      }
+    };
+
+    resetIdleTimer();
+    events.forEach((evt) => window.addEventListener(evt, handleActivity, { passive: true }));
+    return () => {
+      events.forEach((evt) => window.removeEventListener(evt, handleActivity));
+      if (idleWarningTimerRef.current) clearTimeout(idleWarningTimerRef.current);
+      if (idleLogoutTimerRef.current) clearTimeout(idleLogoutTimerRef.current);
+    };
+  }, [session, showIdleWarning, resetIdleTimer]);
 
   // Global Keyboard Shortcuts (Ctrl+K, Ctrl+Shift+L, 1-6 Modules)
   useEffect(() => {
@@ -260,20 +342,7 @@ export default function FintraxisTerminalPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSelectTab]);
-
-  const handleLockSession = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } catch (e) {
-      console.warn("Logout notification error:", e);
-    }
-    localStorage.removeItem("fintraxis_session");
-    setSession(null);
-    if (typeof window !== "undefined") {
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  };
+  }, [handleSelectTab, handleLockSession]);
 
   const handleUpdateSettings = (updated: OperatorSettings) => {
     if (!session) return;
@@ -412,8 +481,13 @@ export default function FintraxisTerminalPage() {
   if (!session) {
     return (
       <AuthGate
+        initialMessage={authNotice}
         onAuthenticated={(s) => {
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("fintraxis_tab_confirmed", "true");
+          }
           setSession(s);
+          setAuthNotice(null);
           const isAdmin = s.role === "SUPER_ADMIN" || s.role === "ADMIN";
           const targetTab: ModuleTab = isAdmin ? "00_ADMIN" : "overview";
           setActiveTab(targetTab);
@@ -708,6 +782,42 @@ export default function FintraxisTerminalPage() {
           onClose={() => setIsTourOpen(false)}
           onNavigateToTab={handleSelectTab}
         />
+
+        {/* Inactivity Idle Security Warning Modal */}
+        {showIdleWarning && (
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="idle-warning-title"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono select-none animate-in fade-in duration-150"
+          >
+            <div className="bg-[#0C111C] border border-[#F59E0B] p-6 max-w-md w-full rounded-2xl shadow-2xl space-y-4">
+              <div className="flex items-center gap-2.5 text-[#F59E0B] font-bold text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <span id="idle-warning-title">SESSION INACTIVITY WARNING</span>
+              </div>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                For banking risk compliance, your active workstation session will expire in 60 seconds due to inactivity. Would you like to remain signed in?
+              </p>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleLockSession("You have signed out.")}
+                  className="min-h-[44px] px-3.5 py-2 bg-[#1E293B] hover:bg-[#334155] text-xs text-white rounded-lg transition-colors cursor-pointer"
+                >
+                  Sign Out Now
+                </button>
+                <button
+                  type="button"
+                  onClick={resetIdleTimer}
+                  className="min-h-[44px] px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-xs font-bold text-white rounded-lg transition-colors cursor-pointer shadow-md"
+                >
+                  Stay Signed In
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Institutional Fixed Status Footer (Desktop only) */}
         <footer className="fixed bottom-0 left-0 lg:left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 hidden lg:flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
