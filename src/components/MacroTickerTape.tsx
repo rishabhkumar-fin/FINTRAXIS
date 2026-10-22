@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Hand,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 
 export type MacroRegion = "IND" | "USA" | "JPN" | "GLOBAL";
@@ -21,6 +23,8 @@ export type MacroRegion = "IND" | "USA" | "JPN" | "GLOBAL";
 interface MacroTickerTapeProps {
   onOpenCommandPalette?: () => void;
   onOpenSettings?: () => void;
+  onOpenMethodology?: () => void;
+  onOpenTour?: () => void;
   selectedTicker?: string;
   selectedCurrency?: string;
   selectedCountry?: string;
@@ -76,6 +80,8 @@ const ALL_BENCHMARKS: BenchmarkItem[] = [
 export function MacroTickerTape({
   onOpenCommandPalette,
   onOpenSettings,
+  onOpenMethodology,
+  onOpenTour,
   selectedTicker,
   selectedCountry,
 }: MacroTickerTapeProps) {
@@ -321,11 +327,35 @@ export function MacroTickerTape({
             </span>
           </button>
 
+          {/* Guided Walkthrough Tour Button */}
+          {onOpenTour && (
+            <button
+              onClick={onOpenTour}
+              className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-[#101A2E] hover:bg-[#182337] border border-[#2563EB]/40 hover:border-[#38BDF8] text-[10.5px] text-[#38BDF8] hover:text-white rounded transition-colors cursor-pointer"
+              title="Interactive Terminal Walkthrough"
+            >
+              <Sparkles className="w-3 h-3 text-[#38BDF8]" />
+              <span className="font-bold">TOUR</span>
+            </button>
+          )}
+
+          {/* Methodology & Data Sources Button */}
+          {onOpenMethodology && (
+            <button
+              onClick={onOpenMethodology}
+              className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-[#070A10] hover:bg-[#0F1626] border border-[#182337] hover:border-[#10B981] text-[10.5px] text-[#CBD5E1] hover:text-[#10B981] rounded transition-colors cursor-pointer"
+              title="Methodology, Formulas & Regulatory Sourcing"
+            >
+              <BookOpen className="w-3 h-3 text-[#10B981]" />
+              <span className="font-bold">METHODOLOGY</span>
+            </button>
+          )}
+
           {/* Settings Modal Button */}
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
-              className="p-1.5 bg-[#0C1220] hover:bg-[#182337] border border-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] transition-colors rounded"
+              className="p-1.5 bg-[#0C1220] hover:bg-[#182337] border border-[#182337] text-[#94A3B8] hover:text-[#FFFFFF] transition-colors rounded cursor-pointer"
               title="Institutional Settings"
             >
               <Settings className="w-3.5 h-3.5" />

@@ -377,22 +377,26 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             Reporting: {company.currency} ({company.scaleUnit})
           </span>
         </div>
+        <div className="sm:hidden px-3 py-1.5 bg-[#0A0E18] border-b border-[#1E293B] text-[10px] text-[#94A3B8] flex items-center justify-between">
+          <span>← Swipe to inspect multi-year filings</span>
+          <span className="text-[#38BDF8] font-bold">Historical →</span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead className="bg-[#070A0F] text-[#94A3B8] uppercase text-[10px] border-b border-[#1E293B]">
               <tr>
-                <th className="px-4 py-2.5">Fiscal Period</th>
-                <th className="px-4 py-2.5 text-right">Consolidated Revenue</th>
-                <th className="px-4 py-2.5 text-right">Operating Profit (EBITDA)</th>
-                <th className="px-4 py-2.5 text-right">Total Debt</th>
-                <th className="px-4 py-2.5 text-right">Cash Reserves</th>
-                <th className="px-4 py-2.5 text-center">Filing Source</th>
+                <th className="px-4 py-2.5 sticky left-0 bg-[#070A0F] z-20 shadow-[2px_0_5px_rgba(0,0,0,0.5)]">Fiscal Period</th>
+                <th className="px-4 py-2.5 text-right min-w-[140px]">Consolidated Revenue</th>
+                <th className="px-4 py-2.5 text-right min-w-[140px]">Operating Profit (EBITDA)</th>
+                <th className="px-4 py-2.5 text-right min-w-[130px]">Total Debt</th>
+                <th className="px-4 py-2.5 text-right min-w-[130px]">Cash Reserves</th>
+                <th className="px-4 py-2.5 text-center min-w-[140px]">Filing Source</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1E293B]/70">
               {periods.slice(0, 3).map((p) => (
-                <tr key={p.id} className="hover:bg-[#111827]/60 transition-colors">
-                  <td className="px-4 py-3 font-bold text-[#38BDF8]">{p.period}</td>
+                <tr key={p.id} className="hover:bg-[#111827]/60 transition-colors group">
+                  <td className="px-4 py-3 font-bold text-[#38BDF8] sticky left-0 bg-[#0C111C] group-hover:bg-[#111827] z-10 shadow-[2px_0_5px_rgba(0,0,0,0.5)] border-r border-[#1E293B]/50">{p.period}</td>
                   <td className="px-4 py-3 text-right text-white font-semibold">
                     {formatFinancialValue(p.revenue, company.currency, company.scaleUnit)}
                   </td>

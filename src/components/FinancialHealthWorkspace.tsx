@@ -29,8 +29,23 @@ export function FinancialHealthWorkspace({
   activeAuditKey,
   onNavigateToTab,
 }: FinancialHealthWorkspaceProps) {
-  const [subView, setSubView] = useState<"RATIOS" | "STATEMENTS">("RATIOS");
+  const [subView, setSubView] = useState<"RATIOS" | "STATEMENTS">(() => {
+    if (typeof window !== "undefined") {
+      const v = new URLSearchParams(window.location.search).get("view");
+      if (v === "STATEMENTS") return "STATEMENTS";
+    }
+    return "RATIOS";
+  });
   const company = profile.company;
+
+  const handleSelectSubView = (mode: "RATIOS" | "STATEMENTS") => {
+    setSubView(mode);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", mode);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -45,7 +60,7 @@ export function FinancialHealthWorkspace({
       >
         <div className="flex items-center gap-2 font-mono text-xs">
           <button
-            onClick={() => setSubView("RATIOS")}
+            onClick={() => handleSelectSubView("RATIOS")}
             className={`flex items-center gap-2 px-3 py-1.5 rounded transition-colors cursor-pointer ${
               subView === "RATIOS"
                 ? "bg-[#2563EB] text-white font-bold"
@@ -56,7 +71,7 @@ export function FinancialHealthWorkspace({
             <span>Solvency & Health Ratios</span>
           </button>
           <button
-            onClick={() => setSubView("STATEMENTS")}
+            onClick={() => handleSelectSubView("STATEMENTS")}
             className={`flex items-center gap-2 px-3 py-1.5 rounded transition-colors cursor-pointer ${
               subView === "STATEMENTS"
                 ? "bg-[#2563EB] text-white font-bold"

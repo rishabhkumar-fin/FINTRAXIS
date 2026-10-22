@@ -44,7 +44,22 @@ export function ICDossier({
   const latest = periods[0];
   const prior = periods[1];
 
-  const [viewMode, setViewMode] = useState<"DECK" | "SCROLL">("DECK");
+  const [viewMode, setViewMode] = useState<"DECK" | "SCROLL">(() => {
+    if (typeof window !== "undefined") {
+      const v = new URLSearchParams(window.location.search).get("view");
+      if (v === "SCROLL") return "SCROLL";
+    }
+    return "DECK";
+  });
+
+  const handleSetViewMode = (mode: "DECK" | "SCROLL") => {
+    setViewMode(mode);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", mode);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
   const [activeSlide, setActiveSlide] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -319,7 +334,7 @@ Synchronized live on FINTRAXIS Terminal.`;
           {/* Deck vs Scroll Slicer */}
           <div className="flex items-center bg-[#070A0F] border border-[#182337] p-0.5 rounded-lg">
             <button
-              onClick={() => setViewMode("DECK")}
+              onClick={() => handleSetViewMode("DECK")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "DECK"
                   ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"
@@ -331,7 +346,7 @@ Synchronized live on FINTRAXIS Terminal.`;
               <span>SLIDE DECK</span>
             </button>
             <button
-              onClick={() => setViewMode("SCROLL")}
+              onClick={() => handleSetViewMode("SCROLL")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
                 viewMode === "SCROLL"
                   ? "bg-[#182337] text-[#38BDF8] border border-[#38BDF8]/40 shadow-sm"

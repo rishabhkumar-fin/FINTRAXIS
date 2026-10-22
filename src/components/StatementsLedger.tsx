@@ -314,8 +314,12 @@ export function StatementsLedger({
 
       {/* Main Multi-Period Ledger Grid */}
       <div className="border border-[#182337] bg-[#070A0F] rounded-xl overflow-hidden shadow-lg">
+        <div className="sm:hidden px-3 py-1.5 bg-[#0A0E18] border-b border-[#182337] text-[10px] text-[#94A3B8] flex items-center justify-between">
+          <span>← Swipe horizontally for multi-period filings</span>
+          <span className="text-[#38BDF8] font-bold">Historical →</span>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono">
+          <table className="w-full text-xs font-mono [&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-20 [&_th:first-child]:bg-[#0A0E18] [&_th:first-child]:border-r [&_th:first-child]:border-[#182337] [&_th:first-child]:shadow-[2px_0_5px_rgba(0,0,0,0.5)] [&_th:first-child]:min-w-[220px] sm:[&_th:first-child]:min-w-[280px] [&_td:first-child]:sticky [&_td:first-child]:left-0 [&_td:first-child]:z-10 [&_td:first-child]:bg-[#070A0F] [&_td:first-child]:border-r [&_td:first-child]:border-[#182337] [&_td:first-child]:shadow-[2px_0_5px_rgba(0,0,0,0.5)] [&_td:first-child]:min-w-[220px] sm:[&_td:first-child]:min-w-[280px] [&_tr:hover>td:first-child]:bg-[#0B111E] [&_tr.bg-\[\#0A0E17\]>td:first-child]:bg-[#0A0E17] [&_th:not(:first-child)]:min-w-[120px] [&_td:not(:first-child)]:min-w-[120px]">
             <thead>
               <tr className="border-b border-[#182337] bg-[#0A0E18] text-[#64748B] text-[11px]">
                 <th className="py-2.5 px-3 text-left w-2/5">STANDARDIZED GAAP / IFRS LINE ITEM</th>

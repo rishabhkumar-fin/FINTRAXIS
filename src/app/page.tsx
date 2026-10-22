@@ -27,6 +27,9 @@ import {
 import { PeacockLogo } from "@/components/PeacockLogo";
 import { SEED_COMPANIES } from "@/lib/seedData";
 import { Loader2, AlertCircle, Sparkles, Menu, Search } from "lucide-react";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { MethodologyModal } from "@/components/MethodologyModal";
+import { TerminalWalkthroughTour } from "@/components/TerminalWalkthroughTour";
 
 export default function FintraxisTerminalPage() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -48,6 +51,9 @@ export default function FintraxisTerminalPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
+  const [isMobileMoreOpen, setIsMobileMoreOpen] = useState<boolean>(false);
+  const [isMethodologyOpen, setIsMethodologyOpen] = useState<boolean>(false);
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
 
   // Audit Sidecar State
   const [isAuditOpen, setIsAuditOpen] = useState<boolean>(false);
@@ -63,6 +69,9 @@ export default function FintraxisTerminalPage() {
     }
     currentParams.set("tab", tab);
     currentParams.set("company", companyId);
+    if (tab !== "02_HEALTH" && tab !== "07_REPORTS") {
+      currentParams.delete("view");
+    }
     const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
     window.history.pushState({ tab, companyId }, "", newUrl);
   }, []);
@@ -218,6 +227,13 @@ export default function FintraxisTerminalPage() {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setIsAiOpen((prev) => !prev);
+        return;
+      }
+
+      // 4. Methodology Guide (Ctrl + M or Cmd + M)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "m") {
+        e.preventDefault();
+        setIsMethodologyOpen((prev) => !prev);
         return;
       }
 
@@ -472,14 +488,20 @@ export default function FintraxisTerminalPage() {
         <MacroTickerTape
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenMethodology={() => setIsMethodologyOpen(true)}
+          onOpenTour={() => setIsTourOpen(true)}
           selectedTicker={profile?.company.symbol}
           selectedCurrency={profile?.company.currency}
           selectedCountry={profile?.company.country}
           userDesk={session.desk}
         />
 
-        {/* Scrollable Workstation Canvas */}
-        <main ref={mainScrollRef} className="flex-1 p-4 lg:p-6 max-w-[1720px] w-full mx-auto relative pb-20 overflow-y-auto">
+        {/* Scrollable Workstation Canvas (Responsive safe padding for mobile bottom nav) */}
+        <main
+          ref={mainScrollRef}
+          tabIndex={-1}
+          className="flex-1 p-3 sm:p-4 lg:p-6 max-w-[1720px] w-full mx-auto relative pb-28 lg:pb-16 overflow-y-auto focus:outline-none"
+        >
           {error && (
             <div className="mb-4 p-3 bg-[#F43F5E]/10 border border-[#F43F5E] text-[#F43F5E] text-xs flex items-center justify-between rounded">
               <div className="flex items-center gap-2">
@@ -643,7 +665,7 @@ export default function FintraxisTerminalPage() {
         {/* Floating AI Financial Risk Copilot Trigger */}
         <button
           onClick={() => setIsAiOpen(true)}
-          className="fixed bottom-10 right-6 z-40 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(37,99,235,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
+          className="fixed bottom-20 lg:bottom-10 right-4 sm:right-6 z-40 bg-[#38BDF8] hover:bg-[#1D4ED8] text-[#080B10] px-4 py-2 font-mono font-bold text-xs rounded-full shadow-[0_4px_24px_rgba(37,99,235,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer no-print border border-[#080B10]"
           title="Open Financial AI Copilot (Ctrl + J)"
         >
           <Sparkles className="w-4 h-4 text-[#080B10]" />
@@ -660,8 +682,35 @@ export default function FintraxisTerminalPage() {
           activeProfile={profile}
         />
 
-        {/* Institutional Fixed Status Footer */}
-        <footer className="fixed bottom-0 left-0 lg:left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
+        {/* Mobile-First Bottom Navigation Bar (Hidden on lg+ screens) */}
+        <MobileBottomNav
+          activeTab={activeTab}
+          onSelectTab={handleSelectTab}
+          earlyWarningCount={profile?.earlyWarningFlags.length || 0}
+          session={session}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenMethodology={() => setIsMethodologyOpen(true)}
+          onOpenAi={() => setIsAiOpen(true)}
+          onLogout={handleLockSession}
+          isMoreOpen={isMobileMoreOpen}
+          setIsMoreOpen={setIsMobileMoreOpen}
+        />
+
+        {/* Methodology & Data Sources Guide Modal (Examiners & Analysts) */}
+        <MethodologyModal
+          isOpen={isMethodologyOpen}
+          onClose={() => setIsMethodologyOpen(false)}
+        />
+
+        {/* Terminal Walkthrough Spotlight Tour */}
+        <TerminalWalkthroughTour
+          isOpen={isTourOpen}
+          onClose={() => setIsTourOpen(false)}
+          onNavigateToTab={handleSelectTab}
+        />
+
+        {/* Institutional Fixed Status Footer (Desktop only) */}
+        <footer className="fixed bottom-0 left-0 lg:left-64 right-0 h-7 border-t border-[#1E2536] bg-[#0A0E17] px-4 hidden lg:flex items-center justify-between text-[10px] text-[#64748B] select-none z-30 font-mono no-print">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-[#10B981]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
@@ -673,7 +722,21 @@ export default function FintraxisTerminalPage() {
             <span>DESK: {session.desk}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span>HOTKEYS: [1-6] MODULES &bull; CTRL+K SEARCH &bull; CTRL+J AI COPILOT &bull; CTRL+SHIFT+L LOCK</span>
+            <button
+              onClick={() => setIsMethodologyOpen(true)}
+              className="text-[#94A3B8] hover:text-[#38BDF8] underline transition-colors cursor-pointer"
+            >
+              METHODOLOGY &amp; FORMULAS (CTRL+M)
+            </button>
+            <span>&bull;</span>
+            <button
+              onClick={() => setIsTourOpen(true)}
+              className="text-[#94A3B8] hover:text-[#38BDF8] underline transition-colors cursor-pointer"
+            >
+              TAKE TOUR
+            </button>
+            <span>&bull;</span>
+            <span>HOTKEYS: [1-6] &bull; CTRL+K &bull; CTRL+J</span>
             <span>&bull;</span>
             <span className="text-[#38BDF8]">FINTRAXIS INSTITUTIONAL</span>
           </div>

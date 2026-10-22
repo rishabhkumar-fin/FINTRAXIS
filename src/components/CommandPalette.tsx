@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Terminal, CornerDownLeft, Lock, Cpu, FileText, Sliders } from "lucide-react";
+import { Terminal, CornerDownLeft, Lock, Cpu, FileText, Sliders, BookOpen, Sparkles } from "lucide-react";
 import { ModuleTab } from "./NavigationTabs";
 
 interface CommandPaletteProps {
@@ -11,6 +11,8 @@ interface CommandPaletteProps {
   onSelectTab: (tab: ModuleTab) => void;
   onLockSession: () => void;
   onExportMemo: () => void;
+  onOpenMethodology?: () => void;
+  onOpenTour?: () => void;
 }
 
 export function CommandPalette({
@@ -20,6 +22,8 @@ export function CommandPalette({
   onSelectTab,
   onLockSession,
   onExportMemo,
+  onOpenMethodology,
+  onOpenTour,
 }: CommandPaletteProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +109,18 @@ export function CommandPalette({
 
     if (raw === "LOCK" || raw === "LOGOUT" || raw === "TERMINATE") {
       onLockSession();
+      onClose();
+      return;
+    }
+
+    if (raw === "METHODOLOGY" || raw.includes("METHOD") || raw.includes("FORMULA")) {
+      if (onOpenMethodology) onOpenMethodology();
+      onClose();
+      return;
+    }
+
+    if (raw === "TOUR" || raw.includes("WALKTHROUGH") || raw.includes("GUIDE")) {
+      if (onOpenTour) onOpenTour();
       onClose();
       return;
     }
@@ -245,7 +261,7 @@ export function CommandPalette({
 
             <button
               onClick={() => handleExecute("ADMIN")}
-              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#3867F5]/40 text-left flex items-center justify-between transition-colors"
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#3867F5]/40 text-left flex items-center justify-between transition-colors cursor-pointer"
             >
               <span className="text-[#38BDF8] font-bold flex items-center gap-1">
                 <Sliders className="w-3 h-3" />
@@ -255,8 +271,30 @@ export function CommandPalette({
             </button>
 
             <button
+              onClick={() => handleExecute("METHODOLOGY")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#10B981]/40 text-left flex items-center justify-between transition-colors cursor-pointer"
+            >
+              <span className="text-[#10B981] font-bold flex items-center gap-1">
+                <BookOpen className="w-3 h-3" />
+                <span>METHODOLOGY</span>
+              </span>
+              <span className="text-[10px] text-[#5A687D]">FORMULAS &amp; SCOPE</span>
+            </button>
+
+            <button
+              onClick={() => handleExecute("TOUR")}
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#F59E0B]/40 text-left flex items-center justify-between transition-colors cursor-pointer"
+            >
+              <span className="text-[#F59E0B] font-bold flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                <span>GUIDED TOUR</span>
+              </span>
+              <span className="text-[10px] text-[#5A687D]">WALKTHROUGH</span>
+            </button>
+
+            <button
               onClick={() => handleExecute("LOCK")}
-              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#EF4444]/40 text-left flex items-center justify-between transition-colors"
+              className="p-2 bg-[#0E131A] hover:bg-[#12161F] border border-[#EF4444]/40 text-left flex items-center justify-between transition-colors cursor-pointer"
             >
               <span className="text-[#EF4444] font-bold flex items-center gap-1">
                 <Lock className="w-3 h-3" />
