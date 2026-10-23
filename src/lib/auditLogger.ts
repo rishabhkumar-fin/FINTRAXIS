@@ -16,6 +16,7 @@ export interface SystemAuditEvent {
     | "SYSTEM_JOB"
     | "PROVIDER_HEALTH"
     | "STATEMENT_EDITOR"
+    | "PERIOD_IMPORT"
     | "SECURITY_REVOKE";
   severity: "INFO" | "WARNING" | "CRITICAL";
   operator: string;

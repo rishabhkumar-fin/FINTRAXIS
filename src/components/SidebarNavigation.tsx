@@ -74,16 +74,20 @@ export function SidebarNavigation({
   const userRole = session?.role || (session?.isDemo ? "DEMO_ANALYST" : "ANALYST");
   const isAdmin = userRole === "SUPER_ADMIN" || userRole === "ADMIN";
 
-  // Canonical Navigation: Admin Console + Overview + 6 Core Workstations
+  // Canonical Navigation: Admin Console (Admin only) + Overview + 6 Core Workstations
   const navItems = [
-    {
-      id: "00_ADMIN" as ModuleTab,
-      name: "Admin Panel",
-      shortDesc: "Governance, Data & Settings",
-      icon: ShieldCheck,
-      badge: isAdmin ? "ADMIN" : "GOVERNANCE",
-      badgeColor: isAdmin ? "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10" : "text-[#94A3B8] border-[#334155] bg-[#1E293B]/40",
-    },
+    ...(isAdmin
+      ? [
+          {
+            id: "00_ADMIN" as ModuleTab,
+            name: "Admin Panel",
+            shortDesc: "Governance, Data & Settings",
+            icon: ShieldCheck,
+            badge: "ADMIN",
+            badgeColor: "text-[#38BDF8] border-[#38BDF8]/40 bg-[#3867F5]/10",
+          },
+        ]
+      : []),
     {
       id: "overview" as ModuleTab,
       name: "Overview",

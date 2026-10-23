@@ -52,7 +52,7 @@ interface SettingsModalProps {
 const DESK_OPTIONS = [
   "Global Credit Risk & Distressed Debt",
   "Special Situations & Restructuring",
-  "Sovereign Risk Desk",
+  "Macroeconomic Risk Desk",
   "Leveraged Finance & Syndicate Desk",
   "Fixed Income Capital Markets (FICM)",
   "Private Credit Underwriting Desk",
@@ -61,10 +61,10 @@ const DESK_OPTIONS = [
 export const WALL_STREET_BADGES = [
   {
     id: "SOVEREIGN_RISK",
-    name: "Sovereign Risk Clearance",
+    name: "Institutional Credit Clearance",
     firm: "FINTRAXIS CENTRAL",
     icon: "🛡️",
-    desc: "Top-tier sovereign debt & macro rate surveillance clearance",
+    desc: "Top-tier corporate debt & macro rate surveillance clearance",
   },
   {
     id: "ALADDIN_CORE",
@@ -620,7 +620,7 @@ export function SettingsModal({
                     <span className="text-[#64748B]">DESK:</span> <span className="text-[#F8FAFC] font-semibold">{desk}</span>
                   </div>
                   <div>
-                    <span className="text-[#64748B]">CLEARANCE:</span> <span className="text-[#10B981] font-semibold">LEVEL 3 SOVEREIGN</span>
+                    <span className="text-[#64748B]">CLEARANCE:</span> <span className="text-[#10B981] font-semibold">LEVEL 3 SENIOR ANALYST</span>
                   </div>
                   <div>
                     <span className="text-[#64748B]">CLUSTER NODE:</span> <span className="text-[#38BDF8] font-semibold">MUM-01 PROD</span>

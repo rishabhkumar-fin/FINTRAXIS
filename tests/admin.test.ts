@@ -4,6 +4,7 @@ import { sqlite } from "../src/db/index.ts";
 import { logAuditEvent, getRecentAuditEvents } from "../src/lib/auditLogger.ts";
 import { verifyOperatorClearance, ROLE_PERMISSIONS } from "../src/lib/authGuard.ts";
 import { auditBalanceSheetIdentity } from "../src/lib/financialCalculations.ts";
+import { validatePeriodRecord, executePeriodUpsert } from "../src/lib/periodImport.ts";
 
 describe("Admin & Operational Governance", () => {
   test("records and retrieves administrative audit journal events", () => {
@@ -46,7 +47,6 @@ describe("Admin & Operational Governance", () => {
   });
 
   test("denies unauthenticated or unauthorized operators from administrative endpoints", () => {
-    // Mock request with analyst operator parameter
     const fakeAnalystReq = new Request("http://localhost:3000/api/admin/users?operator=analyst@desk.local");
     const clearance = verifyOperatorClearance(fakeAnalystReq, ["SUPER_ADMIN"]);
     
@@ -106,5 +106,63 @@ describe("Admin & Operational Governance", () => {
     // Check super admin count
     const superAdmins = sqlite.prepare("SELECT count(*) as count FROM users WHERE role = 'SUPER_ADMIN'").get() as { count: number };
     assert.ok(superAdmins.count >= 0, "Users table query must succeed");
+  });
+
+  test("validates period import: blocks on balance sheet identity mismatch exceeding 0.5%", () => {
+    const imbalancedPayload = {
+      ticker: "TCS.NS",
+      fiscal_year: "FY2099",
+      revenue: 100000,
+      ebit: 20000,
+      total_assets: 100000,
+      total_liabilities: 40000,
+      total_equity: 30000, // 40000 + 30000 = 70000 != 100000 (30% mismatch)
+    };
+
+    const validation = validatePeriodRecord(imbalancedPayload);
+    assert.strictEqual(validation.isValid, false);
+    assert.match(validation.error || "", /Balance Sheet Identity Mismatch/);
+  });
+
+  test("validates period import: successfully upserts valid period idempotently", () => {
+    const validPayload = {
+      ticker: "TCS.NS",
+      fiscal_year: "FY2098",
+      revenue: 100000,
+      ebit: 25000,
+      ebitda: 29000,
+      depreciation_amortization: 4000,
+      finance_cost: 500,
+      net_income: 19000,
+      cash_and_equivalents: 20000,
+      total_assets: 100000,
+      total_liabilities: 30000,
+      total_equity: 70000, // 30000 + 70000 = 100000 (Exact balance)
+      status: "reported (user-entered from filing)",
+    };
+
+    const validation = validatePeriodRecord(validPayload);
+    assert.strictEqual(validation.isValid, true);
+    assert.ok(validation.cleanData);
+
+    // Execute idempotent upsert
+    const periodId1 = executePeriodUpsert(sqlite, validation.cleanData);
+    assert.strictEqual(periodId1, "TCS.NS_FY2098");
+
+    // Re-executing upsert is idempotent (updates in place without error)
+    const periodId2 = executePeriodUpsert(sqlite, validation.cleanData);
+    assert.strictEqual(periodId2, "TCS.NS_FY2098");
+
+    // Verify row exists in database
+    const row = sqlite.prepare("SELECT id, period, revenue FROM financial_periods WHERE id = ?").get("TCS.NS_FY2098") as {
+      id: string;
+      period: string;
+      revenue: number;
+    } | undefined;
+    assert.ok(row, "Period row must exist in financial_periods table");
+    assert.strictEqual(row.revenue, 100000);
+
+    // Cleanup inserted test period
+    sqlite.prepare("DELETE FROM financial_periods WHERE id = 'TCS.NS_FY2098'").run();
   });
 });

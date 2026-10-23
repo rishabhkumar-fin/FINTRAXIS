@@ -114,7 +114,7 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
                   <strong>Source Line Items:</strong> Form 10-K Item 8 / Ind-AS Balance Sheet borrowings less cash and equivalents, divided by operating profit plus depreciation and amortization.
                 </p>
                 <p className="text-[11px] text-[#94A3B8] mt-1">
-                  <strong>Interpretation:</strong> Estimates the theoretical years of operating cash earnings required to retire funded indebtedness. If Net Debt &le; 0, the entity is designated as a <em>Net Cash Fortress</em>.
+                  <strong>Interpretation:</strong> Estimates the theoretical years of operating cash earnings required to retire funded indebtedness. If Net Debt &le; 0, the entity is designated as a <em>Net Cash Surplus</em>.
                 </p>
               </div>
 
@@ -381,7 +381,7 @@ export function MethodologyModal({ isOpen, onClose }: MethodologyModalProps) {
               <div className="space-y-2">
                 <div className="p-3 bg-[#10B981]/10 border border-[#10B981]/30 rounded-xl flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-[#10B981]">TIER 1 // PRIME SOLVENT (Score: 80 – 100)</span>
+                    <span className="text-xs font-bold text-[#10B981]">TIER 1 // STRONG SOLVENT (Score: 80 – 100)</span>
                     <p className="text-[10px] text-[#94A3B8] mt-0.5">
                       Substantial debt service cushion, healthy free cash flow conversion, unencumbered liquidity buffers.
                     </p>

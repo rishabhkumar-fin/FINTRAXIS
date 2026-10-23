@@ -1,5 +1,5 @@
-import { db } from "../db/index";
-import { companies, financialPeriods, auditLineItems } from "../db/schema";
+import { db } from "../db/index.ts";
+import { companies, financialPeriods, auditLineItems } from "../db/schema.ts";
 import { eq, or, sql } from "drizzle-orm";
 import {
   CompanyEntity,
@@ -7,12 +7,12 @@ import {
   AuditRecord,
   CompanyRiskProfile,
   StressSimulationInputs,
-} from "./types";
-import { SEED_COMPANIES, SEED_PERIODS, SEED_AUDIT_ITEMS } from "./seedData";
-import { INSTITUTIONAL_COMPANIES } from "./institutionalDatabase";
-import { calculateRatios, evaluateEarlyWarnings, runStressSimulation } from "./financialEngine";
-import { computeCompanyFinanceSummary } from "./finance/financeMaster";
-import { autoIngestCompany } from "./autoIngest";
+} from "./types.ts";
+import { SEED_COMPANIES, SEED_PERIODS, SEED_AUDIT_ITEMS } from "./seedData.ts";
+import { INSTITUTIONAL_COMPANIES } from "./institutionalDatabase.ts";
+import { calculateRatios, evaluateEarlyWarnings, runStressSimulation } from "./financialEngine.ts";
+import { computeCompanyFinanceSummary } from "./finance/financeMaster.ts";
+import { autoIngestCompany } from "./autoIngest.ts";
 
 /**
  * Ensures the SQLite database is initialized and populated with seed entities.
@@ -155,6 +155,7 @@ export async function getAllCompanies(): Promise<CompanyEntity[]> {
 
 /**
  * Retrieves the full financial risk profile, periods, ratios, EWS flags, and stress simulation.
+ * Unified Single Source of Truth architecture.
  */
 export async function getCompanyDetails(
   id: string,
@@ -167,7 +168,7 @@ export async function getCompanyDetails(
 
   // 1. Direct institutional match (100% verified authentic audited data)
   if (INSTITUTIONAL_COMPANIES[id]) {
-    company = INSTITUTIONAL_COMPANIES[id].company;
+    company = { ...INSTITUTIONAL_COMPANIES[id].company };
     periods = INSTITUTIONAL_COMPANIES[id].periods;
   }
 
@@ -175,14 +176,15 @@ export async function getCompanyDetails(
   if (!company) {
     try {
       const res = db.select().from(companies).where(eq(companies.id, id)).get();
-      if (res) company = res as unknown as CompanyEntity;
+      if (res) company = { ...(res as unknown as CompanyEntity) };
     } catch (e) {
       console.error("DB company lookup error:", e);
     }
   }
 
   if (!company) {
-    company = SEED_COMPANIES.find((c) => c.id === id) || null;
+    const foundSeed = SEED_COMPANIES.find((c) => c.id === id);
+    if (foundSeed) company = { ...foundSeed };
   }
 
   // 3. Automatic on-the-fly ingestion for any company worldwide
@@ -231,6 +233,8 @@ export async function getCompanyDetails(
 
   const isFinancial = company.sector === "Financial Services" || company.sector === "Banking";
   const latestPeriod = periods[0] ?? null;
+
+  // Compute baseline ratios from engine
   const latestRatios = latestPeriod
     ? calculateRatios(latestPeriod, periods[1] ?? null, isFinancial, company)
     : {
@@ -257,7 +261,34 @@ export async function getCompanyDetails(
         contingentLiabilitiesRatio: null,
       };
 
+  // Compute canonical finance summary (Single Source of Truth)
   const financeSummary = computeCompanyFinanceSummary(company, periods);
+
+  // Synchronize latestRatios with financeSummary so there is ZERO cross-screen contradiction
+  if (financeSummary) {
+    if (financeSummary.ratios.netDebtToEbitda !== null) latestRatios.netDebtToEbitda = financeSummary.ratios.netDebtToEbitda;
+    if (financeSummary.ratios.interestCoverage !== null) latestRatios.interestCoverage = financeSummary.ratios.interestCoverage;
+    if (financeSummary.ratios.currentRatio !== null) latestRatios.currentRatio = financeSummary.ratios.currentRatio;
+    if (financeSummary.ratios.quickRatio !== null) latestRatios.quickRatio = financeSummary.ratios.quickRatio;
+    if (financeSummary.ratios.cashRatio !== null) latestRatios.cashRatio = financeSummary.ratios.cashRatio;
+    if (financeSummary.ratios.operatingMarginPct !== null) latestRatios.operatingMarginPct = financeSummary.ratios.operatingMarginPct;
+    if (financeSummary.ratios.grossMarginPct !== null) latestRatios.grossMarginPct = financeSummary.ratios.grossMarginPct;
+    if (financeSummary.ratios.netMarginPct !== null) latestRatios.netMarginPct = financeSummary.ratios.netMarginPct;
+    if (financeSummary.ratios.roePct !== null) latestRatios.roePct = financeSummary.ratios.roePct;
+    if (financeSummary.ratios.roaPct !== null) latestRatios.roaPct = financeSummary.ratios.roaPct;
+    if (financeSummary.ratios.cfoToNetIncome !== null) latestRatios.cfoToNetIncome = financeSummary.ratios.cfoToNetIncome;
+    if (financeSummary.ratios.tolToTnw !== null) latestRatios.tolToTnw = financeSummary.ratios.tolToTnw;
+    if (financeSummary.ratios.altmanZScore !== null) latestRatios.altmanZDoublePrime = financeSummary.ratios.altmanZScore;
+    if (financeSummary.ratios.beneishMScore !== null) latestRatios.beneishMScore = financeSummary.ratios.beneishMScore;
+    if (financeSummary.ratios.promoterPledgePct !== null) latestRatios.promoterPledgeRatio = financeSummary.ratios.promoterPledgePct;
+    if (financeSummary.ratios.indicativeDrawingPower !== null) latestRatios.indicativeDrawingPower = financeSummary.ratios.indicativeDrawingPower;
+    if (financeSummary.ratios.contingentLiabilitiesPct !== null) latestRatios.contingentLiabilitiesRatio = financeSummary.ratios.contingentLiabilitiesPct;
+
+    if (financeSummary.quote?.price) {
+      company.sharePrice = financeSummary.quote.price;
+    }
+  }
+
   const { flags } = evaluateEarlyWarnings(periods, latestRatios);
   const score = financeSummary ? financeSummary.healthScore.score : 85;
   const tier = financeSummary ? financeSummary.healthScore.tier : "TIER_1_STABLE";
@@ -293,7 +324,7 @@ export async function getCompanyDetails(
     riskScore: score,
     earlyWarningFlags: flags,
     simulation,
-    financeSummary,
+    financeSummary: financeSummary ?? undefined,
   };
 }
 
@@ -330,4 +361,4 @@ export async function getAuditItem(
   return found || null;
 }
 
-export { formatFinancialValue, formatRatio, formatPct } from "./formatters";
+export { formatFinancialValue, formatRatio, formatPct } from "./formatters.ts";

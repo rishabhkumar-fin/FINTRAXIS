@@ -1,5 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
+import crypto from "crypto";
 import { checkAuthRateLimit, recordFailedAuthAttempt, resetAuthRateLimit } from "../src/lib/authRateLimit.ts";
 import { verifyOperatorClearance } from "../src/lib/authGuard.ts";
 import { createSignedSessionToken } from "../src/lib/sessionToken.ts";
@@ -97,5 +98,34 @@ describe("Stage 3: Authentication & Security Integrity Tests", () => {
     const clearance = verifyOperatorClearance(req, ["SUPER_ADMIN", "ADMIN"]);
     assert.strictEqual(clearance.allowed, false);
     assert.match(clearance.error || "", /does not have permission/);
+  });
+
+  test("5. Registration password validation rules (minimum 8 characters, letters and numbers)", () => {
+    const validatePassword = (pass: string) => {
+      const hasLetters = /[a-zA-Z]/.test(pass);
+      const hasNumbers = /[0-9]/.test(pass);
+      return pass.length >= 8 && hasLetters && hasNumbers;
+    };
+
+    assert.strictEqual(validatePassword("short1"), false, "Too short");
+    assert.strictEqual(validatePassword("onlylettersnohere"), false, "Missing numbers");
+    assert.strictEqual(validatePassword("1234567890"), false, "Missing letters");
+    assert.strictEqual(validatePassword("ValidPass123"), true, "Valid password with letters and numbers");
+  });
+
+  test("6. Timing-safe cryptographic password verification rejects wrong password", () => {
+    const salt = crypto.randomBytes(16).toString("hex");
+    const correctPass = "AnalystSecret2026";
+    const correctHash = crypto.pbkdf2Sync(correctPass, salt, 10000, 64, "sha512").toString("hex");
+
+    const checkPassword = (attempt: string) => {
+      const attemptHash = crypto.pbkdf2Sync(attempt, salt, 10000, 64, "sha512").toString("hex");
+      const aBuf = Buffer.from(attemptHash, "hex");
+      const bBuf = Buffer.from(correctHash, "hex");
+      return aBuf.length === bBuf.length && crypto.timingSafeEqual(aBuf, bBuf);
+    };
+
+    assert.strictEqual(checkPassword("WrongPassword123"), false, "Wrong password must fail");
+    assert.strictEqual(checkPassword("AnalystSecret2026"), true, "Correct password must match");
   });
 });

@@ -37,7 +37,7 @@ export interface CompanyFinanceSummary {
   periodsCount: number;
   latestPeriodLabel: string;
   quote: StandardMarketQuote;
-  
+
   // Debt Architecture
   debtStructure: {
     totalDebt: number;
@@ -47,6 +47,9 @@ export interface CompanyFinanceSummary {
     liquidInvestments: number;
     hasFundedBorrowings: boolean;
     explanation: string;
+    netDebtDefinition: string;
+    includeLeases: boolean;
+    includeLiquidInvestments: boolean;
   };
 
   // Core Computed Ratios (Single Source of Truth)

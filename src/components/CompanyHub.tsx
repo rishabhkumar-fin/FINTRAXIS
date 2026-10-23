@@ -169,53 +169,16 @@ export function CompanyHub({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            {
-              id: "AAPL",
-              name: "Apple Inc.",
-              exchange: "NASDAQ",
-              country: "USA",
-              flag: "🇺🇸",
-              currency: "USD",
-              price: "$228.50",
-              sector: "Technology",
-              status: "FORTRESS",
-            },
-            {
-              id: "RELIANCE.NS",
-              name: "Reliance Industries",
-              exchange: "NSE / BSE",
-              country: "IND",
-              flag: "🇮🇳",
-              currency: "INR",
-              price: "₹2,940.00",
-              sector: "Energy & Retail",
-              status: "WATCHLIST",
-            },
-            {
-              id: "TCS.NS",
-              name: "Tata Consultancy Services",
-              exchange: "NSE / BSE",
-              country: "IND",
-              flag: "🇮🇳",
-              currency: "INR",
-              price: "₹3,920.00",
-              sector: "IT Services",
-              status: "DEBT FREE",
-            },
-            {
-              id: "MSFT",
-              name: "Microsoft Corporation",
-              exchange: "NASDAQ",
-              country: "USA",
-              flag: "🇺🇸",
-              currency: "USD",
-              price: "$425.00",
-              sector: "Software & Cloud",
-              status: "PRIME",
-            },
-          ].map((item) => {
-            const isCurrent = selected?.symbol === item.id || selected?.id === item.id;
+          {(["TCS.NS", "RELIANCE.NS", "AAPL", "MSFT"]
+            .map((id) => companies.find((c) => c.symbol === id || c.id === id))
+            .filter((c): c is CompanyEntity => !!c)
+            .concat(companies)
+            .filter((c, idx, arr) => arr.findIndex((x) => x.id === c.id) === idx)
+            .slice(0, 4)
+          ).map((item) => {
+            const isCurrent = selected?.symbol === item.symbol || selected?.id === item.id;
+            const flag = item.country === "IND" ? "🇮🇳" : item.country === "USA" ? "🇺🇸" : item.country === "JPN" ? "🇯🇵" : "🌐";
+            const displayStatus = item.symbol === "TCS.NS" ? "NET CASH" : item.symbol === "RELIANCE.NS" ? "WATCHLIST" : "STABLE";
             return (
               <div
                 key={item.id}
@@ -231,17 +194,17 @@ export function CompanyHub({
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="font-mono font-bold text-xs text-[#38BDF8] flex items-center gap-1.5">
-                      <span>{item.flag}</span>
-                      <span>{item.id}</span>
+                      <span>{flag}</span>
+                      <span>{item.symbol}</span>
                     </span>
                     <span
                       className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
-                        item.status === "DEBT FREE" || item.status === "FORTRESS" || item.status === "PRIME"
+                        displayStatus === "NET CASH" || displayStatus === "STABLE"
                           ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
                           : "bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30"
                       }`}
                     >
-                      {item.status}
+                      {displayStatus}
                     </span>
                   </div>
                   <div className="font-semibold text-xs text-white mt-1.5 truncate">
@@ -256,7 +219,8 @@ export function CompanyHub({
                   <div>
                     <div className="text-[9px] text-[#64748B] uppercase">Market Price</div>
                     <div className="font-mono font-bold text-xs text-[#F8FAFC]">
-                      {item.price} <span className="text-[9px] text-[#64748B]">{item.currency}</span>
+                      {item.currency === "INR" ? "₹" : "$"}{typeof item.sharePrice === "number" ? item.sharePrice.toFixed(2) : "N/D"}{" "}
+                      <span className="text-[9px] text-[#64748B]">{item.currency}</span>
                     </div>
                   </div>
 
@@ -349,7 +313,7 @@ export function CompanyHub({
                 <span>&bull;</span>
                 <span>INDUSTRY: <span className="text-[#CBD5E1]">{selected.industry}</span></span>
                 <span>&bull;</span>
-                <span>{selected.country === "IND" ? "IDENTIFIER:" : "CIK / CODE:"} <span className="text-[#38BDF8]">{selected.cik || selected.symbol}</span></span>
+                <span>CIK: <span className="text-[#38BDF8]">{selected.cik ? selected.cik : (selected.country === "IND" ? "Not applicable, not an SEC registrant" : "Not applicable")}</span></span>
                 <span>&bull;</span>
                 <span>ISIN: <span className="text-[#CBD5E1]">{selected.isin || "N/D"}</span></span>
               </div>
@@ -841,7 +805,7 @@ export function CompanyHub({
                     </td>
                     <td className="py-3 px-3 text-left text-[#64748B]">
                       <div>ISIN: {c.isin || "N/D"}</div>
-                      <div>{c.country === "IND" ? (c.cik ? `CIK: ${c.cik}` : "CIK: N/A (Domestic)") : (c.cik ? `CIK: ${c.cik}` : "CIK: N/D")}</div>
+                      <div>{c.cik ? `CIK: ${c.cik}` : (c.country === "IND" ? "CIK: Not applicable (Non-SEC)" : "CIK: Not applicable")}</div>
                     </td>
                     <td className="py-3 px-3 text-right font-mono-numbers text-[#94A3B8]">
                       {c.fxRateToUsd.toFixed(5)}

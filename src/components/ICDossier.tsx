@@ -515,7 +515,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                 INVESTMENT COMMITTEE // BOARDROOM CREDIT RISK DOSSIER &amp; DECK
               </span>
               <span className="px-2 py-0.5 bg-[#0F1626] border border-[#38BDF8]/40 text-[#38BDF8] text-[10px] font-bold rounded">
-                CLASSY PRESENTATION DECK
+                EXECUTIVE SLIDE DECK
               </span>
             </div>
             <div className="text-[10px] text-[#94A3B8] mt-0.5">
@@ -657,7 +657,7 @@ Synchronized live on FINTRAXIS Terminal.`;
          ========================================================================= */}
       <div className="space-y-6 print:space-y-0 print:p-0">
         {/* =======================================================================
-            SLIDE 01: EXECUTIVE TITLE, SOVEREIGN CLEARANCE & CORPORATE IDENTIFICATION
+            SLIDE 01: EXECUTIVE TITLE & CORPORATE IDENTIFICATION
            ======================================================================= */}
         <div className={`${viewMode === "DECK" && activeSlide !== 0 ? "hidden print:block" : "block"} print-slide p-6 sm:p-8 bg-[#0B0F17] border border-[#1E2536] space-y-6 text-[#F8FAFC] rounded-xl relative overflow-hidden print:bg-white print:text-slate-900 print:border-none print:shadow-none print:p-8 print:break-after-page print:min-h-screen`}>
           {/* Slide Header Lockup */}
@@ -812,7 +812,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                     {formatRatio(latestRatios.netDebtToEbitda)}
                   </div>
                   <div className="text-[9px] text-[#38BDF8] print:text-slate-700 mt-0.5">
-                    {(latestRatios.netDebtToEbitda ?? 0) <= 0 ? "Net Cash Fortress" : `Hurdle ≤ ${maxNetDebtHurdle}x`}
+                    {(latestRatios.netDebtToEbitda ?? 0) <= 0 ? "Net Cash Position" : `Hurdle ≤ ${maxNetDebtHurdle}x`}
                   </div>
                 </div>
 
@@ -1589,7 +1589,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   {formatCurr((latest?.totalDebt ?? 0) - (latest?.cashAndEquivalents ?? 0))}
                 </div>
                 <div className="text-[9.5px] text-[#64748B] print:text-slate-600">
-                  {(latest?.totalDebt ?? 0) <= (latest?.cashAndEquivalents ?? 0) ? "Net Cash Fortress" : "Net Debt Burden"}
+                  {(latest?.totalDebt ?? 0) <= (latest?.cashAndEquivalents ?? 0) ? "Net Cash Position" : "Net Debt Gearing"}
                 </div>
               </div>
 
@@ -1682,7 +1682,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   <span>MANAGING DIRECTOR CREDIT THESIS &amp; EXECUTIVE SIGN-OFF</span>
                 </div>
                 <div className="text-[10px] text-[#94A3B8] print:text-slate-600 mt-0.5">
-                  Underwriting recommendation, syndicate terms, and sovereign multi-party supervisory clearance seals
+                  Underwriting recommendation, syndicate terms, and supervisory credit review attestations
                 </div>
               </div>
               <div className="px-2.5 py-1 bg-[#162033] print:bg-slate-200 border border-[#1E2536] print:border-slate-300 rounded text-[10px] text-[#38BDF8] print:text-slate-900 font-bold self-start sm:self-auto">
@@ -1808,7 +1808,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                       DR. KLAUS MEIER
                     </div>
                     <div className="text-[9px] text-[#94A3B8] print:text-slate-600">
-                      klaus.meier@fintraxis.sovereign
+                      klaus.meier@fintraxis.internal
                     </div>
                     <div className="text-[8.5px] text-[#38BDF8] print:text-slate-700 mt-0.5">
                       Global Head of Credit Surveillance &amp; Solvency
@@ -1833,10 +1833,10 @@ Synchronized live on FINTRAXIS Terminal.`;
                       LORD ALISTAIR VANCE
                     </div>
                     <div className="text-[9px] text-[#94A3B8] print:text-slate-600">
-                      alistair.vance@fintraxis.sovereign
+                      alistair.vance@fintraxis.internal
                     </div>
                     <div className="text-[8.5px] text-[#38BDF8] print:text-slate-700 mt-0.5">
-                      Senior Partner, Sovereign Fixed Income &amp; Credit
+                      Senior Partner, Fixed Income &amp; Credit
                     </div>
                   </div>
 
@@ -1864,7 +1864,7 @@ Synchronized live on FINTRAXIS Terminal.`;
                   SYSTEM TIME: {new Date().toISOString().substring(0, 19)} UTC
                 </div>
                 <div className="text-[9.5px] text-[#10B981] print:text-emerald-800 font-bold">
-                  ELECTRONICALLY ATTESTED // SOVEREIGN ENCLAVE #04
+                  ELECTRONICALLY ATTESTED // AUDIT TRAIL RECORD
                 </div>
               </div>
             </div>

@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { X, BookOpen, Scale, HelpCircle, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, BookOpen, Scale, HelpCircle, AlertCircle } from "lucide-react";
 import { getTermDefinition, GlossaryTerm } from "@/lib/glossary";
 import { CompanyEntity, FinancialPeriodData } from "@/lib/types";
-import { formatFinancialValue } from "@/lib/formatters";
 
 export interface ExplainMetricContext {
   termId: string;

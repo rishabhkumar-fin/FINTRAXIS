@@ -33,7 +33,7 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
   {
     id: "crest",
     name: "Executive Monogram Crest",
-    subtitle: "Sovereign Private Bank Hallmark",
+    subtitle: "Institutional Research Hallmark",
     tag: "ZÜRICH",
   },
 ];

@@ -10,35 +10,47 @@ export async function POST(request: Request) {
     const { name, email, password } = body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ success: false, error: "Full Name is required" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Full Name is required." }, { status: 400 });
     }
 
-    if (!email || typeof email !== "string" || !email.trim()) {
-      return NextResponse.json({ success: false, error: "Username or email is required" }, { status: 400 });
+    if (!email || typeof email !== "string" || !email.trim() || !email.includes("@")) {
+      return NextResponse.json({ success: false, error: "A valid email address is required." }, { status: 400 });
     }
 
-    if (!password || typeof password !== "string" || password.length < 8) {
+    if (!password || typeof password !== "string") {
       return NextResponse.json(
-        { success: false, error: "Password must be at least 8 characters" },
+        { success: false, error: "Password is required." },
         { status: 400 }
       );
     }
 
-    const cleanIdentifier = email.trim().toLowerCase();
+    const hasLetters = /[a-zA-Z]/.test(password);
+    const hasNumbers = /[0-9]/.test(password);
+    if (password.length < 8 || !hasLetters || !hasNumbers) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Password must be at least 8 characters long and contain both letters and numbers.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
     const existing = db
       .select()
       .from(users)
       .where(
         or(
-          eq(users.email, cleanIdentifier),
-          sql`lower(${users.name}) = ${cleanIdentifier}`
+          eq(users.email, cleanEmail),
+          sql`lower(${users.name}) = ${cleanEmail}`
         )
       )
       .get();
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: "An account with this username or email already exists" },
+        { success: false, error: "An account with this email address already exists. Please sign in." },
         { status: 409 }
       );
     }
@@ -50,7 +62,6 @@ export async function POST(request: Request) {
       .toString("hex");
 
     const userId = `usr_${crypto.randomBytes(8).toString("hex")}`;
-    const cleanEmail = cleanIdentifier.includes("@") ? cleanIdentifier : `${cleanIdentifier}@fintraxis.local`;
 
     const newUser = {
       id: userId,
@@ -58,13 +69,14 @@ export async function POST(request: Request) {
       email: cleanEmail,
       passwordHash,
       salt,
-      desk: "Credit Risk & Intelligence",
+      desk: "Global Credit Risk & Surveillance",
       avatar: "crest",
       netDebtEbitdaHurdle: 3.50,
       interestCoverageHurdle: 2.50,
       currentRatioHurdle: 1.10,
-      role: "ANALYST",
+      role: "ANALYST", // Role defaults strictly to Analyst
       status: "ACTIVE",
+      mustChangePassword: 0,
       lastLoginAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
@@ -77,16 +89,18 @@ export async function POST(request: Request) {
       email: newUser.email,
       desk: newUser.desk,
       avatar: newUser.avatar,
+      role: newUser.role,
+      isDemo: false,
       netDebtEbitdaHurdle: newUser.netDebtEbitdaHurdle,
       interestCoverageHurdle: newUser.interestCoverageHurdle,
       currentRatioHurdle: newUser.currentRatioHurdle,
-      sessionToken: `SOV-${crypto.randomBytes(12).toString("hex").toUpperCase()}`,
+      sessionToken: `USR-${crypto.randomBytes(12).toString("hex").toUpperCase()}`,
       authenticatedAt: new Date().toISOString(),
     };
 
     return NextResponse.json({
       success: true,
-      message: "User successfully registered",
+      message: "Account successfully created.",
       user: sessionPayload,
     });
   } catch (error: unknown) {

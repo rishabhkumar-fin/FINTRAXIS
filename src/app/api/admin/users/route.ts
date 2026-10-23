@@ -195,6 +195,14 @@ export async function PATCH(request: Request) {
       updates.push("current_ratio_hurdle = ?");
       params.push(currentRatioHurdle);
     }
+    if (body.newPassword && typeof body.newPassword === "string" && body.newPassword.length >= 8) {
+      const salt = crypto.randomBytes(16).toString("hex");
+      const passwordHash = crypto.pbkdf2Sync(body.newPassword, salt, 10000, 64, "sha512").toString("hex");
+      updates.push("password_hash = ?");
+      params.push(passwordHash);
+      updates.push("salt = ?");
+      params.push(salt);
+    }
 
     if (updates.length === 0) {
       return NextResponse.json({ success: false, error: "No valid fields to update" }, { status: 400 });

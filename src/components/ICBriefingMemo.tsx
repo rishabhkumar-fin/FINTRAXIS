@@ -161,7 +161,7 @@ MEMO GENERATED VIA FINTRAXIS DETERMINISTIC AUDIT TERMINAL
             <div className="text-xs text-[#5A687D] mt-1 space-x-2">
               <span>EXCHANGE: {company.exchange}</span>
               <span>&bull;</span>
-              <span>CIK/CODE: {company.cik || company.symbol}</span>
+              <span>CIK: {company.cik ? company.cik : (company.country === "IND" ? "Not applicable, not an SEC registrant" : "Not applicable")}</span>
               <span>&bull;</span>
               <span>REGIME: {company.accountingStandard}</span>
             </div>

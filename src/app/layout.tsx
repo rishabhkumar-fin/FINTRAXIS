@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "FINTRAXIS — Institutional Corporate Financial Intelligence",
     description:
       "Corporate credit risk surveillance terminal, auditable multi-period financial ledger, Basel III early-warning flags, and deterministic stress testing.",
-    siteName: "FINTRAXIS Sovereign Terminal",
+    siteName: "FINTRAXIS Financial Intelligence Platform",
     type: "website",
     locale: "en_US",
   },

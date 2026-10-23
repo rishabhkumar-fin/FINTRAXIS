@@ -11,9 +11,18 @@ export async function GET() {
       ORDER BY key ASC
     `).all();
 
+    const history = sqlite.prepare(`
+      SELECT id, timestamp, event_type as eventType, severity, operator, details
+      FROM admin_audit_logs
+      WHERE event_type = 'POLICY_UPDATE'
+      ORDER BY timestamp DESC
+      LIMIT 50
+    `).all();
+
     return NextResponse.json({
       success: true,
       config: rows,
+      history,
     });
   } catch (err: unknown) {
     console.error("GET /api/admin/config error:", err);
@@ -42,6 +51,31 @@ export async function POST(request: Request) {
         updated_at = excluded.updated_at,
         updated_by = excluded.updated_by
     `);
+
+    // Case 0: Reset to Institutional Default Hurdles
+    if (body.resetToDefault) {
+      const defaults: Record<string, { val: string; desc: string }> = {
+        GLOBAL_LEVERAGE_HURDLE: { val: "3.50", desc: "Global Net Debt / EBITDA threshold trigger for amber/red flags" },
+        GLOBAL_COVERAGE_HURDLE: { val: "2.50", desc: "Global EBIT / Interest Expense coverage floor" },
+        GLOBAL_LIQUIDITY_HURDLE: { val: "1.30", desc: "Global Current Ratio liquidity floor" },
+        ALERT_MARGIN_DETERIORATION_PCT: { val: "-5.0", desc: "Operating margin period-over-period percentage drop alert threshold" },
+        ALERT_REVENUE_CONTRACTION_PCT: { val: "-10.0", desc: "Year-over-year revenue contraction trigger for distress surveillance" },
+        MAX_RATE_SHOCK_BPS: { val: "400", desc: "Maximum permissible interest rate shock in stress simulations (bps)" },
+      };
+      for (const [k, d] of Object.entries(defaults)) {
+        upsertConfig.run(k, d.val, d.desc, now, operator);
+      }
+      logAuditEvent(
+        "POLICY_UPDATE",
+        operator,
+        "Risk hurdle reference thresholds reset to institutional defaults (Leverage 3.50x, Coverage 2.50x, Liquidity 1.30x)",
+        "WARNING"
+      );
+      return NextResponse.json({
+        success: true,
+        message: "Risk hurdles reset to institutional reference defaults",
+      });
+    }
 
     // Case 1: Batch Hurdles calibration
     if (body.hurdles && typeof body.hurdles === "object") {

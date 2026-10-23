@@ -178,7 +178,7 @@ export function CompanyChartModal({
                 {latestRatios.netDebtToEbitda !== null ? `${latestRatios.netDebtToEbitda.toFixed(2)}x` : "0.00x"}
               </div>
               <div className="text-[9px] text-[#10B981] mt-0.5">
-                {(latestRatios.netDebtToEbitda ?? 0) <= 2.0 ? "Fortress Balance Sheet" : "Covenant Monitored"}
+                {(latestRatios.netDebtToEbitda ?? 0) <= 2.0 ? "Net Cash / Low Gearing" : "Covenant Monitored"}
               </div>
             </div>
 
@@ -369,7 +369,7 @@ export function CompanyChartModal({
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
-                    BALANCE SHEET FORTRESS &amp; CAPITAL MATURITY PROFILE
+                    BALANCE SHEET LIQUIDITY &amp; CAPITAL MATURITY PROFILE
                   </h4>
                   <p className="text-[10px] text-[#64748B]">
                     Comparison of liquid cash cushion against total bank debt obligations

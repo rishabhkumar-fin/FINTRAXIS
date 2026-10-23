@@ -117,3 +117,42 @@ $$\text{Stressed Interest Coverage}' = \frac{\text{Stressed EBIT}'}{\text{Stress
 When stressed metrics breach reference hurdles, the application displays:
 > *"Reference threshold breached in this scenario. This is a what-if calculation, not a prediction."*
 > No statement of contractual loan default or covenant breach is asserted unless bilateral loan indenture agreements are formally loaded.
+
+---
+
+## 6. Composite Graded Screening Score & Single Source of Truth
+
+### 6.1 Screening Score Weightings (0–100 Scale)
+The FINTRAXIS rule-based health screening score synthesizes four core financial pillars:
+1. **Solvency & Gearing (35% Weight):**
+   - Net Debt / EBITDA $\le 1.50\text{x}$ or Net Cash: Full 35 points
+   - $1.50\text{x} < \text{Net Debt / EBITDA} \le 2.50\text{x}$: 28 points
+   - $2.50\text{x} < \text{Net Debt / EBITDA} \le 3.50\text{x}$: 18 points
+   - $> 3.50\text{x}$: 5 points
+2. **Debt Service Coverage (25% Weight):**
+   - Interest Coverage $\ge 5.00\text{x}$ (or zero funded debt): Full 25 points
+   - $3.50\text{x} \le \text{Coverage} < 5.00\text{x}$: 20 points
+   - $2.50\text{x} \le \text{Coverage} < 3.50\text{x}$: 12 points
+   - $< 2.50\text{x}$: 4 points
+3. **Liquidity & Working Capital (25% Weight):**
+   - Current Ratio $\ge 1.50\text{x}$: Full 25 points
+   - $1.30\text{x} \le \text{Current Ratio} < 1.50\text{x}$: 20 points
+   - $1.10\text{x} \le \text{Current Ratio} < 1.30\text{x}$: 12 points
+   - $< 1.10\text{x}$: 4 points
+4. **Cash Conversion & Quality of Earnings (15% Weight):**
+   - $\text{CFO} / \text{Net Income} \ge 1.00\text{x}$ and positive FCF: Full 15 points
+   - $0.80\text{x} \le \text{CFO} / \text{Net Income} < 1.00\text{x}$: 10 points
+   - $< 0.80\text{x}$ or negative FCF: 3 points
+
+### 6.2 Health Tiers & Grades
+- **Tier 1 — Stable (Score 80–100):** Strong balance sheet, ample interest coverage, unencumbered liquidity buffers (Grade A).
+- **Tier 2 — Watchlist Surveillance (Score 50–79):** Moderate leverage or working capital friction requiring monitoring (Grade B / C).
+- **Tier 3 — Elevated Risk (Score 0–49):** Compressed debt service buffer or structural operating loss (Grade D / F).
+
+### 6.3 Single Source of Truth Architecture
+- All ratios, leverage multiples, debt structures, and health scores are computed exclusively in `src/lib/finance/financeMaster.ts`.
+- Components, the AI Copilot, stress simulator baselines, and report exports read from this unified module, guaranteeing zero cross-screen divergence.
+
+### 6.4 Market Quote Resolution & Peer Sample Size ($n \ge 3$)
+- **Quote Resolver:** Returns `{ price, currency, asOf, source, status }` with status in `live | delayed | end-of-day | reference`.
+- **Peer Median Policy:** Peer medians are computed dynamically across sector cohorts. If sector sample size $n < 3$, the system explicitly renders *"Insufficient peer data (n < 3 in sector)"* rather than displaying an unrepresentative single-entity benchmark.

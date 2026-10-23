@@ -547,7 +547,7 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
         "    & Default Risk Rises ]      Contracts ]\n" +
         "```\n\n" +
         `### 3. WINNERS VS LOSERS UNDER HIGH BENCHMARK RATES\n` +
-        `• **Winners (Cash Fortress Entities like Apple, TCS, Microsoft):** Zero bank borrowings; they actually EARN massive risk-free treasury interest income on their tens of billions in cash reserves!\n` +
+        `• **Winners (Net Cash Entities like Apple, TCS, Microsoft):** Zero bank borrowings; they actually EARN massive risk-free treasury interest income on their tens of billions in cash reserves!\n` +
         `• **Losers (Leveraged Infrastructure, Real Estate, Telecom):** Floating-rate debt obligations experience instant interest expense surges, compressing debt service coverage (DSCR).\n\n` +
         (comp
           ? `### 4. LIVE APPLICATION TO ${comp.name} (${comp.symbol})\n` +
@@ -606,7 +606,7 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
             `• **Reported Free Cash Flow (FCF):** **${formatFinancialValue(p.freeCashFlow, comp?.currency || "USD", comp?.scaleUnit || "Millions")}**\n` +
             `• **Verdict:** ${
               (p.freeCashFlow ?? 0) > 0
-                ? "Self-funding fortress cash generator. Zero reliance on external credit markets. ✅"
+                ? "Self-funding net cash generator. Zero reliance on external credit markets. ✅"
                 : "Negative FCF burn. Requires external financing or cash buffer liquidation. ⚠️"
             }`
           : "")
@@ -738,7 +738,7 @@ export const FINANCIAL_KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
         `Would you rather have **$10 right now in your hand**, or **$10 five years from now**?\n` +
         `• **Right now!** Because in five years, $10 buys fewer chocolate bars, or you could have saved it in a piggy bank to earn interest.\n` +
         `• A **Discounted Cash Flow (DCF)** is like a financial time machine!\n` +
-        `• It looks into the future: Year 1 ($100), Year 2 ($120), Year 3 ($150)... and **shrinks every future dollar backwards** to see what that entire future stream of money is worth in cold hard cash **TODAY**!\n` +
+        `• It looks into the future: Year 1 ($100), Year 2 ($120), Year 3 ($150)... and **shrinks every future dollar backwards** to see what that entire future stream of money is worth in real cash value **TODAY**!\n` +
         `**Simple Rule for a 10-Year-Old:** *A company is worth whatever total cash it can put into your pockets between today and forever, discounted for waiting!*\n\n` +
         `---\n\n`;
 

@@ -1,3 +1,5 @@
+import type { CompanyFinanceSummary } from "./finance/types";
+
 export type CountryCode = "USA" | "IND" | "JPN" | "GBR" | "EUR" | "GLOBAL";
 export type CurrencyCode = "USD" | "INR" | "JPY" | "GBP" | "EUR";
 export type ScaleUnit = "Millions" | "Crores" | "Billions";
@@ -211,7 +213,7 @@ export interface CompanyRiskProfile {
   riskScore: number; // 0 - 100
   earlyWarningFlags: EarlyWarningFlag[];
   simulation: StressSimulationResult;
-  financeSummary?: unknown;
+  financeSummary?: CompanyFinanceSummary | null;
 }
 
 // ==========================================

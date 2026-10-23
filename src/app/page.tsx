@@ -196,9 +196,11 @@ export default function FintraxisTerminalPage() {
             setSession(verifiedSession);
             localStorage.setItem("fintraxis_session", JSON.stringify(verifiedSession));
 
+            const isAdmin = verifiedSession.role === "SUPER_ADMIN" || verifiedSession.role === "ADMIN";
             if (typeof window !== "undefined" && !new URLSearchParams(window.location.search).get("tab")) {
-              const isAdmin = verifiedSession.role === "SUPER_ADMIN" || verifiedSession.role === "ADMIN";
               initialTab = isAdmin ? "00_ADMIN" : "overview";
+            } else if (!isAdmin && initialTab === "00_ADMIN") {
+              initialTab = "overview";
             }
             setActiveTab(initialTab);
             setIsVerifyingAuth(false);
@@ -731,6 +733,7 @@ export default function FintraxisTerminalPage() {
           onOpenMethodology={() => setIsMethodologyOpen(true)}
           onOpenTour={() => setIsTourOpen(true)}
           onOpenHelp={() => handleOpenGlossary()}
+          companies={companies}
         />
 
         {/* Institutional Settings & Calibration Modal */}

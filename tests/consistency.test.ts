@@ -98,4 +98,45 @@ describe("Stage 2: Cross-Screen Financial Consistency Audit", () => {
     assert.equal(summary.regulatory.cikLabel, "Not applicable (not an SEC registrant)");
     assert.equal(summary.regulatory.isBankOrFinancial, false);
   });
+
+  it("7. Cross-screen consistency audit across all 13 institutional companies", () => {
+    const symbols = Object.keys(INSTITUTIONAL_COMPANIES);
+    assert.ok(symbols.length >= 10, "Must have at least 10 institutional companies");
+
+    for (const sym of symbols) {
+      const item = INSTITUTIONAL_COMPANIES[sym];
+      const sum = computeCompanyFinanceSummary(item.company, item.periods);
+      assert.ok(sum, `Finance summary must exist for ${sym}`);
+
+      // 1. Share price matches exactly between quote and company entity
+      assert.equal(sum.quote.price, item.company.sharePrice ?? sum.quote.price, `Price mismatch on ${sym}`);
+
+      // 2. Net debt is mathematically exact: borrowings + leases - cash & liquid
+      const expectedEffectiveDebt = sum.debtStructure.includeLeases
+        ? sum.debtStructure.totalDebt
+        : sum.debtStructure.borrowings;
+      const expectedNetDebt = expectedEffectiveDebt - (sum.debtStructure.cashAndEquivalents + sum.debtStructure.liquidInvestments);
+      assert.equal(sum.ratios.netDebt, expectedNetDebt, `Net debt mismatch on ${sym}`);
+
+      // 3. EBITDA is positive for operating companies
+      assert.ok(sum.period.ebitda !== null && sum.period.ebitda > 0, `EBITDA must be positive for ${sym}`);
+
+      // 4. If net debt <= 0, netDebtToEbitdaLabel must display "Net Cash" and NEVER "0.0x"
+      if (sum.ratios.isNetCash && sum.ratios.netDebtToEbitda !== null) {
+        assert.ok(sum.ratios.netDebtToEbitdaLabel.includes("Net Cash"), `Label should say Net Cash on ${sym}`);
+        assert.notEqual(sum.ratios.netDebtToEbitdaLabel, "0.0x", `Label must never be 0.0x on ${sym}`);
+        assert.notEqual(sum.ratios.netDebtToEbitdaLabel, "0.00x", `Label must never be 0.00x on ${sym}`);
+        assert.ok(formatNetDebtMultiple(sum.ratios.netDebtToEbitda).includes("Net Cash"));
+      }
+
+      // 5. Health score must be bounded 0-100 and discriminating
+      assert.ok(sum.healthScore.score >= 0 && sum.healthScore.score <= 100, `Score out of bounds for ${sym}`);
+
+      // 6. Net debt rule definition is explicitly stated
+      assert.ok(sum.debtStructure.netDebtDefinition.length > 0, `Net debt definition missing for ${sym}`);
+
+      // 7. Period count matches available periods
+      assert.equal(sum.periodsCount, item.periods.length, `Period count mismatch on ${sym}`);
+    }
+  });
 });

@@ -219,6 +219,28 @@ export function ConcentrationExposure({
                 </div>
               </div>
             ))}
+
+            {/* Segment Sum to 100% Validation (Section 6 Requirement) */}
+            {(() => {
+              const totalPct = segments.reduce((sum, s) => sum + s.percentageOfTotal, 0);
+              const isFull = Math.abs(100 - totalPct) <= 0.5;
+              const residual = Number((100 - totalPct).toFixed(1));
+              return (
+                <div className="pt-3 border-t border-[#1E293B] flex items-center justify-between text-xs font-bold text-white">
+                  <div className="flex items-center gap-2">
+                    <span>Total Segment Share:</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-mono border ${
+                      isFull
+                        ? "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30"
+                        : "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30"
+                    }`}>
+                      {isFull ? "✓ 100% of reported revenue reconciled" : `Residual / Unallocated: ${residual}%`}
+                    </span>
+                  </div>
+                  <span className="font-mono text-[#38BDF8]">{totalPct.toFixed(1)}%</span>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -245,6 +267,11 @@ export function ConcentrationExposure({
               <div className="p-2 rounded bg-[#0A0E17] border border-[#1E293B]">
                 <span className="font-bold text-white block">Regime Interpretation:</span>
                 {currentHhiBadge.desc}
+              </div>
+
+              <div className="p-2 rounded bg-[#0A0E17] border border-[#1E293B] text-[10px] text-[#CBD5E1]">
+                <strong className="text-[#38BDF8] block mb-0.5">What HHI Measures:</strong>
+                Squares the market share percentages of each segment. A pure monopoly scores 10,000; 10 equal segments score 1,000. Lower scores indicate diversified cash flows, mitigating single-segment shocks.
               </div>
 
               <div className="text-[10.5px] text-[#64748B] space-y-1 pt-1">

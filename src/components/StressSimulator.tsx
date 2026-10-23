@@ -230,9 +230,9 @@ export function StressSimulator({ profile, onNavigateToTab }: StressSimulatorPro
               </span>
             </div>
             <p className="text-[11px] text-[#CBD5E1] leading-relaxed">
-              {isThresholdBreached
-                ? `Stressed interest coverage drops to ${formatRatio(simulation.simulatedInterestCoverage)}, falling below the 2.0x bank covenant floor. Syndicates can freeze revolving lines!`
-                : `Stressed interest coverage holds at ${formatRatio(simulation.simulatedInterestCoverage)}, well above the required 2.5x covenant floor.`}
+              {simulation.thresholdBreachSummary || (isThresholdBreached
+                ? `Reference threshold breached in this scenario: Stressed interest coverage drops to ${formatRatio(simulation.simulatedInterestCoverage)}, below reference floor. This is a what-if calculation, not a prediction.`
+                : `Stressed interest coverage holds at ${formatRatio(simulation.simulatedInterestCoverage)}, well above the reference threshold floor. This is a what-if calculation, not a prediction.`)}
             </p>
           </div>
         </div>

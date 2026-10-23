@@ -27,9 +27,10 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
   const sectorPeers = Object.values(INSTITUTIONAL_COMPANIES).filter(
     (c) => c.company.sector.toLowerCase() === company.sector.toLowerCase()
   );
-  const activePeerGroup = sectorPeers.length >= 2 ? sectorPeers : Object.values(INSTITUTIONAL_COMPANIES);
-  const peerSampleSize = activePeerGroup.length;
-  const peerGroupLabel = sectorPeers.length >= 2 ? `${company.sector} (n=${peerSampleSize})` : `Universe (n=${peerSampleSize})`;
+  const hasSufficientPeers = sectorPeers.length >= 3;
+  const activePeerGroup = hasSufficientPeers ? sectorPeers : Object.values(INSTITUTIONAL_COMPANIES);
+  const peerSampleSize = sectorPeers.length;
+  const peerGroupLabel = hasSufficientPeers ? `${company.sector} (n=${peerSampleSize})` : `Insufficient peer data (n=${peerSampleSize} < 3)`;
 
   // Compute medians
   const computeMedian = (getter: (p: (typeof activePeerGroup)[number]) => number | null): number => {
@@ -79,11 +80,12 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       industryMedian: medianLeverage || 2.3,
       sampleSize: peerSampleSize,
       peerLabel: peerGroupLabel,
+      hasSufficientPeers,
       hurdle: 3.5,
-      hurdleLabel: "Hurdle ≤ 3.50x",
+      hurdleLabel: "Reference ≤ 3.50x",
       lowerIsBetter: true,
       meaning: "Years of operational earnings needed to eliminate all funded debt. Lower is safer.",
-      status: (latestRatios.netDebtToEbitda ?? 0) <= 2.5 ? "PRIME" : (latestRatios.netDebtToEbitda ?? 0) <= 3.5 ? "WATCH" : "BREACH",
+      status: (latestRatios.netDebtToEbitda ?? 0) <= 2.5 ? "STRONG" : (latestRatios.netDebtToEbitda ?? 0) <= 3.5 ? "MONITOR" : "ALERT",
     },
     {
       metric: "EBIT Interest Coverage",
@@ -92,11 +94,12 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       industryMedian: medianCoverage || 4.8,
       sampleSize: peerSampleSize,
       peerLabel: peerGroupLabel,
+      hasSufficientPeers,
       hurdle: 2.5,
-      hurdleLabel: "Floor ≥ 2.50x",
+      hurdleLabel: "Reference ≥ 2.50x",
       lowerIsBetter: false,
       meaning: "How many times operating profit can pay annual loan interest. Higher is safer.",
-      status: (latestRatios.interestCoverage ?? 99) >= 4.0 ? "PRIME" : (latestRatios.interestCoverage ?? 99) >= 2.5 ? "WATCH" : "BREACH",
+      status: (latestRatios.interestCoverage ?? 99) >= 4.0 ? "STRONG" : (latestRatios.interestCoverage ?? 99) >= 2.5 ? "MONITOR" : "ALERT",
     },
     {
       metric: "Current Liquidity Ratio",
@@ -105,11 +108,12 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       industryMedian: medianCurrentRatio || 1.45,
       sampleSize: peerSampleSize,
       peerLabel: peerGroupLabel,
-      hurdle: 1.2,
-      hurdleLabel: "Benchmark ≥ 1.20x",
+      hasSufficientPeers,
+      hurdle: 1.3,
+      hurdleLabel: "Reference ≥ 1.30x",
       lowerIsBetter: false,
       meaning: "Liquid short-term assets available for every 1.00 unit of bills due within 1 year.",
-      status: (latestRatios.currentRatio ?? 1.0) >= 1.3 ? "PRIME" : (latestRatios.currentRatio ?? 1.0) >= 1.1 ? "WATCH" : "BREACH",
+      status: (latestRatios.currentRatio ?? 1.0) >= 1.3 ? "STRONG" : (latestRatios.currentRatio ?? 1.0) >= 1.1 ? "MONITOR" : "ALERT",
     },
     {
       metric: "Operating (EBIT) Margin",
@@ -118,11 +122,12 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       industryMedian: medianOperatingMargin || 16.5,
       sampleSize: peerSampleSize,
       peerLabel: peerGroupLabel,
+      hasSufficientPeers,
       hurdle: 10.0,
-      hurdleLabel: "Inv-Grade ≥ 10.0%",
+      hurdleLabel: "Reference ≥ 10.0%",
       lowerIsBetter: false,
       meaning: "Percentage of top-line revenue converted into core operating profit.",
-      status: (latestRatios.operatingMarginPct ?? 15) >= 20 ? "PRIME" : (latestRatios.operatingMarginPct ?? 15) >= 10 ? "WATCH" : "BREACH",
+      status: (latestRatios.operatingMarginPct ?? 15) >= 20 ? "STRONG" : (latestRatios.operatingMarginPct ?? 15) >= 10 ? "MONITOR" : "ALERT",
     },
     {
       metric: "Cash Conversion (CFO / NI)",
@@ -131,11 +136,12 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
       industryMedian: medianCfoToNi || 0.95,
       sampleSize: peerSampleSize,
       peerLabel: peerGroupLabel,
+      hasSufficientPeers,
       hurdle: 0.85,
-      hurdleLabel: "Quality Floor ≥ 0.85x",
+      hurdleLabel: "Reference ≥ 0.85x",
       lowerIsBetter: false,
       meaning: "Quality of earnings: confirms accounting profit is backed by real bankable cash.",
-      status: (latestRatios.cfoToNetIncome ?? 1.0) >= 1.0 ? "PRIME" : (latestRatios.cfoToNetIncome ?? 1.0) >= 0.85 ? "WATCH" : "BREACH",
+      status: (latestRatios.cfoToNetIncome ?? 1.0) >= 1.0 ? "STRONG" : (latestRatios.cfoToNetIncome ?? 1.0) >= 0.85 ? "MONITOR" : "ALERT",
     },
   ];
 
@@ -379,7 +385,7 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
             </div>
             <div className="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
               {isTier1
-                ? "Prime Solvency: Fortress balance sheet liquidity, substantial interest service cushion, and clean operating cash conversion."
+                ? "Strong Solvency: Substantial liquid reserves, conservative debt service cushion, and clean operating cash conversion."
                 : isTier2
                 ? "Watchlist Surveillance: Moderate debt gearing or compressed fixed charge coverage. Quarterly covenant testing recommended."
                 : "Critical Solvency Alert: Significant leverage breach or liquidity strain. Restructuring risk elevated."}
@@ -733,24 +739,34 @@ export function HealthRatios({ profile, onAuditMetric, onNavigateToTab }: Health
                       </div>
                     </div>
 
-                    {/* Industry Median Bar */}
+                    {/* Industry Median Bar or Insufficient Data Notice */}
                     <div className="flex items-center gap-3">
-                      <span className="w-24 text-[10px] text-[#94A3B8] truncate" title={`Median of ${item.peerLabel}`}>Peer (n={item.sampleSize})</span>
-                      <div className="flex-1 bg-[#080B10] h-4 rounded overflow-hidden border border-[#1E2536] relative">
-                        <div
-                          style={{ width: `${medianWidth}%` }}
-                          className="h-full bg-[#3B82F6]/60 rounded transition-all duration-500 flex items-center justify-end pr-2"
-                        >
-                          <span className="text-[9px] font-bold text-[#F8FAFC] font-mono">
-                            {item.industryMedian.toFixed(2)}{item.unit}
-                          </span>
+                      <span className="w-24 text-[10px] text-[#94A3B8] truncate" title={`Sector: ${company.sector}`}>
+                        Peer Median
+                      </span>
+                      {item.hasSufficientPeers ? (
+                        <div className="flex-1 bg-[#080B10] h-4 rounded overflow-hidden border border-[#1E2536] relative">
+                          <div
+                            style={{ width: `${medianWidth}%` }}
+                            className="h-full bg-[#3B82F6]/60 rounded transition-all duration-500 flex items-center justify-end pr-2"
+                          >
+                            <span className="text-[9px] font-bold text-[#F8FAFC] font-mono">
+                              {item.industryMedian.toFixed(2)}{item.unit} (n={item.sampleSize})
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex-1 text-[10px] font-mono text-[#64748B] italic bg-[#080B10] px-2.5 py-1 rounded border border-[#1E2536]">
+                          Insufficient peer data (n = {item.sampleSize} &lt; 3 in sector)
+                        </div>
+                      )}
                     </div>
 
-                    {/* Risk Hurdle Line */}
+                    {/* Reference Threshold (Configurable) */}
                     <div className="flex items-center gap-3">
-                      <span className="w-24 text-[10px] text-[#F43F5E] truncate">Risk Limit</span>
+                      <span className="w-24 text-[10px] text-[#F43F5E] truncate" title="Analytical reference hurdle (configurable)">
+                        Ref. Threshold
+                      </span>
                       <div className="flex-1 bg-[#080B10] h-3 rounded overflow-hidden border border-[#1E2536] relative">
                         <div
                           style={{ width: `${hurdleWidth}%` }}

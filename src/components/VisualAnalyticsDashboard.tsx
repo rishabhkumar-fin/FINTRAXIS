@@ -443,7 +443,7 @@ export function VisualAnalyticsDashboard({ profile }: VisualAnalyticsDashboardPr
                 }`}
               >
                 {isNetCashPositive
-                  ? "🛡️ NET CASH FORTRESS BALANCE SHEET"
+                  ? "🛡️ NET CASH BALANCE SHEET"
                   : "⚠️ LEVERAGED BALANCE SHEET"}
               </div>
             </div>

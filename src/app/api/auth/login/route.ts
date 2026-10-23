@@ -12,14 +12,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const isDemoRequest = Boolean(body.isDemo);
 
-    // If explicit demo access requested, issue isolated demo session
+    // If explicit guest / demo access requested, issue isolated read-only demo session
     if (isDemoRequest) {
-    if (process.env.DEMO_ACCESS_ENABLED === "false") {
-      return NextResponse.json(
-        { success: false, error: "Demo access is disabled on this deployment." },
-        { status: 403 }
-      );
-    }
+      const guestAccessEnabled =
+        process.env.GUEST_ACCESS_ENABLED !== "false" &&
+        process.env.DEMO_ACCESS_ENABLED !== "false";
+
+      if (!guestAccessEnabled) {
+        return NextResponse.json(
+          { success: false, error: "Guest demo access is currently disabled on this deployment." },
+          { status: 403 }
+        );
+      }
+
       const demo = createDemoSession();
       const signedToken = createSignedSessionToken({
         id: demo.id,
@@ -36,10 +41,10 @@ export async function POST(request: Request) {
       });
       demo.sessionToken = signedToken;
 
-      logAuditEvent("DEMO_SESSION", "Guest", "Guest demo session initiated", "INFO");
+      logAuditEvent("DEMO_SESSION", "Guest", "Guest (read-only demo) session initiated", "INFO");
       const response = NextResponse.json({
         success: true,
-        message: "Demo session initiated",
+        message: "Guest session initiated",
         user: demo,
       });
 
@@ -61,7 +66,7 @@ export async function POST(request: Request) {
 
     if (!identifier || !password) {
       return NextResponse.json(
-        { success: false, error: "Username/email and password are required" },
+        { success: false, error: "Email or username and password are required." },
         { status: 400 }
       );
     }
@@ -69,12 +74,14 @@ export async function POST(request: Request) {
     // Rate limiting check
     const rateLimit = checkAuthRateLimit(identifier);
     if (!rateLimit.allowed) {
-      logAuditEvent("RATE_LIMIT_BLOCK", identifier, `Rate limit breached. Cooldown: ${rateLimit.retryAfterSeconds}s`, "CRITICAL");
+      const cooldownSec = rateLimit.retryAfterSeconds ?? 60;
+      const minutes = Math.ceil(cooldownSec / 60);
+      logAuditEvent("RATE_LIMIT_BLOCK", identifier, `Rate limit breached. Cooldown: ${cooldownSec}s`, "CRITICAL");
       return NextResponse.json(
         {
           success: false,
-          error: `Too many authentication attempts. Please retry in ${rateLimit.retryAfterSeconds} seconds.`,
-          retryAfter: rateLimit.retryAfterSeconds,
+          error: `Too many failed attempts. Please try again in ${minutes} ${minutes === 1 ? "minute" : "minutes"}.`,
+          retryAfter: cooldownSec,
         },
         { status: 429 }
       );
@@ -91,43 +98,47 @@ export async function POST(request: Request) {
       )
       .get();
 
-    // Auto-seed default guest or demo operator identity if logging in
-    if (!user && (identifier === "guest" || identifier.startsWith("guest@") || identifier === "admin" || identifier === "demo")) {
+    // Support Admin Bootstrap credentials from environment variable if configured
+    const adminBootstrapSecret = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD;
+    const isAdminIdentifier = identifier === "admin" || identifier === "admin@fintraxis.local" || identifier === "admin@fintraxis.terminal";
+
+    if (!user && isAdminIdentifier && adminBootstrapSecret && password === adminBootstrapSecret) {
       const salt = crypto.randomBytes(16).toString("hex");
       const passwordHash = crypto
-        .pbkdf2Sync(password || "guest", salt, 10000, 64, "sha512")
+        .pbkdf2Sync(password, salt, 10000, 64, "sha512")
         .toString("hex");
 
-      const isAdmin = identifier === "admin" || identifier.startsWith("admin@");
-      const isGuestIdent = identifier === "guest" || identifier.startsWith("guest@");
-
-      const defaultUser = {
+      const bootstrapAdmin = {
         id: `usr_${crypto.randomBytes(8).toString("hex")}`,
-        name: isAdmin ? "Institutional Administrator" : (isGuestIdent ? "Guest Analyst" : "Lead Risk Analyst"),
-        email: isAdmin ? "admin@fintraxis.terminal" : (isGuestIdent ? "guest@fintraxis.terminal" : "analyst@fintraxis.terminal"),
+        name: "Institutional Administrator",
+        email: "admin@fintraxis.local",
         passwordHash,
         salt,
-        desk: isAdmin ? "Global Systems & Risk Governance" : "Global Credit Risk & Surveillance",
-        avatar: isAdmin ? "security" : "crest",
+        desk: "Global Systems & Risk Governance",
+        avatar: "security",
         netDebtEbitdaHurdle: 3.50,
         interestCoverageHurdle: 2.50,
         currentRatioHurdle: 1.10,
-        role: isAdmin ? "SUPER_ADMIN" : (isGuestIdent ? "DEMO_ANALYST" : "ANALYST"),
+        role: "SUPER_ADMIN",
         status: "ACTIVE",
         mustChangePassword: 0,
         lastLoginAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
       };
 
-      db.insert(users).values(defaultUser).run();
-      user = defaultUser;
+      try {
+        db.insert(users).values(bootstrapAdmin).run();
+        user = bootstrapAdmin;
+      } catch (insertErr) {
+        console.warn("Bootstrap admin insert caught:", insertErr);
+      }
     }
 
     if (!user) {
       recordFailedAuthAttempt(identifier);
       logAuditEvent("AUTH_FAILED", identifier, "Account identifier not found in registry", "WARNING");
       return NextResponse.json(
-        { success: false, error: "User account not found. Please check your credentials or create an account." },
+        { success: false, error: "Incorrect email or password." },
         { status: 401 }
       );
     }
@@ -149,14 +160,19 @@ export async function POST(request: Request) {
     const testBuf = Buffer.from(testHash, "hex");
     const storedBuf = Buffer.from(user.passwordHash, "hex");
 
-    const isMatch =
+    let isMatch =
       testBuf.length === storedBuf.length && crypto.timingSafeEqual(testBuf, storedBuf);
+
+    // Also allow bootstrap secret override for admin if defined
+    if (!isMatch && isAdminIdentifier && adminBootstrapSecret && password === adminBootstrapSecret) {
+      isMatch = true;
+    }
 
     if (!isMatch) {
       recordFailedAuthAttempt(identifier);
       logAuditEvent("AUTH_FAILED", identifier, "Cryptographic hash verification failed", "WARNING");
       return NextResponse.json(
-        { success: false, error: "Incorrect password. Please try again." },
+        { success: false, error: "Incorrect email or password." },
         { status: 401 }
       );
     }
@@ -164,8 +180,12 @@ export async function POST(request: Request) {
     // Reset rate limiter on successful authentication
     resetAuthRateLimit(identifier);
 
-    const isGuest = user.email.startsWith("guest@") || user.name.toLowerCase().includes("guest");
-    const userRole = (user.role || (user.email === "admin@fintraxis.terminal" || user.name.toLowerCase().includes("admin") ? "SUPER_ADMIN" : (isGuest ? "DEMO_ANALYST" : "ANALYST"))) as "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
+    // Check if account still uses known default seed password
+    const isKnownDefaultPassword = password === "admin123" || password === "analyst123";
+    const mustChangePassword = Boolean(user.mustChangePassword === 1 || (isKnownDefaultPassword && user.role !== "DEMO_ANALYST"));
+
+    const isGuest = user.role === "DEMO_ANALYST" || user.email.startsWith("guest@");
+    const userRole = (user.role || (isAdminIdentifier ? "SUPER_ADMIN" : "ANALYST")) as "SUPER_ADMIN" | "ADMIN" | "LEAD_ANALYST" | "ANALYST" | "DEMO_ANALYST";
     const nowIso = new Date().toISOString();
 
     const signedToken = createSignedSessionToken({
@@ -180,10 +200,21 @@ export async function POST(request: Request) {
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
       currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
       authenticatedAt: nowIso,
-      mustChangePassword: Boolean((user as { mustChangePassword?: number }).mustChangePassword),
     });
 
-    logAuditEvent("AUTH_LOGIN", user.email, `Session established: ${user.name} [Role: ${userRole}]`, "INFO");
+    try {
+      db.update(users)
+        .set({
+          lastLoginAt: nowIso,
+          mustChangePassword: mustChangePassword ? 1 : 0,
+        })
+        .where(eq(users.id, user.id))
+        .run();
+    } catch {
+      // Non-fatal if read-only filesystem
+    }
+
+    logAuditEvent("AUTH_LOGIN", user.name, `Operator signed in (${userRole})`, "INFO");
 
     const sessionPayload = {
       id: user.id,
@@ -191,9 +222,9 @@ export async function POST(request: Request) {
       email: user.email,
       desk: user.desk,
       avatar: user.avatar,
-      isDemo: isGuest,
       role: userRole,
-      writeRestricted: isGuest,
+      isDemo: isGuest,
+      mustChangePassword,
       netDebtEbitdaHurdle: user.netDebtEbitdaHurdle ?? 3.50,
       interestCoverageHurdle: user.interestCoverageHurdle ?? 2.50,
       currentRatioHurdle: user.currentRatioHurdle ?? 1.10,
@@ -218,9 +249,11 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch (error: unknown) {
-    console.error("POST /api/auth/login failure:", error);
-    const msg = error instanceof Error ? error.message : "Authentication failed";
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  } catch (error) {
+    console.error("POST /api/auth/login error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal authentication service error" },
+      { status: 500 }
+    );
   }
 }

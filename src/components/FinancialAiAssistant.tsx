@@ -12,8 +12,10 @@ function FormattedAiResponse({ content }: { content: string }) {
   let codeBlockLines: string[] = [];
 
   const parseInlineMarkdown = (line: string): React.ReactNode[] => {
+    // Replace html entities like &bull; with unicode bullet
+    const sanitized = line.replace(/&bull;/g, "•").replace(/&mdash;/g, "—").replace(/&amp;/g, "&");
     // Regex for bold **text** and inline code `code`
-    const tokens = line.split(/(\*\*.*?\*\*|`.*?`)/g);
+    const tokens = sanitized.split(/(\*\*.*?\*\*|`.*?`)/g);
     return tokens.map((token, i) => {
       if (token.startsWith("**") && token.endsWith("**")) {
         return <strong key={i} className="font-bold text-white">{token.slice(2, -2)}</strong>;
@@ -87,11 +89,11 @@ function FormattedAiResponse({ content }: { content: string }) {
     }
 
     // Bullet points
-    if (trimmed.startsWith("- ") || trimmed.startsWith("* ") || trimmed.startsWith("• ")) {
-      const cleanBullet = trimmed.replace(/^[-*•]s+/, "");
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ") || trimmed.startsWith("• ") || trimmed.startsWith("&bull; ")) {
+      const cleanBullet = trimmed.replace(/^([-*•]|&bull;)\s+/, "");
       currentList.push(
         <li key={`li_${idx}`} className="text-xs sm:text-[12.5px] text-[#CBD5E1] flex items-start gap-1.5">
-          <span className="text-[#38BDF8] mt-1 text-[8px]">&bull;</span>
+          <span className="text-[#38BDF8] mt-1 text-[8px]">•</span>
           <span className="flex-1">{parseInlineMarkdown(cleanBullet)}</span>
         </li>
       );
@@ -206,8 +208,8 @@ export function FinancialAiAssistant({
       id: "intro",
       sender: "ai",
       text: activeProfile
-        ? `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nActive surveillance loaded for **${company?.name} (${company?.symbol})**:\n\n• **Country & Regime:** ${company?.country} (${company?.currency} ${company?.scaleUnit}) &bull; ${company?.accountingStandard}\n• **Credit Solvency Tier:** **${activeProfile.riskTier}** (Score: \`${activeProfile.riskScore}/100\`)\n• **Net Debt / EBITDA:** \`${activeProfile.latestRatios?.netDebtToEbitda !== null ? (activeProfile.latestRatios.netDebtToEbitda <= 0 ? `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x (Net Cash)` : `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x`) : "N/D"}\`\n• **Interest Coverage:** \`${activeProfile.latestRatios?.interestCoverage !== null ? `${activeProfile.latestRatios?.interestCoverage?.toFixed(2)}x` : "N/D"}\`\n\nAll figures are grounded directly in the **SQLite WAL Ledger** and audited XBRL filings. Ask any question about this company's credit health, simulate adverse shocks, or explore financial concepts below.`
-        : `### 🏛️ Wall Street & Institutional Risk Intelligence Copilot\n\nWelcome to **FINTRAXIS Institutional Intelligence**. I provide grounded financial analysis, credit underwriting memos, forensic accounting diagnostics, and macro interest rate stress tests.\n\nAll company data is queried in real time from our local **SQLite Financial Database** with zero invented metrics. What would you like to explore?`,
+        ? `### 🏛️ Institutional Credit & Risk Intelligence Copilot\n\nActive surveillance loaded for **${company?.name} (${company?.symbol})**:\n\n• **Country & Regime:** ${company?.country} (${company?.currency} ${company?.scaleUnit}) &bull; ${company?.accountingStandard}\n• **Credit Solvency Tier:** **${activeProfile.riskTier}** (Score: \`${activeProfile.riskScore}/100\`)\n• **Net Debt / EBITDA:** \`${activeProfile.latestRatios?.netDebtToEbitda !== null ? (activeProfile.latestRatios.netDebtToEbitda <= 0 ? `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x (Net Cash)` : `${activeProfile.latestRatios.netDebtToEbitda.toFixed(2)}x`) : "N/D"}\`\n• **Interest Coverage:** \`${activeProfile.latestRatios?.interestCoverage !== null ? `${activeProfile.latestRatios?.interestCoverage?.toFixed(2)}x` : "N/D"}\`\n\nAll figures are grounded directly in the **SQLite WAL Ledger** and audited XBRL filings. Ask any question about this company's credit health, simulate adverse shocks, or explore financial concepts below.`
+        : `### 🏛️ Institutional Credit & Risk Intelligence Copilot\n\nWelcome to **FINTRAXIS Institutional Intelligence**. I provide grounded financial analysis, credit underwriting memos, forensic accounting diagnostics, and macro interest rate stress tests.\n\nAll company data is queried in real time from our local **SQLite Financial Database** with zero invented metrics. What would you like to explore?`,
       timestamp: "Just now",
       sources: company
         ? [

@@ -49,9 +49,21 @@ export function computeCompanyFinanceSummary(
   const netDebt = effectiveDebt - totalLiquid;
   const isNetCash = netDebt <= 0;
 
+  // Net Debt Definition rule string
+  const netDebtDefinition = includeLeases
+    ? includeLiquidInv
+      ? "Net Debt = Total Borrowings + Lease Liabilities (Ind AS 116 / ASC 842) - (Cash & Equivalents + Marketable Securities)"
+      : "Net Debt = Total Borrowings + Lease Liabilities (Ind AS 116 / ASC 842) - Cash & Equivalents"
+    : includeLiquidInv
+      ? "Net Debt = Funded Borrowings - (Cash & Equivalents + Marketable Securities) [Excludes Lease Liabilities]"
+      : "Net Debt = Funded Borrowings - Cash & Equivalents [Excludes Lease Liabilities]";
+
   // Explanation for "Zero debt" vs Interest Expense
   let debtExplanation = "";
-  if (rawTotalDebt === 0 && (latest.interestExpense ?? 0) > 0) {
+  if (borrowings === 0 && (latest.interestExpense ?? 0) > 0) {
+    debtExplanation =
+      "No financial borrowings; finance cost relates to lease liabilities (Ind AS 116 / ASC 842) and other finance charges.";
+  } else if (rawTotalDebt === 0 && (latest.interestExpense ?? 0) > 0) {
     debtExplanation =
       "No financial borrowings; finance cost relates to lease liabilities (Ind AS 116 / ASC 842) and other finance charges.";
   } else if (isNetCash) {
@@ -90,8 +102,8 @@ export function computeCompanyFinanceSummary(
 
   const financeCostExplanation =
     rawTotalDebt === 0 && interest > 0
-      ? "Finance cost relates to lease liabilities under Ind AS 116, not bank borrowings"
-      : "Operating EBIT divided by gross interest expense";
+      ? "Finance cost relates to lease liabilities under Ind AS 116, not bank borrowings. Interest coverage uses reported gross finance cost."
+      : "Operating EBIT divided by gross interest expense (finance cost).";
 
   // Liquidity Ratios
   const currentAssets = latest.totalCurrentAssets ?? 0;
@@ -291,7 +303,7 @@ export function computeCompanyFinanceSummary(
     period: latest,
     allPeriods: periods,
     periodsCount: periods.length,
-    latestPeriodLabel: `Latest period in dataset: ${latest.period}. Newer filings may exist.`,
+    latestPeriodLabel: `Audited ledger (${periods.length} periods available). Latest period in dataset: ${latest.period}. Newer filings may exist.`,
     quote,
     debtStructure: {
       totalDebt: rawTotalDebt,
@@ -301,6 +313,9 @@ export function computeCompanyFinanceSummary(
       liquidInvestments: liquidInv,
       hasFundedBorrowings,
       explanation: debtExplanation,
+      netDebtDefinition,
+      includeLeases,
+      includeLiquidInvestments: includeLiquidInv,
     },
     ratios: {
       netDebt,
