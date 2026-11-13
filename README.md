@@ -1,9 +1,6 @@
 # FINTRAXIS: Corporate Financial Intelligence & Credit Terminal
 
 An institutional corporate financial intelligence, solvency analysis, and deterministic stress testing platform built with Next.js 15, React 19, TypeScript, and SQLite, supporting US-GAAP, Ind-AS, and Japanese FSA accounting disclosures.
-
-Ready for review by Mumbai University external examiners, Mumbai corporate finance desks, Wall Street credit analysts, and IIM Calcutta academic committees.
-
 ---
 
 ## 1. Quick Start & Setup Instructions (PowerShell)
