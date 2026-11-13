@@ -1,87 +1,258 @@
-# FINTRAXIS: Corporate Financial Intelligence & Credit Terminal
+# FINTRAXIS
+### Financial Intelligence and Credit Risk Analysis Platform
 
-An institutional corporate financial intelligence, solvency analysis, and deterministic stress testing platform built with Next.js 15, React 19, TypeScript, and SQLite, supporting US-GAAP, Ind-AS, and Japanese FSA accounting disclosures.
+**FINTRAXIS** is a full-stack financial intelligence platform designed to help users analyse corporate financial performance, assess credit-related risks and examine factors that may affect a company's financial stability.
+
+The platform brings company intelligence, financial statement analysis, vulnerability screening, business dependency analysis, concentration assessment and scenario simulation into one integrated research environment.
+
+Its objective is to make corporate financial analysis more structured, accessible and evidence-based, while maintaining transparency around financial data, calculations and assumptions.
+
+**GitHub Repository:** [github.com/rishabhkumar-fin/FINTRAXIS](https://github.com/rishabhkumar-fin/FINTRAXIS)
+
 ---
 
-## 1. Quick Start & Setup Instructions (PowerShell)
+## Platform Overview
 
-```powershell
-# 1. Clone or navigate to the repository directory
-cd "c:\Users\Rishabh Kumar Yadav\Documents\FINTRAXIS"
+Understanding a company's financial position requires more than reviewing individual financial ratios. It involves examining financial statements, identifying changes in performance, evaluating business dependencies and understanding potential sources of risk.
 
-# 2. Configure environment variables from template
-Copy-Item .env.example .env.local
+FINTRAXIS brings these areas together through a connected company research workflow.
 
-# 3. Install dependencies
-npm install
+Users can select a company, examine its available financial information, assess financial health, investigate potential vulnerabilities, review business exposure and explore hypothetical financial scenarios.
 
-# 4. Run automated test suite (all 35 suites / 124+ tests)
-npm test
+## Core Modules
 
-# 5. Build for production
-npm run build
+### 1. Company Intelligence
 
-# 6. Start the local production server
-npm run start
+Provides a central workspace for company research.
+
+- Search for companies and access available company information.
+- Review company profiles and relevant financial data.
+- Organise analysis around a selected company.
+- Access company-related information through a common workspace.
+
+### 2. Financial Health Analysis
+
+Examines a company's financial position through key financial indicators.
+
+Areas of analysis include:
+
+- Revenue and growth
+- Profitability
+- Liquidity
+- Debt and leverage
+- Cash flow
+
+The module helps users understand financial performance through reported figures and relevant financial metrics.
+
+### 3. Vulnerability Screening
+
+Identifies financial indicators that may require further investigation.
+
+- Examine changes in financial performance.
+- Identify potential areas of financial weakness.
+- Review the metrics behind individual risk signals.
+- Support investigation through available financial evidence.
+
+Risk indicators are analytical signals and should not be interpreted as guaranteed predictions.
+
+### 4. Business Dependency Intelligence
+
+Examines available information about business relationships that may influence a company's operations.
+
+- Review disclosed supplier and customer relationships.
+- Examine available business dependency information.
+- Identify relationships that may warrant further investigation.
+
+Analysis is limited to the availability and reliability of disclosed information.
+
+### 5. Concentration and Exposure Analysis
+
+Examines potential concentration within a company's business structure.
+
+- Review available customer and supplier concentration information.
+- Examine segment and geographic exposure where data is available.
+- Identify potential areas of concentrated business exposure.
+
+Concentration metrics should only be calculated when the underlying information is sufficiently complete.
+
+### 6. Scenario and Resilience Simulation
+
+Allows users to explore hypothetical changes in financial conditions.
+
+Examples include:
+
+- Revenue decline
+- Increase in operating costs
+- Changes in financial assumptions
+- Comparison of baseline and stressed financial outcomes
+
+Scenario results represent sensitivity analysis based on specified inputs, not guaranteed forecasts.
+
+---
+
+## Technology Stack
+
+| Component | Technology |
+|---|---|
+| Frontend | React |
+| Programming Language | TypeScript |
+| Frontend Tooling | Vite |
+| Backend | Node.js |
+| API Framework | Express |
+| Database | SQLite |
+| Server Development | tsx |
+
+## Project Structure
+
+```text
+FINTRAXIS/
+│
+├── client/
+│   └── Frontend application
+│
+├── server/
+│   └── src/
+│       ├── analytics/
+│       │   └── calculations.ts
+│       │
+│       ├── db/
+│       │   ├── schema.ts
+│       │   ├── database.ts
+│       │   └── seed.ts
+│       │
+│       ├── modulesData.ts
+│       └── index.ts
+│
+├── package.json
+├── package-lock.json
+└── README.md
 ```
 
-The application will be accessible at: `http://localhost:3000`.
+The frontend handles the user interface and presentation of analytical results. The backend manages application routes, data operations and financial calculations, while SQLite provides local relational data storage.
+
+## Data Integrity and Analytical Approach
+
+Financial analysis depends on the quality and completeness of its underlying information.
+
+FINTRAXIS follows these principles:
+
+- **Source awareness:** Financial information should retain its source context.
+- **Reporting periods:** Financial figures should be associated with their relevant reporting periods.
+- **Transparent calculations:** Derived metrics should use identifiable inputs and calculation logic.
+- **Missing information:** Unavailable data should not be silently replaced with invented values.
+- **Clear assumptions:** Hypothetical scenario inputs should remain distinguishable from reported financial information.
+- **Responsible interpretation:** Risk indicators should support further investigation rather than imply certainty.
+
+Financial and market-data coverage depends on the configured data provider, company and reporting jurisdiction.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm
+- Git
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/rishabhkumar-fin/FINTRAXIS.git
+```
+
+### 2. Navigate to the project directory
+
+```bash
+cd FINTRAXIS
+```
+
+### 3. Install dependencies
+
+```bash
+npm install
+```
+
+### 4. Configure environment variables
+
+Create the required environment file:
+
+```text
+server/.env
+```
+
+Add the API credentials required by the data providers configured in the application.
+
+For example, if Financial Modeling Prep is enabled:
+
+```env
+FMP_API_KEY=your_api_key_here
+```
+
+Never commit API keys, passwords, session secrets or private configuration files to GitHub.
+
+### 5. Start the application
+
+```bash
+npm run dev
+```
+
+The development environment starts the frontend and backend using the project's configured scripts.
+
+Default local addresses:
+
+| Service | Address |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:5000 |
+| Backend Health Check | http://localhost:5000/api/health |
+
+The actual ports may differ depending on the project configuration.
+
+## Testing and Build
+
+Run the configured test suite:
+
+```bash
+npm test
+```
+
+Build the backend:
+
+```bash
+npm run build:server
+```
+
+Build the frontend:
+
+```bash
+npm run build:client
+```
+
+These commands use the scripts defined in the root `package.json`.
+
+## Development Priorities
+
+FINTRAXIS is being developed with the following engineering priorities:
+
+1. **Maintainable architecture** — organise responsibilities across frontend, backend and data layers.
+2. **Reliable financial calculations** — use identifiable inputs and consistent calculation logic.
+3. **Data transparency** — distinguish reported information from derived results and hypothetical assumptions.
+4. **Usable financial research** — present complex financial information in a clear and understandable manner.
+5. **Responsible credit risk analysis** — avoid unsupported conclusions when information is incomplete.
+
+## Project Information
+
+| | |
+|---|---|
+| Project Name | FINTRAXIS |
+| Tagline | Financial Intelligence and Credit Risk Analysis Platform |
+| Domain | Financial Technology |
+| Focus | Corporate Financial Intelligence and Credit Risk Analysis |
+| Application | Full-stack Web Application |
+| Primary Language | TypeScript |
+| Repository Owner | [rishabhkumar-fin](https://github.com/rishabhkumar-fin) |
 
 ---
 
-## 2. Authentication & Security Policy
+**FINTRAXIS**
 
-- **No Public Credentials:** Default passwords and developer credentials are never printed on login forms.
-- **Admin Bootstrap Password:** Administrators authenticate using strong credentials. An initial bootstrap password may be configured via `ADMIN_BOOTSTRAP_PASSWORD` server environment variable.
-- **Guest / Read-Only Demo:** Explicitly labeled demo sessions can be launched via **"Continue as Guest"** when `GUEST_ACCESS_ENABLED=true` (or `DEMO_ACCESS_ENABLED=true`). Guests have read-only clearance across all analysis modules and export features; admin routes, user management, and configuration writes return HTTP 403.
-- **Password Enforcement:** User registrations enforce minimum 8 characters with a required mix of letters and numbers. Accounts logging in with legacy default credentials receive a prominent `PASSWORD UPDATE DUE` badge.
-- **Rate Limiting & Security:** In-memory brute force rate limiting (HTTP 429), timing-safe PBKDF2 hash verification, and httpOnly/SameSite session cookies.
-
----
-
-## 3. Architecture & Single Source of Truth
-
-- **Unified Financial Engine (`src/lib/finance/`):** A single source of truth (`financeMaster.ts`) computes every financial ratio, leverage multiple, Ind AS 116 lease split, and health score once per company and period. Overview, Financial Statements, Vulnerability Monitor, Scenario Simulator baseline, Copilot, and Exports read from this typed result, guaranteeing zero cross-screen divergence.
-- **Market Quote Resolver (`src/lib/finance/quoteResolver.ts`):** Returns `{ price, currency, asOf, source, status }` with status in `live | delayed | end-of-day | reference`. Price, day change, day range, and 52-week corridor are strictly mathematically consistent.
-- **Database Engine:** Local SQLite with `better-sqlite3` operating in Write-Ahead Logging (WAL) mode with Drizzle ORM (`data/fintraxis.db`), persisting users, companies, reporting periods, and audit logs across server restarts. On Vercel serverless environments, the database copies to `/tmp/fintraxis.db` automatically at runtime.
-- **Data Integrity Pledge:** Zero fabrication. If an accounting item or identifier is not verified in statutory filings, it is explicitly rendered as *"Not available from current source"* or *"Reference data (unverified)"*, never defaulted to zero or fabricated.
-
----
-
-## 4. Key Platform Modules
-
-| Module Code | Module Name | Primary Analytical Question |
-|---|---|---|
-| `00_ADMIN` | **Admin Console** | System health, user roles, period coverage matrix, data quality drilldown, and risk hurdles. *(Admin role only)* |
-| `overview` | **Executive Overview** | Plain-language executive digest, market quote vs reported accounting, and core health hurdles. |
-| `01_HUB` | **Company Directory** | Issuer search, interactive price charts, cross-peer fundamentals, and persistent watchlists. |
-| `02_HEALTH` | **3-Statement Ledger** | Audited balance sheet identity checks, cash flow reconciliation, and standardized GAAP/Ind-AS line items. |
-| `03_VULNERABILITY` | **Vulnerability Monitor** | Early warning triggers, debt maturity profile, and working capital leak surveillance. |
-| `04_DEPENDENCIES` | **Business Dependencies** | Single-source suppliers, critical corporate customers, and public sector backing disclosures. |
-| `05_CONCENTRATION` | **Concentration Exposure** | Segment revenue breakdown, 100% reconciliation checks, and Herfindahl-Hirschman Index (HHI) analysis. |
-| `06_SIMULATOR` | **Stress Simulator** | Deterministic macroeconomic stress engine: variable-cost operating leverage and floating debt rate shock with exact EBIT waterfall bridge. |
-| `07_REPORTS` | **Research Reports** | Investment Committee credit memos, CSV data matrix exports, presentation slides, and SHA-256 tamper-evident hash digests. |
-
----
-
-## 5. Deployment Guide (Vercel)
-
-To deploy FINTRAXIS to Vercel:
-
-1. Import the repository into your Vercel Dashboard.
-2. In **Project Settings → Environment Variables**, configure:
-   - `SESSION_SECRET`: A 64-character random cryptographic secret.
-   - `ADMIN_BOOTSTRAP_PASSWORD`: Strong password for the initial administrator account.
-   - `GUEST_ACCESS_ENABLED`: Set to `true` to allow guest demo evaluation.
-   - `GEMINI_API_KEY`: (Optional) Server-only key for enhanced AI Copilot natural language responses.
-3. Deploy. The baseline SQLite database (`data/fintraxis.db`) is included in the deployment bundle and initialized in `/tmp` at runtime.
-
----
-
-## 6. Key Documentation Links
-
-- [Quantitative Methodology & Formulas](docs/methodology.md)
-- [Financial Data Sources & Provenance](docs/data-sources.md)
-- [Period Filing Import Specification & Templates](docs/period-import.md)
-- [Comprehensive Financial Concept Guide](docs/CONCEPT_GUIDE.md)
-- [Institutional Fix-and-Finish Changelog](docs/CHANGELOG.md)
+*Financial Intelligence and Credit Risk Analysis Platform.*
